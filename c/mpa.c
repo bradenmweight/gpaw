@@ -3,6 +3,7 @@
 PyObject* evaluate_mpa_poly(PyObject *self, PyObject *args)
 {
     PyArrayObject* x_GG_obj;
+    PyArrayObject* dx_GG_obj;
     double omega;
     double f;
     PyArrayObject* omegat_nGG_obj;
@@ -11,8 +12,8 @@ PyObject* evaluate_mpa_poly(PyObject *self, PyObject *args)
     double factor;
 
     // evaluate_mpa_poly(x2_GG, omega, f, omegat_nGG, W_nGG, self.eta, self.factor)
-    if (!PyArg_ParseTuple(args, "OddOOdd",
-                          &x_GG_obj, &omega, &f, &omegat_nGG_obj, &W_nGG_obj, &eta, &factor))
+    if (!PyArg_ParseTuple(args, "OOddOOdd",
+                          &x_GG_obj, &dx_GG_obj, &omega, &f, &omegat_nGG_obj, &W_nGG_obj, &eta, &factor))
         return NULL;
 
 
@@ -54,6 +55,7 @@ PyObject* evaluate_mpa_poly(PyObject *self, PyObject *args)
     }
     
     double complex* x_GG = (double complex*)PyArray_DATA(x_GG_obj);
+    double complex* dx_GG = (double complex*)PyArray_DATA(dx_GG_obj);
     double complex* omegat_nGG = (double complex*)PyArray_DATA(omegat_nGG_obj);
     double complex* W_nGG = (double complex*)PyArray_DATA(W_nGG_obj);
 
@@ -67,6 +69,7 @@ PyObject* evaluate_mpa_poly(PyObject *self, PyObject *args)
         for (int G2=0; G2<nG2; G2++)
         {
             double complex result = 0;
+            double complex dresult = 0;
             for (int p=0; p<np; p++)
             {
                 int index = G2 + G1 * (nG2) + p * (nG1 * nG2);
@@ -75,8 +78,10 @@ PyObject* evaluate_mpa_poly(PyObject *self, PyObject *args)
                 //double complex x2 = (1.0-f) / (omega_eta_p - omegat);
                 double complex x1 = 1.0 / (omega_eta_m + omegat);
                 result += (x1) * W_nGG[index];
+                dresult -= x1*x1 * W_nGG[index];
             }
             *x_GG++ = result * 2 * factor;
+            *dx_GG++ = dresult * 2 * factor;
         }
     }
     } else if (f < 1e-10)
@@ -86,6 +91,7 @@ PyObject* evaluate_mpa_poly(PyObject *self, PyObject *args)
         for (int G2=0; G2<nG2; G2++)
         {
             double complex result = 0;
+            double complex dresult = 0;
             for (int p=0; p<np; p++)
             {
                 int index = G2 + G1 * (nG2) + p * (nG1 * nG2);
@@ -94,8 +100,10 @@ PyObject* evaluate_mpa_poly(PyObject *self, PyObject *args)
                 //double complex x2 = (1.0-f) / (omega_eta_p - omegat);
                 double complex x2 = 1.0 / (omega_eta_p - omegat);
                 result += x2 * W_nGG[index];
+                dresult -= x2 * x2 * W_nGG[index];
             }
             *x_GG++ = result * (2 * factor);
+            *dx_GG++ = dresult * 2 * factor;
         }
     }
     } else
@@ -105,6 +113,7 @@ PyObject* evaluate_mpa_poly(PyObject *self, PyObject *args)
         for (int G2=0; G2<nG2; G2++)
         {
             double complex result = 0;
+            double complex dresult = 0;
             for (int p=0; p<np; p++)
             {
                 int index = G2 + G1 * (nG2) + p * (nG1 * nG2);
@@ -114,8 +123,10 @@ PyObject* evaluate_mpa_poly(PyObject *self, PyObject *args)
                 double complex x1 = f / (omega_eta_m + omegat);
                 double complex x2 = (1.0-f) / (omega_eta_p - omegat);
                 result += (x1 + x2) * W_nGG[index];
+                dresult -= (x1 * x1 + x2 * x2) * W_nGG[index];
             }
             *x_GG++ = result * (2 * factor);
+            *dx_GG++ = dresult * (2 * factor);
         }
     }
     }
