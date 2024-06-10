@@ -496,7 +496,7 @@ Jan 18, 2021: :git:`21.1.0 <../21.1.0>`
 * Improved relaxation in the excited states in parallel,
   see  :ref:`linear response TDDFT <lrtddft>`
 
-* We now have a :ref:`code coverage` report updated every night.
+* We now have a code coverage report updated every night.
 
 * Plane-wave mode implementation of hybrid functionals can now be selected
   via a *dict*: ``xc={'name': ..., 'backend': 'pw'}``, where then name must be
