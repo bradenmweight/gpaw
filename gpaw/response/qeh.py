@@ -292,6 +292,7 @@ class BuildingBlock:
                 # the material does not have z --> -z symmetry
                 chiDM_w += factor * chi_wGG[:, iG, 0]
                 chiMD_w += chi_wGG[:, 0, iG] * np.conjugate(factor)
+                drhoD_z += chi_wGG[0, 0, iG] * np.conjugate(factor) / L
             # Fourier transform to get induced density at \omega=0
             drhoM_z += np.exp(1j * qGr_R) * chi_wGG[0, iG, 0]
             for iG1 in Glist[1:]:
