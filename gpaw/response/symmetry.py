@@ -385,45 +385,6 @@ class PWSymmetryAnalyzer:
     # Set up complex frequency alias
     symmetrize_zGG = symmetrize_wGG
 
-    @timer('symmetrize_wxx')
-    def symmetrize_wxx(self, A_wxx, optical_limit=False):
-        """Symmetrize an array in xx'."""
-        tmp_wxx = np.zeros_like(A_wxx)
-
-        A_cv = self.qpd.gd.cell_cv
-        iA_cv = self.qpd.gd.icell_cv
-
-        if self.use_time_reversal:
-            AT_wxx = np.transpose(A_wxx, (0, 2, 1))
-
-        for s in self.s_s:
-            G_G, sign, shift_c = self.G_sG[s]
-            if optical_limit:
-                G_G = np.array(G_G) + 2
-                G_G = np.insert(G_G, 0, [0, 1])
-                U_cc, _, TR, shift_c, ft_c = self.get_symmetry_operator(s)
-                M_vv = np.dot(np.dot(A_cv.T, U_cc.T), iA_cv)
-
-            if sign == 1:
-                tmp = A_wxx[:, G_G, :][:, :, G_G]
-                if optical_limit:
-                    tmp[:, 0:3, :] = np.transpose(np.dot(M_vv.T,
-                                                         tmp[:, 0:3, :]),
-                                                  (1, 0, 2))
-                    tmp[:, :, 0:3] = np.dot(tmp[..., 0:3], M_vv)
-                tmp_wxx += tmp
-            elif sign == -1:
-                tmp = AT_wxx[:, G_G, :][:, :, G_G]
-                if optical_limit:
-                    tmp[:, 0:3, :] = np.transpose(np.dot(M_vv.T,
-                                                         tmp[:, 0:3, :]),
-                                                  (1, 0, 2)) * sign
-                    tmp[:, :, 0:3] = np.dot(tmp[:, :, 0:3], M_vv) * sign
-                tmp_wxx += tmp
-
-        # Inplace overwriting
-        A_wxx[:] = tmp_wxx / self.how_many_symmetries()
-
     @timer('symmetrize_wxvG')
     def symmetrize_wxvG(self, A_wxvG):
         """Symmetrize chi0_wxvG"""
