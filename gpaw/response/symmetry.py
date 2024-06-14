@@ -277,21 +277,6 @@ class PWSymmetryAnalyzer:
 
         return KPointDescriptor(ik_kc)
 
-    def unfold_kpoints(self, points_pv, tol=1e-8, mod=None):
-        points_pc = np.dot(points_pv, self.qpd.gd.cell_cv.T) / (2 * np.pi)
-
-        # Get the little group of q
-        U_scc = []
-        for s in self.s_s:
-            U_cc, sign, _, _, _ = self.get_symmetry_operator(s)
-            U_scc.append(sign * U_cc)
-        U_scc = np.array(U_scc)
-
-        points = np.concatenate(np.dot(points_pc, U_scc.transpose(0, 2, 1)))
-        points = unique_rows(points, tol=tol, mod=mod)
-        points = np.dot(points, self.qpd.gd.icell_cv) * (2 * np.pi)
-        return points
-
     def get_kpoint_weight(self, k_c):
         K = self.kptfinder.find(k_c)
         iK = self.kd.bz2ibz_k[K]
