@@ -122,7 +122,7 @@ class PWSymmetryAnalyzer:
                     if s == ns:
                         break
                     tmp = self.get_symmetry_operator(self.s_s[s])
-                    op_cc, sign, TR, shift_c, ft_c = tmp
+                    op_cc, sign, shift_c, ft_c = tmp
                     op_c = sign * op_cc[c]
                     tisl.append(f'  ({op_c[0]:2d} {op_c[1]:2d} {op_c[2]:2d})')
                 tisl.append('\n')
@@ -251,7 +251,7 @@ class PWSymmetryAnalyzer:
         # Get the little group of q
         U_scc = []
         for s in self.s_s:
-            U_cc, sign, _, _, _ = self.get_symmetry_operator(s)
+            U_cc, sign, _, _ = self.get_symmetry_operator(s)
             U_scc.append(sign * U_cc)
         U_scc = np.array(U_scc)
 
@@ -327,7 +327,7 @@ class PWSymmetryAnalyzer:
         tmp_wxvG = np.zeros_like(A_wxvG)
         for s in self.s_s:
             G_G, sign, shift_c = self.G_sG[s]
-            U_cc, _, TR, shift_c, ft_c = self.get_symmetry_operator(s)
+            U_cc, _, shift_c, ft_c = self.get_symmetry_operator(s)
             M_vv = np.dot(np.dot(A_cv.T, U_cc.T), iA_cv)
             if sign == 1:
                 tmp = sign * np.dot(M_vv.T, A_wxvG[..., G_G])
@@ -349,7 +349,7 @@ class PWSymmetryAnalyzer:
 
         for s in self.s_s:
             G_G, sign, shift_c = self.G_sG[s]
-            U_cc, _, TR, shift_c, ft_c = self.get_symmetry_operator(s)
+            U_cc, _, shift_c, ft_c = self.get_symmetry_operator(s)
             M_vv = np.dot(np.dot(A_cv.T, U_cc.T), iA_cv)
             if sign == 1:
                 tmp = np.dot(np.dot(M_vv.T, A_wvv), M_vv)
@@ -372,15 +372,11 @@ class PWSymmetryAnalyzer:
 
         reds = s % self.nU
         if self.timereversal(s):
-            TR = np.conj
             sign = -1
         else:
             sign = 1
 
-            def TR(x):
-                return x
-
-        return U_scc[reds], sign, TR, self.shift_sc[s], ft_sc[reds]
+        return U_scc[reds], sign, self.shift_sc[s], ft_sc[reds]
 
     @timer('Initialize_G_maps')
     def initialize_G_maps(self):
@@ -393,7 +389,7 @@ class PWSymmetryAnalyzer:
 
         G_sG = [None] * self.nsym
         for s in self.s_s:
-            U_cc, sign, _, shift_c, _ = self.get_symmetry_operator(s)
+            U_cc, sign, shift_c, _ = self.get_symmetry_operator(s)
             iU_cc = np.linalg.inv(U_cc).T
             UG_Gc = np.dot(G_Gc - shift_c, sign * iU_cc)
 
