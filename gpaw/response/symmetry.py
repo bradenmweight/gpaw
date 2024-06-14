@@ -247,21 +247,6 @@ class PWSymmetryAnalyzer:
 
         return K_gk
 
-    def get_BZ(self):
-        # Get the little group of q
-        U_scc = []
-        for s in self.s_s:
-            U_cc, sign, _, _, _ = self.get_symmetry_operator(s)
-            U_scc.append(sign * U_cc)
-        U_scc = np.array(U_scc)
-
-        # Determine the irreducible BZ
-        bzk_kc, ibzk_kc, _ = get_reduced_bz(self.qpd.gd.cell_cv,
-                                            U_scc,
-                                            False)
-
-        return bzk_kc
-
     def get_reduced_kd(self, *, pbc_c):
         # Get the little group of q
         U_scc = []
