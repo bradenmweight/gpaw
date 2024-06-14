@@ -392,10 +392,8 @@ class PWSymmetryAnalyzer:
         Q_G = qpd.Q_qG[0]
 
         G_sG = [None] * self.nsym
-        UG_sGc = [None] * self.nsym
-        Q_sG = [None] * self.nsym
         for s in self.s_s:
-            U_cc, sign, TR, shift_c, ft_c = self.get_symmetry_operator(s)
+            U_cc, sign, _, shift_c, _ = self.get_symmetry_operator(s)
             iU_cc = np.linalg.inv(U_cc).T
             UG_Gc = np.dot(G_Gc - shift_c, sign * iU_cc)
 
@@ -411,12 +409,7 @@ class PWSymmetryAnalyzer:
                     print('This should not be possible but' +
                           'a G-vector was mapped outside the sphere')
                     raise IndexError
-            UG_sGc[s] = UG_Gc
-            Q_sG[s] = UQ_G
             G_sG[s] = [np.array(G_G, dtype=np.int32), sign, shift_c]
-        self.G_Gc = G_Gc
-        self.UG_sGc = UG_sGc
-        self.Q_sG = Q_sG
         self.G_sG = G_sG
 
     def unfold_ibz_kpoint(self, ik):
