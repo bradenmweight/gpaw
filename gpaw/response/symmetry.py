@@ -287,18 +287,6 @@ class PWSymmetryAnalyzer:
             if K in K_k:
                 return len(K_k)
 
-    def get_shift(self, K1, K2, U_cc, sign):
-        """Get shift for mapping between K1 and K2."""
-        kd = self.kd
-        k1_c = kd.bzk_kc[K1]
-        k2_c = kd.bzk_kc[K2]
-
-        shift_c = np.dot(U_cc, k1_c) - k2_c * sign
-        assert np.allclose(shift_c.round(), shift_c)
-        shift_c = shift_c.round().astype(int)
-
-        return shift_c
-
     @timer('symmetrize_wGG')
     def symmetrize_wGG(self, A_wGG):
         """Symmetrize an array in GG'."""
