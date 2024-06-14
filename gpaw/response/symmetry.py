@@ -342,22 +342,6 @@ class PWSymmetryAnalyzer:
 
         return shift_c
 
-    @timer('map_G')
-    def map_G(self, K1, K2, a_MG):
-        """Map a function of G from K1 to K2. """
-        if len(a_MG) == 0:
-            return []
-
-        if K1 == K2:
-            return a_MG
-
-        G_G, sign = self.map_G_vectors(K1, K2)
-
-        s = self.get_kpoint_mapping(K1, K2)
-        U_cc, _, TR, shift_c, ft_c = self.get_symmetry_operator(s)
-
-        return TR(a_MG[..., G_G])
-
     @timer('symmetrize_wGG')
     def symmetrize_wGG(self, A_wGG):
         """Symmetrize an array in GG'."""
@@ -473,14 +457,6 @@ class PWSymmetryAnalyzer:
                 return x
 
         return U_scc[reds], sign, TR, self.shift_sc[s], ft_sc[reds]
-
-    @timer('map_G_vectors')
-    def map_G_vectors(self, K1, K2):
-        """Return G vector mapping."""
-        s = self.get_kpoint_mapping(K1, K2)
-        G_G, sign, shift_c = self.G_sG[s]
-
-        return G_G, sign
 
     @timer('Initialize_G_maps')
     def initialize_G_maps(self):
