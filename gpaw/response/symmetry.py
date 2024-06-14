@@ -287,19 +287,6 @@ class PWSymmetryAnalyzer:
             if K in K_k:
                 return len(K_k)
 
-    def get_kpoint_mapping(self, K1, K2):
-        """Get index of symmetry for mapping between K1 and K2"""
-        s_s = self.s_s
-        bz2bz_ks = self.kd.bz2bz_ks
-        bzk2rbz_s = bz2bz_ks[K1][s_s]
-        try:
-            s = np.argwhere(bzk2rbz_s == K2)[0][0]
-        except IndexError:
-            self.context.print(f'K = {K1} cannot be mapped into '
-                               f'K = {K2}')
-            raise
-        return s_s[s]
-
     def get_shift(self, K1, K2, U_cc, sign):
         """Get shift for mapping between K1 and K2."""
         kd = self.kd
@@ -384,27 +371,6 @@ class PWSymmetryAnalyzer:
 
         # Overwrite the input
         A_wvv[:] = tmp_wvv / self.how_many_symmetries()
-
-    @timer('map_v')
-    def map_v(self, K1, K2, a_Mv):
-        """Map a function of v (cartesian component) from K1 to K2."""
-
-        if len(a_Mv) == 0:
-            return []
-
-        if K1 == K2:
-            return a_Mv
-
-        A_cv = self.qpd.gd.cell_cv
-        iA_cv = self.qpd.gd.icell_cv
-
-        # Get symmetry
-        s = self.get_kpoint_mapping(K1, K2)
-        U_cc, sign, TR, _, ft_c = self.get_symmetry_operator(s)
-
-        # Create cartesian operator
-        M_vv = np.dot(np.dot(A_cv.T, U_cc.T), iA_cv)
-        return sign * np.dot(TR(a_Mv), M_vv)
 
     def timereversal(self, s):
         """Is this a time-reversal symmetry?"""
