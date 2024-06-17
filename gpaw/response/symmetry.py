@@ -78,12 +78,6 @@ class PWSymmetryAnalyzer:
 
         self.kptfinder = kpoints.kptfinder
 
-        self.initialize()
-
-    @timer('Initialize')
-    def initialize(self):
-        """Initialize relevant quantities."""
-
         self.s_s, self.shift_sc = self.analyze_symmetries()
         self.G_sG = self.initialize_G_maps()
 
