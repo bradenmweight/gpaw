@@ -102,7 +102,12 @@ class PWSymmetryAnalyzer:
 
         self.s_s, self.shift_sc = self.analyze_symmetries()
         self.infostring += f'Found {len(self.s_s)} allowed symmetries. '
-        self.analyze_kpoints()
+
+        K_gK = self.group_kpoints()
+        ng = len(K_gK)
+        self.infostring += f'{ng} groups of equivalent kpoints. '
+        percent = (1. - (ng + 0.) / self.kd.nbzkpts) * 100
+        self.infostring += f'{percent}% reduction. '
 
         self.G_sG = self.initialize_G_maps()
 
@@ -130,15 +135,6 @@ class PWSymmetryAnalyzer:
                 isl.append(''.join(tisl))
             isl.append('\n')
         return ''.join(isl)
-
-    @timer('Analyze')
-    def analyze_kpoints(self):
-        """Calculate the reduction in the number of kpoints."""
-        K_gK = self.group_kpoints()
-        ng = len(K_gK)
-        self.infostring += f'{ng} groups of equivalent kpoints. '
-        percent = (1. - (ng + 0.) / self.kd.nbzkpts) * 100
-        self.infostring += f'{percent}% reduction. '
 
     @timer('Analyze symmetries.')
     def analyze_symmetries(self):
