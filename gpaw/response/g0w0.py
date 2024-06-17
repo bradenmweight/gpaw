@@ -1,7 +1,7 @@
 from __future__ import annotations
 import pickle
 import warnings
-from math import pi
+from math import pi, isclose
 from pathlib import Path
 from collections.abc import Iterable
 
@@ -48,12 +48,10 @@ def compare_inputs(inp1, inp2, rel_tol=1e-14, abs_tol=1e-14):
     :returns: bool indicating if structures don't match (False) or do match
     (True)
     """
-    from math import isclose
-
     if isinstance(inp1, dict):
         if inp1.keys() != inp2.keys():
             return False
-        for key in set().union(inp1, inp2):
+        for key in inp1 & inp2:
             val1 = inp1[key]
             val2 = inp2[key]
             if not compare_inputs(val1, val2,
