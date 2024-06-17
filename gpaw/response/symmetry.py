@@ -106,10 +106,10 @@ class PWSymmetryAnalyzer:
 
         # Print info
         self.context.print(self.infostring)
-        self.print_symmetries()
+        self.context.print(self.symmetry_description())
 
-    def print_symmetries(self):
-        """Handsome print function for symmetry operations."""
+    def symmetry_description(self) -> str:
+        """Return string description of symmetry operations."""
         isl = ['\n']
         nx = 6  # You are not allowed to use non-symmorphic syms (value 3)
         ns = len(self.s_s)
@@ -127,7 +127,7 @@ class PWSymmetryAnalyzer:
                 tisl.append('\n')
                 isl.append(''.join(tisl))
             isl.append('\n')
-        self.context.print(''.join(isl))  # flush output
+        return ''.join(isl)
 
     @timer('Analyze')
     def analyze_kpoints(self):
