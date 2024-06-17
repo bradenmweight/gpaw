@@ -143,8 +143,4 @@ def test_response_na_plasmon(in_tmp_dir):
         while len(dfs):
             df = dfs.pop()
             for df2 in dfs:
-                try:
-                    assert np.max(np.abs((df - df2) / df)) < 2e-3
-                except AssertionError:
-                    print(np.max(np.abs((df - df2) / df)))
-                    raise AssertionError
+                assert np.max(np.abs((df - df2) / df)) < 2e-3
