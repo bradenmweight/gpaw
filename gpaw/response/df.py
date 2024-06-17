@@ -661,8 +661,8 @@ class DielectricFunction(DielectricFunctionCalculator):
                  hilbert=True,
                  nbands=None, eta=0.2,
                  intraband=True, nblocks=1, world=mpi.world, txt=sys.stdout,
-                 truncation=None, disable_point_group=False,
-                 disable_time_reversal=False,
+                 truncation=None,
+                 symmetry_analyzer=None,
                  integrationmode=None, rate=0.0,
                  eshift: float | None = None):
         """Creates a DielectricFunction object.
@@ -701,10 +701,6 @@ class DielectricFunction(DielectricFunctionCalculator):
         """
         gs, context = get_gs_and_context(calc, txt, world, timer=None)
         wd = get_frequency_descriptor(frequencies, gs=gs, nbands=nbands)
-
-        symmetry_analyzer = SymmetryAnalyzer(
-            point_group=not disable_point_group,
-            time_reversal=not disable_time_reversal)
 
         chi0calc = Chi0Calculator(
             gs, context, nblocks=nblocks,
