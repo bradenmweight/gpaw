@@ -7,6 +7,7 @@ from gpaw.mpi import world
 from gpaw.test import findpeak
 from gpaw.utilities import compiled_with_sl
 from gpaw.response.df import DielectricFunction
+from gpaw.response.symmetry import SymmetryAnalyzer
 
 # Comparing the plasmon peaks found in bulk sodium for two different
 # atomic structures. Testing for identical plasmon peaks. Not using
@@ -57,15 +58,15 @@ def test_response_na_plasmon(in_tmp_dir):
     a2.calc.write('gs_Na_large.gpw', 'all')
 
     # Settings that should yield the same result
-    settings = [{'disable_point_group': True, 'disable_time_reversal': True},
-                {'disable_point_group': False, 'disable_time_reversal': True},
-                {'disable_point_group': True, 'disable_time_reversal': False},
-                {'disable_point_group': False, 'disable_time_reversal': False}]
+    settings = [
+        {'symmetry_analyzer': SymmetryAnalyzer(pointgroup, timerev)}
+        for pointgroup in [False, True]
+        for timerev in [False, True]]
+
 
     # Test block parallelization (needs scalapack)
     if world.size > 1 and compiled_with_sl():
-        settings.append({'disable_point_group': False,
-                         'disable_time_reversal': False,
+        settings.append({'symmetry_analyzer': SymmetryAnalyzer(True, True),
                          'nblocks': 2})
 
     # Calculate the dielectric functions
