@@ -494,7 +494,7 @@ class BSEBackend:
         self.context.timer.stop('Calculate Hamiltonian')
 
         # XXX Why do we define a new mySsize?
-        # is it different from self.mySsize, 
+        # is it different from self.mySsize,
         # from the tests it doesnt seem so.
         mySsize = self.myKsize * self.Nv * self.Nc * self.nspins
         if self.myKsize > 0:
