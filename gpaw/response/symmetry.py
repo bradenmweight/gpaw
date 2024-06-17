@@ -242,9 +242,14 @@ class PWSymmetryAnalyzer:
         k2g_g = np.unique(smallestk_k, return_index=True)[1]
 
         K_gs = sbz2sbz_ks[k2g_g]
-        K_gk = [np.unique(K_s[K_s != nk]) for K_s in K_gs]
+        K_gK = [np.unique(K_s[K_s != nk]) for K_s in K_gs]
 
-        return K_gk
+        return K_gK
+
+    def get_kpt_domain(self):
+        k_kc = np.array([self.kd.bzk_kc[K_K[0]] for
+                         K_K in self.group_kpoints()])
+        return k_kc
 
     def get_tetrahedron_ikpts(self, *, pbc_c):
         """Find irreducible k-points for tetrahedron integration."""

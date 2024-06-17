@@ -291,12 +291,9 @@ class Chi0ComponentCalculator:
             disable_time_reversal=self.disable_time_reversal)
 
         if integrationmode is None:
-            K_gK = analyzer.group_kpoints()
-            k_kc = np.array([self.gs.kd.bzk_kc[K_K[0]] for
-                             K_K in K_gK])
+            k_kc = analyzer.get_kpt_domain()
         elif integrationmode == 'tetrahedron integration':
-            k_kc = analyzer.get_tetrahedron_kpt_domain(
-                pbc_c=self.pbc)
+            k_kc = analyzer.get_tetrahedron_kpt_domain(pbc_c=self.pbc)
 
         from gpaw.response.kpoints import ResponseKPointGrid
         kpoints = ResponseKPointGrid(self.gs.kd, qpd.gd.icell_cv, k_kc)
