@@ -51,7 +51,7 @@ def compare_inputs(inp1, inp2, rel_tol=1e-14, abs_tol=1e-14):
     if isinstance(inp1, dict):
         if inp1.keys() != inp2.keys():
             return False
-        for key in inp1 & inp2:
+        for key in inp1.keys() & inp2.keys():
             val1 = inp1[key]
             val2 = inp2[key]
             if not compare_inputs(val1, val2,
