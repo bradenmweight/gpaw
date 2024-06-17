@@ -14,7 +14,8 @@ from gpaw.response.pair_functions import SingleQPWDescriptor
 from gpaw.response.pw_parallelization import block_partition
 from gpaw.response.integrators import (
     Integrand, PointIntegrator, TetrahedronIntegrator, Domain)
-from gpaw.response.symmetry import PWSymmetryAnalyzer, SymmetryAnalyzer
+from gpaw.response.symmetry import (PWSymmetryAnalyzer, QSymmetryInput,
+                                    ensure_qsymmetry)
 from gpaw.response.kpoints import KPointDomain
 
 if TYPE_CHECKING:
@@ -164,7 +165,7 @@ class Chi0ComponentCalculator:
     """Base class for the Chi0XXXCalculator suite."""
 
     def __init__(self, gs, context, *, nblocks,
-                 symmetry_analyzer=None,
+                 qsymmetry: QSymmetryInput = None,
                  integrationmode=None):
         """Set up attributes common to all chi0 related calculators.
 
@@ -186,9 +187,7 @@ class Chi0ComponentCalculator:
         self.blockcomm, self.kncomm = block_partition(
             self.context.comm, self.nblocks)
 
-        if symmetry_analyzer is None:
-            symmetry_analyzer = SymmetryAnalyzer()
-        self.symmetry_analyzer = symmetry_analyzer
+        self.qsymmetry = ensure_qsymmetry(qsymmetry)
 
         # Set up integrator
         self.integrationmode = integrationmode
@@ -215,8 +214,7 @@ class Chi0ComponentCalculator:
         elif self.integrationmode == 'tetrahedron integration':
             self.context.print('Using integrator: TetrahedronIntegrator')
             cls = TetrahedronIntegrator
-            if any([self.symmetry_analyzer.point_group,
-                    self.symmetry_analyzer.time_reversal]):
+            if not self.qsymmetry.disabled:
                 self.check_high_symmetry_ibz_kpts()
         else:
             raise ValueError(f'Integration mode "{self.integrationmode}"'
@@ -282,7 +280,7 @@ class Chi0ComponentCalculator:
     @timer('Get kpoints')
     def get_kpoints(self, qpd, integrationmode):
         """Get the integration domain."""
-        symmetries = self.symmetry_analyzer.analyze(
+        symmetries = self.qsymmetry.analyze(
             self.gs.kpoints, qpd, self.context)
 
         if integrationmode is None:
