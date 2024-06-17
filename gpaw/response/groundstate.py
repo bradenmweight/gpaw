@@ -309,7 +309,7 @@ class ResponseGroundStateAdapter:
     @cached_property
     def kpoints(self):
         from gpaw.response.kpoints import ResponseKPointGrid
-        return ResponseKPointGrid(self.kd, self.gd.icell_cv, self.kd.bzk_kc)
+        return ResponseKPointGrid(self.kd)
 
 
 @dataclass

@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.spatial import Delaunay, cKDTree
 
-from gpaw.kpt_descriptor import KPointDescriptor
 from gpaw.bztools import get_reduced_bz, unique_rows
 from gpaw.cgpaw import GG_shuffle
 
@@ -236,11 +235,17 @@ class PWSymmetryAnalyzer:
         k2g_g = np.unique(smallestk_k, return_index=True)[1]
 
         K_gs = sbz2sbz_ks[k2g_g]
-        K_gk = [np.unique(K_s[K_s != nk]) for K_s in K_gs]
+        K_gK = [np.unique(K_s[K_s != nk]) for K_s in K_gs]
 
-        return K_gk
+        return K_gK
 
-    def get_reduced_kd(self, *, pbc_c):
+    def get_kpt_domain(self):
+        k_kc = np.array([self.kd.bzk_kc[K_K[0]] for
+                         K_K in self.group_kpoints()])
+        return k_kc
+
+    def get_tetrahedron_ikpts(self, *, pbc_c):
+        """Find irreducible k-points for tetrahedron integration."""
         # Get the little group of q
         U_scc = []
         for s in self.s_s:
@@ -268,7 +273,17 @@ class PWSymmetryAnalyzer:
             elif len(k_kc):
                 ik_kc = unique_rows(np.append(k_kc, ik_kc, axis=0))
 
-        return KPointDescriptor(ik_kc)
+        return ik_kc
+
+    def get_tetrahedron_kpt_domain(self, *, pbc_c):
+        ik_kc = self.get_tetrahedron_ikpts(pbc_c=pbc_c)
+        if pbc_c.all():
+            k_kc = ik_kc
+        else:
+            k_kc = np.append(ik_kc,
+                             ik_kc + (~pbc_c).astype(int),
+                             axis=0)
+        return k_kc
 
     def get_kpoint_weight(self, k_c):
         K = self.kptfinder.find(k_c)
