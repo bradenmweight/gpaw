@@ -8,6 +8,7 @@ import pytest
 from gpaw import GPAW
 from gpaw.mpi import world
 from gpaw.response import ResponseContext, ResponseGroundStateAdapter
+from gpaw.response.symmetry import SymmetryAnalyzer
 from gpaw.response.frequencies import (ComplexFrequencyDescriptor,
                                        FrequencyDescriptor)
 from gpaw.response.chiks import ChiKSCalculator, SelfEnhancementCalculator
@@ -396,12 +397,15 @@ class ChiKSTestingFactory:
         if cache_string in self.cached_chiks:
             return self.cached_chiks[cache_string]
 
+        usesym = not disable_syms
+        symmetry_analyzer = SymmetryAnalyzer(
+            point_group=usesym, time_reversal=usesym)
+
         chiks_calc = ChiKSCalculator(
             self.gs, context=self.context,
             ecut=self.ecut, nbands=self.nbands,
             gammacentered=self.gammacentered,
-            disable_time_reversal=disable_syms,
-            disable_point_group=disable_syms,
+            symmetry_analyzer=symmetry_analyzer,
             bandsummation=bandsummation,
             nblocks=nblocks)
 
