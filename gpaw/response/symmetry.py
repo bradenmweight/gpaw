@@ -29,6 +29,13 @@ class KPointFinder:
 
 @dataclass
 class SymmetryAnalyzer:
+    """
+    disable_point_group : bool
+        Disable point group symmetry in k-integration and symmetrization.
+    disable_time_reversal : bool
+        Disable time reversal symmetry k-integration and symmetrization.
+    """
+
     point_group: bool = True
     time_reversal: bool = True
 

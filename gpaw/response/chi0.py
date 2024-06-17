@@ -337,8 +337,7 @@ class Chi0OpticalExtensionCalculator(Chi0ComponentPWCalculator):
             self.rate = rate
             self.drude_calc = Chi0DrudeCalculator(
                 self.gs, self.context,
-                disable_point_group=self.disable_point_group,
-                disable_time_reversal=self.disable_time_reversal,
+                symmetry_analyzer=self.symmetry_analyzer,
                 integrationmode=self.integrationmode)
         else:
             self.drude_calc = None
