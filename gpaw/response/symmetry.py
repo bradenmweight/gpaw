@@ -53,14 +53,16 @@ class QSymmetryAnalyzer:
             not self.time_reversal)
 
 
-QSymmetryInput = Union[QSymmetryAnalyzer, dict, None]
+QSymmetryInput = Union[QSymmetryAnalyzer, dict, bool]
 
 
 def ensure_qsymmetry(qsymmetry: QSymmetryInput) -> QSymmetryAnalyzer:
     if not isinstance(qsymmetry, QSymmetryAnalyzer):
-        if qsymmetry is None:
-            qsymmetry = {}
-        qsymmetry = QSymmetryAnalyzer(**qsymmetry)
+        if isinstance(qsymmetry, dict):
+            qsymmetry = QSymmetryAnalyzer(**qsymmetry)
+        else:
+            qsymmetry = QSymmetryAnalyzer(
+                point_group=qsymmetry, time_reversal=qsymmetry)
     return qsymmetry
 
 
