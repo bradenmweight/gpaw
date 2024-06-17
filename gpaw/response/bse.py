@@ -3,7 +3,7 @@ from datetime import timedelta
 from functools import cached_property
 from time import time, ctime
 
-from ase.units import Hartree, Bohr
+from ase.units import Hartree
 from ase.dft import monkhorst_pack
 import numpy as np
 from scipy.linalg import eigh
@@ -12,12 +12,12 @@ from gpaw.blacs import BlacsGrid, Redistributor
 from gpaw.kpt_descriptor import KPointDescriptor
 from gpaw.mpi import world, serial_comm
 from gpaw.response import ResponseContext
+from gpaw.response.groundstate import CellDescriptor
 from gpaw.response.chi0 import Chi0Calculator
 from gpaw.response.context import timer
 from gpaw.response.coulomb_kernels import CoulombKernel
 from gpaw.response.df import write_response_function
 from gpaw.response.frequencies import FrequencyDescriptor
-from gpaw.response.groundstate import ResponseGroundStateAdapter
 from gpaw.response.pair import KPointPairFactory, get_gs_and_context
 from gpaw.response.pair_functions import SingleQPWDescriptor
 from gpaw.response.screened_interaction import initialize_w_calculator
@@ -362,7 +362,7 @@ class BSEBackend:
                     epsc_n = e_mk[mci:mcf, iKq]
                     deps_ksmn[ik, s] = -(epsv_m[:, np.newaxis] - epsc_n)
                 else:
-                    deps_ksmn[ik, s] = -pair.get_transition_energies(m_m, n_n)
+                    deps_ksmn[ik, s] = -pair.get_transition_energies()
 
                 rho_mnG = get_pair_density(qpd0, pair, m_m, n_n,
                                            pawcorr=pawcorr)
@@ -374,7 +374,7 @@ class BSEBackend:
                     v0_kmn = v_kmn[:, :, ::2]
                     v1_kmn = v_kmn[:, :, 1::2]
                     if optical_limit:
-                        deps0_mn = -pair.get_transition_energies(m_m, n_n)
+                        deps0_mn = -pair.get_transition_energies()
                         rho_mnG[:, :, 0] *= deps0_mn
 
                     # This recreates the old behaviour of
@@ -664,7 +664,7 @@ class BSEBackend:
              optical=True):
         vchi_w = self.get_vchi(w_w=w_w, eta=eta, optical=optical,
                                write_eig=write_eig)
-        return VChi(self.gs, self.context, w_w, vchi_w, optical=optical)
+        return VChi(self.gs.cd, self.context, w_w, vchi_w, optical=optical)
 
     def collect_A_SS(self, A_sS):
         if world.rank == 0:
@@ -829,7 +829,7 @@ def read_spectrum(filename):
 
 @dataclass
 class VChi:
-    gs: ResponseGroundStateAdapter
+    cd: CellDescriptor
     context: ResponseContext
     w_w: np.ndarray
     vchi_w: np.ndarray
@@ -845,12 +845,8 @@ class VChi:
 
     def alpha(self):
         assert self.optical
-        pbc_c = self.gs.pbc
-        V = self.gs.nonpbc_cell_product()
-
-        alpha_w = -V * self.vchi_w / (4 * np.pi)
-        alpha_w *= Bohr**(sum(~pbc_c))
-        return alpha_w
+        L = self.cd.nonperiodic_hypervolume
+        return -L * self.vchi_w / (4 * np.pi)
 
     def dielectric_function(self, filename='df_bse.csv'):
         """Returns and writes real and imaginary part of the dielectric

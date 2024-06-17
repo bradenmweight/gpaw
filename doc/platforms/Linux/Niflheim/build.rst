@@ -34,7 +34,7 @@ and run it like this::
 
     You will need Python 3.8 or later.  You can install that with::
 
-        $ module load Python/3.8.6-GCCcore-10.2.0
+        $ module load Python
 
 Type ``python3 gpaw_venv.py --help`` for help.  After a few minutes, you will
 have a ``<venv-name>`` folder with a GPAW installation inside.

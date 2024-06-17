@@ -10,7 +10,7 @@ def workflow():
         runs = [run(script='run_tests_emt.py')]
 
         for name in all_optimizers:
-            if name == 'Berny':
+            if name in {'Berny', 'CellAwareBFGS'}:
                 continue
             runs.append(run(script='run_tests.py',
                             args=[name], cores=8, tmax='1d'))

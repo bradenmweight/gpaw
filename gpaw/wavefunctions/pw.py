@@ -590,6 +590,8 @@ class PWWaveFunctions(FDPWWaveFunctions):
         c = reader.bohr**1.5
         if reader.version < 0:
             c = 1  # old gpw file
+        elif reader.version >= 4:
+            c *= self.gd.N_c.prod()
         for kpt in self.kpt_u:
             ng = self.ng_k[kpt.k]
             index = (kpt.s, kpt.k) if self.collinear else (kpt.k,)

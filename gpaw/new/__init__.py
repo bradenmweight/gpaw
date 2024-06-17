@@ -43,13 +43,13 @@ def zips(*iterables, strict=True):
     if items:
         i = len(items)
         plural = " " if i == 1 else "s 1-"
-        msg = f"zips() argument {i+1} is shorter than argument{plural}{i}"
+        msg = f"zips() argument {i + 1} is shorter than argument{plural}{i}"
         raise ValueError(msg)
     sentinel = object()
     for i, iterator in enumerate(iterators[1:], 1):
         if next(iterator, sentinel) is not sentinel:
             plural = " " if i == 1 else "s 1-"
-            msg = f"zips() argument {i+1} is longer than argument{plural}{i}"
+            msg = f"zips() argument {i + 1} is longer than argument{plural}{i}"
             raise ValueError(msg)
 
 

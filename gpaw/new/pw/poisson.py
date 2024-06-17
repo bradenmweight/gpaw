@@ -180,7 +180,8 @@ class DipoleLayerPWPoissonSolver(PoissonSolver):
         self.ps = ps
         self.grid = grid
         self.width = width / Bohr
-        (self.axis,) = np.where(~grid.pbc_c)
+        (self.axis,) = np.where(~grid.pbc_c)[0]
+        self.correction = np.nan
 
     def solve(self,
               vHt_g: PWArray,
@@ -192,8 +193,10 @@ class DipoleLayerPWPoissonSolver(PoissonSolver):
         L = self.grid.cell_cv[c, c]
         self.correction = 2 * np.pi * dip_v[c] * L / self.grid.volume
         vHt_g.data -= 2 * self.correction * self.sawtooth_g.data
-
         return epot + 2 * np.pi * dip_v[c]**2 / self.grid.volume
+
+    def dipole_layer_correction(self) -> float:
+        return self.correction
 
     @cached_property
     def sawtooth_g(self) -> PWArray:
@@ -202,8 +205,8 @@ class DipoleLayerPWPoissonSolver(PoissonSolver):
             c = self.axis
             L = grid.cell_cv[c, c]
             w = self.width / 2
-            assert w < L / 2
-            gc = int(w / grid.size_c[c])
+            assert w < L / 2, (w, L, c)
+            gc = int(w / L * grid.size_c[c])
             x = np.linspace(0, L, grid.size_c[c], endpoint=False)
             sawtooth = x / L - 0.5
             a = 1 / L - 0.75 / w
@@ -214,7 +217,7 @@ class DipoleLayerPWPoissonSolver(PoissonSolver):
             shape = [1, 1, 1]
             shape[c] = -1
             sawtooth_r.data[:] = sawtooth.reshape(shape)
-            sawtooth_g = sawtooth_r.fft(pw=self.ps.pw).data
+            sawtooth_g = sawtooth_r.fft(pw=self.ps.pw.new(comm=None)).data
         else:
             sawtooth_g = None
 

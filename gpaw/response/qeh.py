@@ -71,7 +71,6 @@ class BuildingBlock:
         self.direction = direction
 
         self.df = df  # dielectric function object
-        assert self.df.coulomb.truncation == '2D'
         self.wd = self.df.chi0calc.wd
 
         self.context = self.df.context.with_txt(txt)
@@ -187,8 +186,9 @@ class BuildingBlock:
             if q_inf is not None:
                 qstr = '(' + ', '.join(['%.3f' % x for x in q_inf]) + ')'
                 self.context.print('    and q_inf=%s' % qstr, flush=False)
-            qpd, chi_wGG, wblocks = self.df.get_rpa_density_response(
-                q_c=q_c, qinf_v=q_inf, direction=self.direction)
+            chi0_dyson_eqs = self.df.get_chi0_dyson_eqs(q_c, truncation='2D')
+            qpd, chi_wGG, wblocks = chi0_dyson_eqs.rpa_density_response(
+                qinf_v=q_inf, direction=self.direction)
             self.context.print('calculated chi!')
 
             chiM_w, chiD_w, chiDM_w, chiMD_w, drhoM_z, drhoD_z = \

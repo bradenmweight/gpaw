@@ -32,14 +32,11 @@ class KPointPair:
         self.kpt2 = kpt2
         self.Q_G = Q_G
 
-    def get_transition_energies(self, n_n, m_m):
+    def get_transition_energies(self):
         """Return the energy difference for specified bands."""
-        n_n = np.array(n_n)
-        m_m = np.array(m_m)
         kpt1 = self.kpt1
         kpt2 = self.kpt2
-        deps_nm = (kpt1.eps_n[n_n - self.kpt1.n1][:, np.newaxis] -
-                   kpt2.eps_n[m_m - self.kpt2.n1])
+        deps_nm = kpt1.eps_n[:, np.newaxis] - kpt2.eps_n
         return deps_nm
 
     def get_occupation_differences(self):

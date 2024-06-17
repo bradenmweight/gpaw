@@ -30,7 +30,7 @@ def backend_problemsize_kwargs(request):
     name = request.param
     eigenproblem_size = world.size * 64
     if name == 'eigh':
-        return ScipyDiagonalizer, eigenproblem_size, {}
+        return ScipyDiagonalizer, eigenproblem_size, {'comm': world}
     elif name == 'blacs':
         if not compiled_with_sl():
             pytest.skip()
@@ -72,7 +72,6 @@ def test_diagonalizer_eigenproblem_correctness(backend_problemsize_kwargs,
         a_copy,
         b_copy,
         eps,
-        is_master=is_master_rank,
         debug=False)
 
     if is_master_rank:

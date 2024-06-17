@@ -50,7 +50,6 @@ def test_corehole_si(in_tmp_dir, add_cwd_to_setup_paths, gpw_files):
     _ = si.get_potential_energy()
 
 
-@pytest.mark.later
 def test_si_nonortho(in_tmp_dir, add_cwd_to_setup_paths, gpw_files):
     # Generate setup for oxygen with half a core-hole:
     # restart from file

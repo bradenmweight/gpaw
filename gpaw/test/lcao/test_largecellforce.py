@@ -15,10 +15,8 @@ from numpy import array
 from ase import Atoms
 from gpaw import GPAW
 from gpaw.atom.basis import BasisMaker
-import pytest
 
 
-@pytest.mark.later
 def test_lcao_largecellforce(gpaw_new):
     hbasis = BasisMaker('H').generate(1, 0, energysplit=1.8, tailnorm=0.03**.5)
     basis = {'H': hbasis}
@@ -32,8 +30,7 @@ def test_lcao_largecellforce(gpaw_new):
     calc = GPAW(h=0.23,
                 mode='lcao',
                 basis=basis,
-                convergence={'density': 1e-4, 'energy': 1e-7},
-                )
+                convergence={'density': 1e-4, 'energy': 1e-7})
 
     system.calc = calc
 

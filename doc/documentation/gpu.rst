@@ -3,14 +3,27 @@
 GPU
 ===
 
-Ground-state calculations on a GPU is an new feature with
+Ground-state calculations on a GPU is a new feature with
 some limitations:
 
 * only PW-mode
 * it has only been implemented in the new GPAW code
 * only parallelization over **k**-points
 
+You use the new code like this:
+
+>>> from gpaw.new.ase_interface import GPAW
+>>> atoms = ...
+>>> atoms.calc = GPAW(..., parallel={'gpu': True})
+
+Alternatively, you can use ``from gpaw import GPAW`` and the select new GPAW
+by setting the environment variable :envvar:`GPAW_NEW` to ``1``:
+``GPAW_NEW=1 python ...``.
 See :git:`gpaw/test/gpu/test_pw.py` for an example.
+
+.. envvar:: GPAW_NEW
+
+   If this environment variable is set to ``1`` then new GPAW will be used.
 
 .. tip::
 

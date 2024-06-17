@@ -1,4 +1,5 @@
 from __future__ import annotations
+from dataclasses import dataclass
 from typing import Union
 from pathlib import Path
 from functools import cached_property
@@ -125,11 +126,9 @@ class ResponseGroundStateAdapter:
         width = getattr(occs, '_width', 0.0) / Ha
         return width
 
-    def nonpbc_cell_product(self):
-        """Volume, area, or length, taken in all non-periodic directions."""
-        nonpbc = ~self.pbc
-        cell_cv = self.gd.cell_cv
-        return abs(np.linalg.det(cell_cv[nonpbc][:, nonpbc]))
+    @cached_property
+    def cd(self):
+        return CellDescriptor(self.gd.cell_cv, self.pbc)
 
     @property
     def nt_sR(self):
@@ -311,6 +310,36 @@ class ResponseGroundStateAdapter:
     def kpoints(self):
         from gpaw.response.kpoints import ResponseKPointGrid
         return ResponseKPointGrid(self.kd, self.gd.icell_cv, self.kd.bzk_kc)
+
+
+@dataclass
+class CellDescriptor:
+    cell_cv: np.ndarray
+    pbc_c: np.ndarray
+
+    @property
+    def nonperiodic_hypervolume(self):
+        """Get the hypervolume of the cell along nonperiodic directions.
+
+        Returns the hypervolume Λ in units of Å, where
+
+        Λ = 1        in 3D
+        Λ = L        in 2D, where L is the out-of-plane cell vector length
+        Λ = A        in 1D, where A is the transverse cell area
+        Λ = V        in 0D, where V is the cell volume
+        """
+        cell_cv = self.cell_cv
+        pbc_c = self.pbc_c
+        if sum(pbc_c) > 0:
+            # In 1D and 2D, we assume the cartesian representation of the unit
+            # cell to be block diagonal, separating the periodic and
+            # nonperiodic cell vectors in different blocks.
+            assert np.allclose(cell_cv[~pbc_c][:, pbc_c], 0.) and \
+                np.allclose(cell_cv[pbc_c][:, ~pbc_c], 0.), \
+                "In 1D and 2D, please put the periodic/nonperiodic axis " \
+                "along a cartesian component"
+        L = np.abs(np.linalg.det(cell_cv[~pbc_c][:, ~pbc_c]))
+        return L * Bohr**sum(~pbc_c)  # Bohr -> Å
 
 
 # Contains all the relevant information

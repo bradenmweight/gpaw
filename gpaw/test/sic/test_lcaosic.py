@@ -8,7 +8,7 @@ import numpy as np
 
 @pytest.mark.later
 @pytest.mark.sic
-def test_lcaosic(in_tmp_dir, needs_ase_master):
+def test_lcaosic(in_tmp_dir):
     """
     Test Perdew-Zunger Self-Interaction
     Correction  in LCAO mode using ETDM

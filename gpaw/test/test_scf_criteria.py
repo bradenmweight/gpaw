@@ -30,7 +30,7 @@ class FourIterations(Criterion):
 
 
 @pytest.mark.later
-def test_scf_criterion(in_tmp_dir):
+def test_scf_criterion(in_tmp_dir, gpaw_new):
     """Tests different ways of setting SCF convergence criteria,
     and that it behaves consistenly with regard to the work function."""
     convergence = {'eigenstates': 1.0,
@@ -49,8 +49,10 @@ def test_scf_criterion(in_tmp_dir):
                       txt=None,
                       poissonsolver={'dipolelayer': 'xy'})
     atoms.get_potential_energy()
-    workfunctions1 = Ha * atoms.calc.hamiltonian.get_workfunctions(
-        atoms.calc.wfs)
+    workfunctions1 = (
+        atoms.calc.dft.workfunctions()
+        if gpaw_new else
+        Ha * atoms.calc.hamiltonian.get_workfunctions(atoms.calc.wfs))
     atoms.calc.write('scf-criterion.gpw')
 
     # Flip and use saved calculator; work functions should be opposite.
@@ -59,10 +61,12 @@ def test_scf_criterion(in_tmp_dir):
                   cell=(5., 5., 9.),
                   pbc=(True, True, False))
     atoms.center()
-    atoms.calc = GPAW('scf-criterion.gpw', txt=None)  # checks loading
+    atoms.calc = GPAW('scf-criterion.gpw')  # checks loading
     atoms.get_potential_energy()
-    workfunctions2 = Ha * atoms.calc.hamiltonian.get_workfunctions(
-        atoms.calc.wfs)
+    workfunctions2 = (
+        atoms.calc.dft.workfunctions()
+        if gpaw_new else
+        Ha * atoms.calc.hamiltonian.get_workfunctions(atoms.calc.wfs))
 
     assert workfunctions1[0] == pytest.approx(workfunctions2[1])
     assert workfunctions1[1] == pytest.approx(workfunctions2[0])

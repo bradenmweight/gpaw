@@ -3,7 +3,6 @@ from gpaw import GPAW, PW
 import pytest
 
 
-@pytest.mark.later
 @pytest.mark.stress
 def test_pseudopotential_ah(in_tmp_dir):
     si = bulk('Si', 'diamond', a=5.5, cubic=not True)

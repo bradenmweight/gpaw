@@ -16,7 +16,7 @@ def timer(func, *args, **kwargs):
 
 
 @pytest.mark.later
-def test_generic_relax(in_tmp_dir, needs_ase_master):
+def test_generic_relax(in_tmp_dir):
     a = 4.0  # Size of unit cell (Angstrom)
     c = a / 2
     d = 0.74  # Experimental bond length

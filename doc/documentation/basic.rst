@@ -289,7 +289,7 @@ Some features are not available in all modes.  Here is a
     - (experimental)
     -
     - +
-  * - Time-propergation TDDFT
+  * - Time-propagation TDDFT
     - +
     - +
     -
@@ -327,7 +327,7 @@ Some features are not available in all modes.  Here is a
     - +
   * - Solvent models
     - +
-    -
+    - +
     -
   * - MGGA
     - +
@@ -335,7 +335,7 @@ Some features are not available in all modes.  Here is a
     - +
   * - Constrained DFT
     - +
-    -
+    - +
     -
   * - Ehrenfest
     - +

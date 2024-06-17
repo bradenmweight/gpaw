@@ -121,8 +121,7 @@ class PWSymmetryAnalyzer:
                     s = x + y * nx
                     if s == ns:
                         break
-                    tmp = self.get_symmetry_operator(self.s_s[s])
-                    op_cc, sign, TR, shift_c, ft_c = tmp
+                    op_cc, sign = self.get_symmetry_operator(self.s_s[s])
                     op_c = sign * op_cc[c]
                     tisl.append(f'  ({op_c[0]:2d} {op_c[1]:2d} {op_c[2]:2d})')
                 tisl.append('\n')
@@ -247,26 +246,11 @@ class PWSymmetryAnalyzer:
 
         return K_gk
 
-    def get_BZ(self):
-        # Get the little group of q
-        U_scc = []
-        for s in self.s_s:
-            U_cc, sign, _, _, _ = self.get_symmetry_operator(s)
-            U_scc.append(sign * U_cc)
-        U_scc = np.array(U_scc)
-
-        # Determine the irreducible BZ
-        bzk_kc, ibzk_kc, _ = get_reduced_bz(self.qpd.gd.cell_cv,
-                                            U_scc,
-                                            False)
-
-        return bzk_kc
-
     def get_reduced_kd(self, *, pbc_c):
         # Get the little group of q
         U_scc = []
         for s in self.s_s:
-            U_cc, sign, _, _, _ = self.get_symmetry_operator(s)
+            U_cc, sign = self.get_symmetry_operator(s)
             U_scc.append(sign * U_cc)
         U_scc = np.array(U_scc)
 
@@ -292,21 +276,6 @@ class PWSymmetryAnalyzer:
 
         return KPointDescriptor(ik_kc)
 
-    def unfold_kpoints(self, points_pv, tol=1e-8, mod=None):
-        points_pc = np.dot(points_pv, self.qpd.gd.cell_cv.T) / (2 * np.pi)
-
-        # Get the little group of q
-        U_scc = []
-        for s in self.s_s:
-            U_cc, sign, _, _, _ = self.get_symmetry_operator(s)
-            U_scc.append(sign * U_cc)
-        U_scc = np.array(U_scc)
-
-        points = np.concatenate(np.dot(points_pc, U_scc.transpose(0, 2, 1)))
-        points = unique_rows(points, tol=tol, mod=mod)
-        points = np.dot(points, self.qpd.gd.icell_cv) * (2 * np.pi)
-        return points
-
     def get_kpoint_weight(self, k_c):
         K = self.kptfinder.find(k_c)
         iK = self.kd.bz2ibz_k[K]
@@ -317,47 +286,6 @@ class PWSymmetryAnalyzer:
             if K in K_k:
                 return len(K_k)
 
-    def get_kpoint_mapping(self, K1, K2):
-        """Get index of symmetry for mapping between K1 and K2"""
-        s_s = self.s_s
-        bz2bz_ks = self.kd.bz2bz_ks
-        bzk2rbz_s = bz2bz_ks[K1][s_s]
-        try:
-            s = np.argwhere(bzk2rbz_s == K2)[0][0]
-        except IndexError:
-            self.context.print(f'K = {K1} cannot be mapped into '
-                               f'K = {K2}')
-            raise
-        return s_s[s]
-
-    def get_shift(self, K1, K2, U_cc, sign):
-        """Get shift for mapping between K1 and K2."""
-        kd = self.kd
-        k1_c = kd.bzk_kc[K1]
-        k2_c = kd.bzk_kc[K2]
-
-        shift_c = np.dot(U_cc, k1_c) - k2_c * sign
-        assert np.allclose(shift_c.round(), shift_c)
-        shift_c = shift_c.round().astype(int)
-
-        return shift_c
-
-    @timer('map_G')
-    def map_G(self, K1, K2, a_MG):
-        """Map a function of G from K1 to K2. """
-        if len(a_MG) == 0:
-            return []
-
-        if K1 == K2:
-            return a_MG
-
-        G_G, sign = self.map_G_vectors(K1, K2)
-
-        s = self.get_kpoint_mapping(K1, K2)
-        U_cc, _, TR, shift_c, ft_c = self.get_symmetry_operator(s)
-
-        return TR(a_MG[..., G_G])
-
     @timer('symmetrize_wGG')
     def symmetrize_wGG(self, A_wGG):
         """Symmetrize an array in GG'."""
@@ -367,7 +295,8 @@ class PWSymmetryAnalyzer:
             # tmp2_GG = np.zeros_like(A_GG)
 
             for s in self.s_s:
-                G_G, sign, _ = self.G_sG[s]
+                G_G = self.G_sG[s]
+                _, sign = self.get_symmetry_operator(s)
                 GG_shuffle(G_G, sign, A_GG, tmp_GG)
 
                 # This is the exact operation that GG_shuffle does.
@@ -385,45 +314,6 @@ class PWSymmetryAnalyzer:
     # Set up complex frequency alias
     symmetrize_zGG = symmetrize_wGG
 
-    @timer('symmetrize_wxx')
-    def symmetrize_wxx(self, A_wxx, optical_limit=False):
-        """Symmetrize an array in xx'."""
-        tmp_wxx = np.zeros_like(A_wxx)
-
-        A_cv = self.qpd.gd.cell_cv
-        iA_cv = self.qpd.gd.icell_cv
-
-        if self.use_time_reversal:
-            AT_wxx = np.transpose(A_wxx, (0, 2, 1))
-
-        for s in self.s_s:
-            G_G, sign, shift_c = self.G_sG[s]
-            if optical_limit:
-                G_G = np.array(G_G) + 2
-                G_G = np.insert(G_G, 0, [0, 1])
-                U_cc, _, TR, shift_c, ft_c = self.get_symmetry_operator(s)
-                M_vv = np.dot(np.dot(A_cv.T, U_cc.T), iA_cv)
-
-            if sign == 1:
-                tmp = A_wxx[:, G_G, :][:, :, G_G]
-                if optical_limit:
-                    tmp[:, 0:3, :] = np.transpose(np.dot(M_vv.T,
-                                                         tmp[:, 0:3, :]),
-                                                  (1, 0, 2))
-                    tmp[:, :, 0:3] = np.dot(tmp[..., 0:3], M_vv)
-                tmp_wxx += tmp
-            elif sign == -1:
-                tmp = AT_wxx[:, G_G, :][:, :, G_G]
-                if optical_limit:
-                    tmp[:, 0:3, :] = np.transpose(np.dot(M_vv.T,
-                                                         tmp[:, 0:3, :]),
-                                                  (1, 0, 2)) * sign
-                    tmp[:, :, 0:3] = np.dot(tmp[:, :, 0:3], M_vv) * sign
-                tmp_wxx += tmp
-
-        # Inplace overwriting
-        A_wxx[:] = tmp_wxx / self.how_many_symmetries()
-
     @timer('symmetrize_wxvG')
     def symmetrize_wxvG(self, A_wxvG):
         """Symmetrize chi0_wxvG"""
@@ -436,8 +326,8 @@ class PWSymmetryAnalyzer:
 
         tmp_wxvG = np.zeros_like(A_wxvG)
         for s in self.s_s:
-            G_G, sign, shift_c = self.G_sG[s]
-            U_cc, _, TR, shift_c, ft_c = self.get_symmetry_operator(s)
+            G_G = self.G_sG[s]
+            U_cc, sign = self.get_symmetry_operator(s)
             M_vv = np.dot(np.dot(A_cv.T, U_cc.T), iA_cv)
             if sign == 1:
                 tmp = sign * np.dot(M_vv.T, A_wxvG[..., G_G])
@@ -458,8 +348,7 @@ class PWSymmetryAnalyzer:
             AT_wvv = np.transpose(A_wvv, (0, 2, 1))
 
         for s in self.s_s:
-            G_G, sign, shift_c = self.G_sG[s]
-            U_cc, _, TR, shift_c, ft_c = self.get_symmetry_operator(s)
+            U_cc, sign = self.get_symmetry_operator(s)
             M_vv = np.dot(np.dot(A_cv.T, U_cc.T), iA_cv)
             if sign == 1:
                 tmp = np.dot(np.dot(M_vv.T, A_wvv), M_vv)
@@ -470,27 +359,6 @@ class PWSymmetryAnalyzer:
         # Overwrite the input
         A_wvv[:] = tmp_wvv / self.how_many_symmetries()
 
-    @timer('map_v')
-    def map_v(self, K1, K2, a_Mv):
-        """Map a function of v (cartesian component) from K1 to K2."""
-
-        if len(a_Mv) == 0:
-            return []
-
-        if K1 == K2:
-            return a_Mv
-
-        A_cv = self.qpd.gd.cell_cv
-        iA_cv = self.qpd.gd.icell_cv
-
-        # Get symmetry
-        s = self.get_kpoint_mapping(K1, K2)
-        U_cc, sign, TR, _, ft_c = self.get_symmetry_operator(s)
-
-        # Create cartesian operator
-        M_vv = np.dot(np.dot(A_cv.T, U_cc.T), iA_cv)
-        return sign * np.dot(TR(a_Mv), M_vv)
-
     def timereversal(self, s):
         """Is this a time-reversal symmetry?"""
         tr = bool(s // self.nU)
@@ -499,27 +367,14 @@ class PWSymmetryAnalyzer:
     def get_symmetry_operator(self, s):
         """Return symmetry operator s."""
         U_scc = self.kd.symmetry.op_scc
-        ft_sc = self.kd.symmetry.ft_sc
 
         reds = s % self.nU
         if self.timereversal(s):
-            TR = np.conj
             sign = -1
         else:
             sign = 1
 
-            def TR(x):
-                return x
-
-        return U_scc[reds], sign, TR, self.shift_sc[s], ft_sc[reds]
-
-    @timer('map_G_vectors')
-    def map_G_vectors(self, K1, K2):
-        """Return G vector mapping."""
-        s = self.get_kpoint_mapping(K1, K2)
-        G_G, sign, shift_c = self.G_sG[s]
-
-        return G_G, sign
+        return U_scc[reds], sign
 
     @timer('Initialize_G_maps')
     def initialize_G_maps(self):
@@ -531,12 +386,10 @@ class PWSymmetryAnalyzer:
         Q_G = qpd.Q_qG[0]
 
         G_sG = [None] * self.nsym
-        UG_sGc = [None] * self.nsym
-        Q_sG = [None] * self.nsym
         for s in self.s_s:
-            U_cc, sign, TR, shift_c, ft_c = self.get_symmetry_operator(s)
+            U_cc, sign = self.get_symmetry_operator(s)
             iU_cc = np.linalg.inv(U_cc).T
-            UG_Gc = np.dot(G_Gc - shift_c, sign * iU_cc)
+            UG_Gc = np.dot(G_Gc - self.shift_sc[s], sign * iU_cc)
 
             assert np.allclose(UG_Gc.round(), UG_Gc)
             UQ_G = np.ravel_multi_index(UG_Gc.round().astype(int).T,
@@ -550,12 +403,7 @@ class PWSymmetryAnalyzer:
                     print('This should not be possible but' +
                           'a G-vector was mapped outside the sphere')
                     raise IndexError
-            UG_sGc[s] = UG_Gc
-            Q_sG[s] = UQ_G
-            G_sG[s] = [np.array(G_G, dtype=np.int32), sign, shift_c]
-        self.G_Gc = G_Gc
-        self.UG_sGc = UG_sGc
-        self.Q_sG = Q_sG
+            G_sG[s] = np.array(G_G, dtype=np.int32)
         self.G_sG = G_sG
 
     def unfold_ibz_kpoint(self, ik):

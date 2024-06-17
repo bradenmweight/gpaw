@@ -15,6 +15,7 @@ from gpaw.new import trace, zips
 from gpaw.typing import Array3D, Vector
 from gpaw.utilities import unpack_hermitian, unpack_density
 from gpaw.new.symmetry import SymmetrizationPlan
+from gpaw.new.ibzwfs import IBZWaveFunctions
 
 
 class Density:
@@ -209,11 +210,14 @@ class Density:
             x = -charge / pseudo_charge
             self.nt_sR.data *= x
 
-    def update(self, ibzwfs, ked=False):
+    def update(self, ibzwfs: IBZWaveFunctions, ked=False):
         self.nt_sR.data[:] = 0.0
         self.D_asii.data[:] = 0.0
         ibzwfs.add_to_density(self.nt_sR, self.D_asii)
         self.nt_sR.data[:self.ndensities] += self.nct_R.data
+
+        # LCAO ...:
+        ibzwfs.normalize_density(self)
 
         if ked:
             self.update_ked(ibzwfs, symmetrize=False)

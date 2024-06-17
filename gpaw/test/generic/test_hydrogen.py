@@ -11,7 +11,7 @@ from gpaw import GPAW, FermiDirac
 
 
 @pytest.mark.later
-def test_generic_hydrogen(in_tmp_dir, needs_ase_master):
+def test_generic_hydrogen(in_tmp_dir):
     a = 4.0
     h = 0.2
     hydrogen = Atoms('H',

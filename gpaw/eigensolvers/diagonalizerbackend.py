@@ -3,6 +3,7 @@ import numpy as np
 from scipy.linalg import eigh
 
 from gpaw.blacs import BlacsGrid, Redistributor
+from gpaw.mpi import broadcast_exception, MPIComm
 
 
 class ScipyDiagonalizer:
@@ -11,8 +12,10 @@ class ScipyDiagonalizer:
     The ScipyDiagonalizer wraps scipy.linalg.eigh to solve a
     (generalized) eigenproblem on one core.
     """
+    def __init__(self, comm: MPIComm):
+        self.comm = comm
 
-    def diagonalize(self, A, B, eps, is_master, debug):
+    def diagonalize(self, A, B, eps, debug):
         """Solves the eigenproblem A @ x = eps [B] @ x.
 
         The problem is solved inplace, so when done, A has the eigenvectors as
@@ -36,16 +39,17 @@ class ScipyDiagonalizer:
         debug : bool
             Flag to check for finiteness when running in debug mode.
         """
-        if is_master:
-            eps[:], A[:] = eigh(
-                A, B, lower=True, check_finite=debug, overwrite_b=True)
+        with broadcast_exception(self.comm):
+            if self.comm.rank == 0:
+                eps[:], A[:] = eigh(
+                    A, B, lower=True, check_finite=debug, overwrite_b=True)
 
 
 class ScalapackDiagonalizer:
     """Diagonalizer class that uses general_diagonalize_dc.
 
     The ScalapackDiagonalizer wraps general_diagonalize_dc to solve a
-    (generalized) eigenproblem on one core.
+    (generalized) eigenproblem on one core???
     """
 
     def __init__(
@@ -78,6 +82,7 @@ class ScalapackDiagonalizer:
         self.arraysize = arraysize
         self.blocksize = blocksize
         self.dtype = dtype
+        self.scalapack_communicator = scalapack_communicator
 
         self.blacsgrid = BlacsGrid(
             scalapack_communicator, grid_nrows, grid_ncols)
@@ -96,7 +101,7 @@ class ScalapackDiagonalizer:
             self.distributed_descriptor,
             self.head_rank_descriptor)
 
-    def diagonalize(self, A, B, eps, is_master, debug):
+    def diagonalize(self, A, B, eps, debug):
         """Solves the eigenproblem A @ x = eps [B] @ x.
 
         The problem is solved inplace, so when done, A has the eigenvectors
@@ -126,7 +131,7 @@ class ScalapackDiagonalizer:
         vec_mm = self.distributed_descriptor.zeros(dtype=self.dtype)
 
         temporary_eps = np.zeros([self.arraysize])
-        if is_master:
+        if self.scalapack_communicator.rank == 0:
             assert self.blacsgrid.comm.rank == 0
             Asc_MM[:, :] = A
             Bsc_MM[:, :] = B
@@ -141,7 +146,7 @@ class ScalapackDiagonalizer:
         # transpose-conjugated before they are consistent with Scipy behaviour
         self.all_to_head_redistributor.redistribute(vec_mm, vec_MM, uplo="G")
 
-        if is_master:
+        if self.scalapack_communicator.rank == 0:
             # Conjugate-transpose here since general_diagonalize_dc gives us
             # Fortran-convention eigenvectors.
             A[:, :] = vec_MM.conj().T

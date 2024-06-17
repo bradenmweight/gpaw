@@ -44,7 +44,7 @@ class MomentCorrection:
 
         if np.allclose(np.diff(self.moms), 1):
             # Increasing sequence
-            moms = f'range({self.moms[0]}, {self.moms[-1]+1})'
+            moms = f'range({self.moms[0]}, {self.moms[-1] + 1})'
         else:
             # List of integers
             _moms = ', '.join([f'{m:.0f}' for m in self.moms])

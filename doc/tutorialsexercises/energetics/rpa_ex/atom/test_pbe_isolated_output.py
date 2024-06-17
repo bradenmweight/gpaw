@@ -21,6 +21,7 @@ def test():
 
     for result, benchmark in zip(isolated_results, isolated_benchmark):
         assert len(result) == 3
+        print(result, benchmark)
         assert np.allclose(result, benchmark, rtol=1.e-5, atol=1.e-8)
 
 

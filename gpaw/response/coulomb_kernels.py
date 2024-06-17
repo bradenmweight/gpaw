@@ -30,10 +30,12 @@ class CoulombKernel:
         self.pbc_c = pbc_c
         self.kd = kd
 
-    def from_gs(gs, *, truncation):
-        return CoulombKernel(truncation, N_c=gs.kd.N_c,
-                             pbc_c=gs.atoms.get_pbc(),
-                             kd=gs.kd)
+    @classmethod
+    def from_gs(cls, gs, *, truncation):
+        return cls(truncation,
+                   N_c=gs.kd.N_c,
+                   pbc_c=gs.atoms.get_pbc(),
+                   kd=gs.kd)
 
     def new(self, *, truncation):
         return CoulombKernel(truncation,

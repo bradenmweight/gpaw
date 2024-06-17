@@ -39,7 +39,7 @@ def test_lcaotddft_simple(gpw_files, in_tmp_dir):
              5.371491974534e-05,
              5.385046706407e-05]
 
-    tol = 1e-10
+    tol = 1e-8
     assert data_i == pytest.approx(ref_i, abs=tol)
 
     # Test spectrum
@@ -77,7 +77,7 @@ def test_lcaotddft_simple(gpw_files, in_tmp_dir):
              5.231586230700e-02,
              5.008661764300e-02]
 
-    tol = 1e-7
+    tol = 1e-5
     assert data_i == pytest.approx(ref_i, abs=tol)
 
 

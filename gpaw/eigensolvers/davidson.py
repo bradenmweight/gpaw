@@ -1,15 +1,13 @@
 from functools import partial
 
-from ase.utils.timing import timer
 import numpy as np
-
+from ase.utils.timing import timer
 from gpaw import debug
+from gpaw.eigensolvers.diagonalizerbackend import (ScalapackDiagonalizer,
+                                                   ScipyDiagonalizer)
 from gpaw.eigensolvers.eigensolver import Eigensolver
-from gpaw.matrix import matrix_matrix_multiply as mmm
 from gpaw.hybrids import HybridXC
-from gpaw.eigensolvers.diagonalizerbackend import (
-    ScipyDiagonalizer,
-    ScalapackDiagonalizer)
+from gpaw.matrix import matrix_matrix_multiply as mmm
 
 
 class DummyArray:
@@ -69,7 +67,7 @@ class Davidson(Eigensolver):
                 dtype=self.dtype,
                 blocksize=slsize)
         else:
-            self.diagonalizer_backend = ScipyDiagonalizer()
+            self.diagonalizer_backend = ScipyDiagonalizer(slcomm)
 
     def estimate_memory(self, mem, wfs):
         Eigensolver.estimate_memory(self, mem, wfs)
@@ -188,8 +186,7 @@ class Davidson(Eigensolver):
 
                 try:
                     self.diagonalizer_backend.diagonalize(
-                        H_NN, S_NN, eps_N, is_master=is_gridband_master,
-                        debug=debug)
+                        H_NN, S_NN, eps_N, debug=debug)
                 except np.linalg.LinAlgError as ex:
                     raise ValueError(
                         'Too few plane waves or grid points') from ex

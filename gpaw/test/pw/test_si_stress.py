@@ -6,7 +6,6 @@ from gpaw import GPAW, PW, Mixer
 from gpaw.mpi import world
 
 
-@pytest.mark.later
 @pytest.mark.stress
 def test_pw_si_stress(in_tmp_dir, gpaw_new):
     xc = 'PBE'
