@@ -10,7 +10,7 @@ from ase.units import Hartree
 from gpaw.utilities.blas import mmmx
 
 from gpaw.response import ResponseGroundStateAdapter, ResponseContext, timer
-from gpaw.response.symmetry import SymmetryAnalyzer
+from gpaw.response.symmetry import QSymmetryAnalyzer
 from gpaw.response.frequencies import ComplexFrequencyDescriptor
 from gpaw.response.pw_parallelization import PlaneWaveBlockDistributor
 from gpaw.response.matrix_elements import (PlaneWaveMatrixElementCalculator,
@@ -86,7 +86,7 @@ class GeneralizedSuscetibilityCalculator(PairFunctionIntegrator):
         self.matrix_element_calc1 = mecalc1
         self.matrix_element_calc2 = mecalc2
         if mecalc2 is not mecalc1:
-            assert not self.symmetry_analyzer.time_reversal, \
+            assert not self.qsymmetry.time_reversal, \
                 'Cannot make use of time-reversal symmetry for generalized ' \
                 'susceptibilities with two different matrix elements'
 
@@ -168,8 +168,7 @@ class GeneralizedSuscetibilityCalculator(PairFunctionIntegrator):
         gd = self.gs.gd
 
         # Update to internal basis, if needed
-        if internal and self.gammacentered \
-           and not self.symmetry_analyzer.disabled:
+        if internal and self.gammacentered and not self.qsymmetry.disabled:
             # In order to make use of the symmetries of the system to reduce
             # the k-point integration, the internal code assumes a plane wave
             # basis which is centered at q in reciprocal space.
@@ -372,7 +371,7 @@ class GeneralizedSuscetibilityCalculator(PairFunctionIntegrator):
             # Always output chiks with distribution 'ZgG'
             chiks = chiks.copy_with_distribution('ZgG')
 
-        if self.gammacentered and not self.symmetry_analyzer.disabled:
+        if self.gammacentered and not self.qsymmetry.disabled:
             # Reduce the q-centered plane-wave basis used internally to the
             # gammacentered basis
             assert not chiks.qpd.gammacentered  # Internal qpd
@@ -467,7 +466,7 @@ class SelfEnhancementCalculator(GeneralizedSuscetibilityCalculator):
     def __init__(self, gs: ResponseGroundStateAdapter, context=None,
                  rshelmax: int = -1,
                  rshewmin: float | None = None,
-                 use_symmetry=True,
+                 qsymmetry: bool = True,
                  **kwargs):
         """Construct the SelfEnhancementCalculator.
 
@@ -487,12 +486,9 @@ class SelfEnhancementCalculator(GeneralizedSuscetibilityCalculator):
         self.rshelmax = rshelmax
         self.rshewmin = rshewmin
 
-        assert 'symmetry_analyzer' not in kwargs
-        symmetry_analyzer = SymmetryAnalyzer(
-            point_group=use_symmetry, time_reversal=False)
-
         super().__init__(gs, context=context,
-                         symmetry_analyzer=symmetry_analyzer,
+                         qsymmetry=QSymmetryAnalyzer(
+                             point_group=qsymmetry, time_reversal=False),
                          **kwargs)
 
     def create_matrix_element_calculators(self):
