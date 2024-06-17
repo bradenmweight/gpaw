@@ -8,7 +8,6 @@ import pytest
 from gpaw import GPAW
 from gpaw.mpi import world
 from gpaw.response import ResponseContext, ResponseGroundStateAdapter
-from gpaw.response.symmetry import SymmetryAnalyzer
 from gpaw.response.frequencies import (ComplexFrequencyDescriptor,
                                        FrequencyDescriptor)
 from gpaw.response.chiks import ChiKSCalculator, SelfEnhancementCalculator
@@ -338,7 +337,7 @@ def test_xi(gpw_files, system, qrel, gammacentered):
                         nblocks=nblocks)
 
     # Parameters to cross-tabulate
-    usesym_s = [True, False]
+    qsymmetry_s = [True, False]
     bandsummation_b = ['double', 'pairwise']
 
     # ---------- Script ---------- #
@@ -347,11 +346,11 @@ def test_xi(gpw_files, system, qrel, gammacentered):
     gs = ResponseGroundStateAdapter(calc)
 
     xi_mzGG = []
-    for usesym in usesym_s:
+    for qsymmetry in qsymmetry_s:
         for bandsummation in bandsummation_b:
             xi_calc = SelfEnhancementCalculator(
                 gs,
-                use_symmetry=usesym,
+                qsymmetry=qsymmetry,
                 bandsummation=bandsummation,
                 **fixed_kwargs)
             xi = xi_calc.calculate(spincomponent, q_c, zd)
@@ -397,15 +396,11 @@ class ChiKSTestingFactory:
         if cache_string in self.cached_chiks:
             return self.cached_chiks[cache_string]
 
-        usesym = not disable_syms
-        symmetry_analyzer = SymmetryAnalyzer(
-            point_group=usesym, time_reversal=usesym)
-
         chiks_calc = ChiKSCalculator(
             self.gs, context=self.context,
             ecut=self.ecut, nbands=self.nbands,
             gammacentered=self.gammacentered,
-            symmetry_analyzer=symmetry_analyzer,
+            qsymmetry=not disable_syms,
             bandsummation=bandsummation,
             nblocks=nblocks)
 

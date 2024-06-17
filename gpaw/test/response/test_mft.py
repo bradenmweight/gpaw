@@ -10,7 +10,6 @@ import numpy as np
 from gpaw import GPAW
 
 from gpaw.response import ResponseGroundStateAdapter, ResponseContext
-from gpaw.response.symmetry import SymmetryAnalyzer
 from gpaw.response.chiks import ChiKSCalculator
 from gpaw.response.localft import LocalFTCalculator, LocalPAWFTCalculator
 from gpaw.response.site_data import AtomicSites, AtomicSiteData
@@ -161,9 +160,7 @@ def test_Co_hcp(in_tmp_dir, gpw_files):
     # Initialize the exchange calculator with and without symmetry
     gs = ResponseGroundStateAdapter(calc)
     context = ResponseContext()
-    chiks_calc0 = ChiKSCalculator(gs, context,
-                                  symmetry_analyzer=SymmetryAnalyzer(
-                                      point_group=False, time_reversal=False),
+    chiks_calc0 = ChiKSCalculator(gs, context, qsymmetry=False,
                                   ecut=ecut, nbands=nbands, gammacentered=True)
     localft_calc = LocalPAWFTCalculator(gs, context)
     isoexch_calc0 = IsotropicExchangeCalculator(chiks_calc0, localft_calc)

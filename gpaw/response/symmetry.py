@@ -1,3 +1,4 @@
+from typing import Union
 from dataclasses import dataclass
 
 import numpy as np
@@ -28,12 +29,15 @@ class KPointFinder:
 
 
 @dataclass
-class SymmetryAnalyzer:
-    """
-    disable_point_group : bool
-        Disable point group symmetry in k-integration and symmetrization.
-    disable_time_reversal : bool
-        Disable time reversal symmetry k-integration and symmetrization.
+class QSymmetryAnalyzer:
+    """K-point symmetry analyzer for transitions k -> k + q.
+
+    Parameters
+    ----------
+    point_group : bool
+        Use point group symmetry.
+    time_reversal : bool
+        Use time-reversal symmetry (if applicable).
     """
 
     point_group: bool = True
@@ -47,6 +51,19 @@ class SymmetryAnalyzer:
         return PWSymmetryAnalyzer(
             kpoints, qpd, context, not self.point_group,
             not self.time_reversal)
+
+
+QSymmetryInput = Union[QSymmetryAnalyzer, dict, bool]
+
+
+def ensure_qsymmetry(qsymmetry: QSymmetryInput) -> QSymmetryAnalyzer:
+    if not isinstance(qsymmetry, QSymmetryAnalyzer):
+        if isinstance(qsymmetry, dict):
+            qsymmetry = QSymmetryAnalyzer(**qsymmetry)
+        else:
+            qsymmetry = QSymmetryAnalyzer(
+                point_group=qsymmetry, time_reversal=qsymmetry)
+    return qsymmetry
 
 
 class PWSymmetryAnalyzer:

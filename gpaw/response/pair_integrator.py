@@ -6,7 +6,7 @@ from ase.units import Hartree
 from gpaw.utilities.progressbar import ProgressBar
 
 from gpaw.response import timer
-from gpaw.response.symmetry import SymmetryAnalyzer
+from gpaw.response.symmetry import ensure_qsymmetry
 from gpaw.response.kspair import (KohnShamKPointPair,
                                   KohnShamKPointPairExtractor)
 from gpaw.response.pw_parallelization import block_partition
@@ -79,23 +79,21 @@ class PairFunctionIntegrator(ABC):
     generalization in the future.
     """
 
-    def __init__(self, gs, context, symmetry_analyzer=None, nblocks=1):
+    def __init__(self, gs, context, qsymmetry=True, nblocks=1):
         """Construct the PairFunctionIntegrator
 
         Parameters
         ----------
         gs : ResponseGroundStateAdapter
         context : ResponseContext
-        symmetry_analyzer: SymmetryAnalyzer
+        qsymmetry : QSymmetryInput
         nblocks : int
             Distribute the pair function into nblocks. Useful when the pair
             function itself becomes a large array (read: memory limiting).
         """
         self.gs = gs
         self.context = context
-        if symmetry_analyzer is None:
-            symmetry_analyzer = SymmetryAnalyzer()
-        self.symmetry_analyzer = symmetry_analyzer
+        self.qsymmetry = ensure_qsymmetry(qsymmetry)
 
         # Communicators for distribution of memory and work
         (self.blockcomm,
@@ -204,7 +202,7 @@ class PairFunctionIntegrator(ABC):
         return qpd
 
     def get_pw_symmetry_analyzer(self, qpd):
-        return self.symmetry_analyzer.analyze(
+        return self.qsymmetry.analyze(
             self.gs.kpoints, qpd, self.context)
 
     def get_band_and_spin_transitions(self, spincomponent, nbands=None,

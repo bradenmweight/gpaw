@@ -661,7 +661,7 @@ class DielectricFunction(DielectricFunctionCalculator):
                  nbands=None, eta=0.2,
                  intraband=True, nblocks=1, world=mpi.world, txt=sys.stdout,
                  truncation=None,
-                 symmetry_analyzer=None,
+                 qsymmetry=True,
                  integrationmode=None, rate=0.0,
                  eshift: float | None = None):
         """Creates a DielectricFunction object.
@@ -707,7 +707,7 @@ class DielectricFunction(DielectricFunctionCalculator):
             ecut=ecut, nbands=nbands, eta=eta,
             hilbert=hilbert,
             intraband=intraband,
-            symmetry_analyzer=symmetry_analyzer,
+            qsymmetry=qsymmetry,
             integrationmode=integrationmode,
             rate=rate, eshift=eshift
         )
