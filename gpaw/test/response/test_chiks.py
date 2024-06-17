@@ -337,7 +337,7 @@ def test_xi(gpw_files, system, qrel, gammacentered):
                         nblocks=nblocks)
 
     # Parameters to cross-tabulate
-    disable_sym_s = [True, False]
+    usesym_s = [True, False]
     bandsummation_b = ['double', 'pairwise']
 
     # ---------- Script ---------- #
@@ -346,11 +346,11 @@ def test_xi(gpw_files, system, qrel, gammacentered):
     gs = ResponseGroundStateAdapter(calc)
 
     xi_mzGG = []
-    for disable_sym in disable_sym_s:
+    for usesym in usesym_s:
         for bandsummation in bandsummation_b:
             xi_calc = SelfEnhancementCalculator(
                 gs,
-                disable_point_group=disable_sym,
+                use_symmetry=usesym,
                 bandsummation=bandsummation,
                 **fixed_kwargs)
             xi = xi_calc.calculate(spincomponent, q_c, zd)

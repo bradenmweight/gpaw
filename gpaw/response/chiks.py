@@ -467,6 +467,7 @@ class SelfEnhancementCalculator(GeneralizedSuscetibilityCalculator):
     def __init__(self, gs: ResponseGroundStateAdapter, context=None,
                  rshelmax: int = -1,
                  rshewmin: float | None = None,
+                 use_symmetry=True,
                  **kwargs):
         """Construct the SelfEnhancementCalculator.
 
@@ -487,9 +488,11 @@ class SelfEnhancementCalculator(GeneralizedSuscetibilityCalculator):
         self.rshewmin = rshewmin
 
         assert 'symmetry_analyzer' not in kwargs
+        symmetry_analyzer = SymmetryAnalyzer(
+            point_group=use_symmetry, time_reversal=False)
+
         super().__init__(gs, context=context,
-                         symmetry_analyzer=SymmetryAnalyzer(
-                             point_group=True, time_reversal=False),
+                         symmetry_analyzer=symmetry_analyzer,
                          **kwargs)
 
     def create_matrix_element_calculators(self):
