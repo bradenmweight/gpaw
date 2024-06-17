@@ -375,14 +375,11 @@ class BSEBackend:
         # Calculate pair densities, eigenvalues and occupations
         self.context.timer.start('Pair densities')
         self.so = self.spinors + 1
-        self.Nv = self.Nv
-        self.Nc = self.Nc
-        self.Ns = self.spins
-        rhoex_KsmnG = np.zeros((self.nK, self.Ns, self.Nv,
+        rhoex_KsmnG = np.zeros((self.nK, self.spins, self.Nv,
                                 self.Nc, len(self.v_G)), complex)
-        df_Ksmn = np.zeros((self.nK, self.Ns, self.Nv,
+        df_Ksmn = np.zeros((self.nK, self.spins, self.Nv,
                             self.Nc), float)  # -(ev - ec)
-        deps_ksmn = np.zeros((self.myKsize, self.Ns, self.Nv,
+        deps_ksmn = np.zeros((self.myKsize, self.spins, self.Nv,
                               self.Nc), float)  # -(fv - fc)
 
         optical_limit = np.allclose(self.q_c, 0.0)
@@ -411,7 +408,7 @@ class BSEBackend:
         # These include the indirect (exchange) kernel,
         # pseudo-energies, and occupation numbers
         for ik, iK in enumerate(self.myKrange):
-            for s in range(self.Ns):
+            for s in range(self.spins):
                 pair = get_pair(qpd0, s, iK,
                                 self.vi_s[s], self.vf_s[s],
                                 self.ci_s[s], self.cf_s[s])
@@ -475,8 +472,8 @@ class BSEBackend:
             self.mode, self.q_c))
 
         # Hamiltonian buffer array
-        H_ksmnKsmn = np.zeros((self.myKsize, self.Ns, self.Nv, self.Nc,
-                               self.nK, self.Ns, self.Nv, self.Nc), complex)
+        H_ksmnKsmn = np.zeros((self.myKsize, self.spins, self.Nv, self.Nc,
+                               self.nK, self.spins, self.Nv, self.Nc), complex)
 
         # Add kernels to buffer array
         self.add_indirect_kernel(kptpair_factory, rhoex_KsmnG, H_ksmnKsmn)
@@ -486,13 +483,13 @@ class BSEBackend:
         H_ksmnKsmn /= self.gs.volume
         self.context.timer.stop('Calculate Hamiltonian')
 
-        self.mySsize = self.myKsize * self.Nv * self.Nc * self.Ns
+        self.mySsize = self.myKsize * self.Nv * self.Nc * self.spins
         if self.myKsize > 0:
-            iS0 = self.myKrange[0] * self.Nv * self.Nc * self.Ns
+            iS0 = self.myKrange[0] * self.Nv * self.Nc * self.spins
 
         df_S = np.reshape(df_Ksmn, -1)
         # multiply by 2 when spin-paired and no SOC
-        df_S *= 2.0 / self.nK / self.Ns / self.so
+        df_S *= 2.0 / self.nK / self.spins / self.so
         deps_s = np.reshape(deps_ksmn, -1)
         H_sS = np.reshape(H_ksmnKsmn, (self.mySsize, self.nS))
         for iS in range(self.mySsize):
@@ -507,7 +504,7 @@ class BSEBackend:
     def add_direct_kernel(self, kptpair_factory, pair_calc,
                           screened_potential, spinors, H_ksmnKsmn):
         for ik1, iK1 in enumerate(self.myKrange):
-            for s1 in range(self.Ns):
+            for s1 in range(self.spins):
                 kptv1 = kptpair_factory.get_k_point(
                     s1, iK1, self.vi_s[s1], self.vf_s[s1])
                 kptc1 = kptpair_factory.get_k_point(
@@ -515,7 +512,7 @@ class BSEBackend:
 
                 for Q_c in self.qd.bzk_kc:
                     iK2 = self.kd.find_k_plus_q(Q_c, [kptv1.K])[0]
-                    for s2 in range(self.Ns):
+                    for s2 in range(self.spins):
                         if self.mode == 'RPA' or s1 != s2:
                             continue
 
@@ -544,7 +541,7 @@ class BSEBackend:
                             screened_potential.W_qGG[iq],
                             rho4_nnG,
                             optimize='optimal')
-                        W_mnmn *= self.Ns * self.so
+                        W_mnmn *= self.spins * self.so
                         H_ksmnKsmn[ik1, s1, :, :, iK2, s1] -= 0.5 * W_mnmn
                         self.context.timer.stop('Screened exchange')
 
@@ -553,21 +550,21 @@ class BSEBackend:
                 tleft = dt * self.myKsize / (iK1 + 1) - dt
                 self.context.print(
                     '  Finished %s pair orbitals in %s - Estimated %s left'
-                    % ((iK1 + 1) * self.Nv * self.Nc * self.Ns * world.size,
+                    % ((iK1 + 1) * self.Nv * self.Nc * self.spins * world.size,
                        timedelta(seconds=round(dt)),
                        timedelta(seconds=round(tleft))))
 
     @timer('add_indirect_kernel')
     def add_indirect_kernel(self, kptpair_factory, rhoex_KsmnG, H_ksmnKsmn):
         for ik1, iK1 in enumerate(self.myKrange):
-            for s1 in range(self.Ns):
+            for s1 in range(self.spins):
                 kptv1 = kptpair_factory.get_k_point(
                     s1, iK1, self.vi_s[s1], self.vf_s[s1])
                 rho1_mnG = rhoex_KsmnG[iK1, s1]
                 # rhoex_KsnmG
 
                 rho1ccV_mnG = rho1_mnG.conj()[:, :] * self.v_G
-                for s2 in range(self.Ns):
+                for s2 in range(self.spins):
                     for Q_c in self.qd.bzk_kc:
                         iK2 = self.kd.find_k_plus_q(Q_c, [kptv1.K])[0]
                         rho2_mnG = rhoex_KsmnG[iK2, s2]
