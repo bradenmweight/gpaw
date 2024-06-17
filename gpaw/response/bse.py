@@ -225,8 +225,8 @@ class BSEBackend:
         self.qd.set_symmetry(self.gs.atoms, self.kd.symmetry)
 
         # bands
-        self.spins = self.gs.nspins
-        if self.spins == 2:
+        self.nspins = self.gs.nspins
+        if self.nspins == 2:
             if self.spinors:
                 self.spinors = False
                 self.context.print('***WARNING*** Presently the spinor ' +
@@ -255,7 +255,7 @@ class BSEBackend:
         self.eshift = eshift
 
         # Number of pair orbitals
-        self.nS = self.kd.nbzkpts * self.nv * self.nc * self.spins
+        self.nS = self.kd.nbzkpts * self.nv * self.nc * self.nspins
         self.nS *= (self.spinors + 1)**2
 
         self.coulomb = CoulombKernel.from_gs(self.gs, truncation=truncation)
@@ -266,8 +266,37 @@ class BSEBackend:
 
         self.Nv = self.nv * (self.spinors + 1)
         self.Nc = self.nc * (self.spinors + 1)
-        self.ns = (
-            -(-self.kd.nbzkpts // world.size) * self.Nv * self.Nc * self.spins)
+        self.ns = (-(-self.kd.nbzkpts // world.size)
+                   * self.Nv * self.Nc * self.nspins)
+
+        # Parallelization stuff
+        self.nK = self.kd.nbzkpts
+        self.myKrange, self.myKsize, self.mySsize = \
+            self.parallelisation_sizes()
+
+        # Setup bands
+        if self.spinors:
+            # Calculate spinors. Here m is index of eigenvalues with SOC
+            # and n is the basis of eigenstates without SOC. Below m is used
+            # for unoccupied states and n is used for occupied states so be
+            # careful!
+            self.spinors_data = self._spinordata()
+
+            # Get all pair densities to allow for SOC mixing
+            # Use twice as many no-SOC states as BSE bands to allow mixing
+            # For example: 2 valence, 3 conduction, then
+            # actually use 2 * 2 + 2 * 3 = 10 total bands
+            # and then one calculates all matrix elements
+            # (vv, vc, cv, and cc) in this 10x10 basis
+            # from which they are then transformed into
+            # to SOC basis.
+            self.vi_s = self.spinors_data.vi_s
+            self.vf_s = self.spinors_data.vf_s
+            self.ci_s = self.spinors_data.ci_s
+            self.cf_s = self.spinors_data.cf_s
+        else:
+            self.vi_s, self.vf_s = self.val_sn[:, 0], self.val_sn[:, -1] + 1
+            self.ci_s, self.cf_s = self.con_sn[:, 0], self.con_sn[:, -1] + 1
 
     def parse_bands(self, bands, band_type='valence'):
         """Helper function that checks whether bands are correctly specified,
@@ -285,7 +314,7 @@ class BSEBackend:
         band indices.
         """
         if hasattr(bands, '__iter__'):
-            if self.spins == 2:
+            if self.nspins == 2:
                 if len(bands) != 2 or (len(bands[0]) != len(bands[1])):
                     raise ValueError('For a spin-polarized calculation, '
                                      'the same number of bands must be '
@@ -299,7 +328,7 @@ class BSEBackend:
         # if we get here, bands is not iterable
         # check that the specified input is valid
 
-        if self.spins == 2:
+        if self.nspins == 2:
             raise NotImplementedError('For a spin-polarized calculation, '
                                       'bands must be specified as lists '
                                       'of shape (2,n)')
@@ -330,28 +359,11 @@ class BSEBackend:
         e_mk = soc.eigenvalues().T
         v_kmn = soc.eigenvectors()
         e_mk /= Hartree
-        return SpinorData(self.con_sn, self.val_sn,
-                          e_mk, v_kmn[:, :, ::2], v_kmn[:, :, 1::2])
+        return SpinorData(self.con_sn, self.val_sn, e_mk,
+                          v_kmn[:, :, ::2], v_kmn[:, :, 1::2])
 
     @timer('BSE calculate')
     def calculate(self, optical):
-        if self.spinors:
-            # Calculate spinors. Here m is index of eigenvalues with SOC
-            # and n is the basis of eigenstates without SOC. Below m is used
-            # for unoccupied states and n is used for occupied states so be
-            # careful!
-            spinors = self._spinordata()
-        else:
-            spinors = None
-
-        return self._calculate(optical, spinors)
-
-    def _calculate(self, optical, spinors=None):
-        # Parallelization stuff
-        self.nK = self.kd.nbzkpts
-        self.myKrange, self.myKsize, self.mySsize = \
-            self.parallelisation_sizes()
-
         # Calculate exchange interaction
         qpd0 = SingleQPWDescriptor.from_q(self.q_c, self.ecut, self.gs.gd)
         self.ikq_k = self.kd.find_k_plus_q(self.q_c)
@@ -374,12 +386,12 @@ class BSEBackend:
 
         # Calculate pair densities, eigenvalues and occupations
         self.context.timer.start('Pair densities')
-        self.so = self.spinors + 1
-        rhoex_KsmnG = np.zeros((self.nK, self.spins, self.Nv,
+        so = self.spinors + 1
+        rhoex_KsmnG = np.zeros((self.nK, self.nspins, self.Nv,
                                 self.Nc, len(self.v_G)), complex)
-        df_Ksmn = np.zeros((self.nK, self.spins, self.Nv,
+        df_Ksmn = np.zeros((self.nK, self.nspins, self.Nv,
                             self.Nc), float)  # -(ev - ec)
-        deps_ksmn = np.zeros((self.myKsize, self.spins, self.Nv,
+        deps_ksmn = np.zeros((self.myKsize, self.nspins, self.Nv,
                               self.Nc), float)  # -(fv - fc)
 
         optical_limit = np.allclose(self.q_c, 0.0)
@@ -387,28 +399,11 @@ class BSEBackend:
         get_pair = kptpair_factory.get_kpoint_pair
         get_pair_density = pair_calc.get_pair_density
 
-        if self.spinors:
-            # Get all pair densities to allow for SOC mixing
-            # Use twice as many no-SOC states as BSE bands to allow mixing
-            # For example: 2 valence, 3 conduction, then
-            # actually use 2 * 2 + 2 * 3 = 10 total bands
-            # and then one calculates all matrix elements
-            # (vv, vc, cv, and cc) in this 10x10 basis
-            # from which they are then transformed into
-            # to SOC basis.
-            self.vi_s = spinors.vi_s
-            self.vf_s = spinors.vf_s
-            self.ci_s = spinors.ci_s
-            self.cf_s = spinors.cf_s
-        else:
-            self.vi_s, self.vf_s = self.val_sn[:, 0], self.val_sn[:, -1] + 1
-            self.ci_s, self.cf_s = self.con_sn[:, 0], self.con_sn[:, -1] + 1
-
         # Calculate all properties diagonal in k-point
         # These include the indirect (exchange) kernel,
         # pseudo-energies, and occupation numbers
         for ik, iK in enumerate(self.myKrange):
-            for s in range(self.spins):
+            for s in range(self.nspins):
                 pair = get_pair(qpd0, s, iK,
                                 self.vi_s[s], self.vf_s[s],
                                 self.ci_s[s], self.cf_s[s])
@@ -421,7 +416,7 @@ class BSEBackend:
                     deps_ksmn[ik, s] = -(epsv_m[:, np.newaxis] - epsc_n)
                 elif self.spinors:
                     iKq = self.gs.kd.find_k_plus_q(self.q_c, [iK])[0]
-                    deps_ksmn[ik, s] = spinors.get_deps(iK, iKq)
+                    deps_ksmn[ik, s] = self.spinors_data.get_deps(iK, iKq)
                 else:
                     deps_ksmn[ik, s] = -pair.get_transition_energies()
 
@@ -447,7 +442,8 @@ class BSEBackend:
                     df_Ksmn[iK, s, 1::2, ::2] = df_mn
                     df_Ksmn[iK, s, 1::2, 1::2] = df_mn
 
-                    rhoex_KsmnG[iK, s] = spinors.rho_valence_conduction(
+                    rhoex_KsmnG[iK, s] = \
+                        self.spinors_data.rho_valence_conduction(
                         rho_mnG, iK, iKq)
                     if optical_limit:
                         rhoex_KsmnG[iK, s, :, :, 0] /= deps_ksmn[ik, s]
@@ -467,33 +463,49 @@ class BSEBackend:
 
         # Calculate Hamiltonian
         self.context.timer.start('Calculate Hamiltonian')
-        self.t0 = time()
+        t0 = time()
+
+        def update_progress(iK1):
+            dt = time() - t0
+            tleft = dt * self.myKsize / (iK1 + 1) - dt
+
+            self.context.print(
+                '  Finished %s pair orbitals in %s - Estimated %s left'
+                % ((iK1 + 1) * self.Nv * self.Nc * self.nspins * world.size,
+                    timedelta(seconds=round(dt)),
+                    timedelta(seconds=round(tleft))))
+
         self.context.print('Calculating {} matrix elements at q_c = {}'.format(
             self.mode, self.q_c))
 
         # Hamiltonian buffer array
-        H_ksmnKsmn = np.zeros((self.myKsize, self.spins, self.Nv, self.Nc,
-                               self.nK, self.spins, self.Nv, self.Nc), complex)
+        H_ksmnKsmn = np.zeros((self.myKsize, self.nspins, self.Nv, self.Nc,
+                               self.nK, self.nspins, self.Nv, self.Nc),
+                              complex)
 
         # Add kernels to buffer array
         self.add_indirect_kernel(kptpair_factory, rhoex_KsmnG, H_ksmnKsmn)
-        if not self.mode == 'RPA':
+        if self.mode != 'RPA':
             self.add_direct_kernel(kptpair_factory, pair_calc,
-                                   screened_potential, spinors, H_ksmnKsmn)
+                                   screened_potential, update_progress,
+                                   H_ksmnKsmn)
 
         H_ksmnKsmn /= self.gs.volume
         self.context.timer.stop('Calculate Hamiltonian')
 
-        self.mySsize = self.myKsize * self.Nv * self.Nc * self.spins
+        # XXX Why do we define a new mySsize?
+        # is it different from self.mySsize, 
+        # from the tests it doesnt seem so.
+        mySsize = self.myKsize * self.Nv * self.Nc * self.nspins
         if self.myKsize > 0:
-            iS0 = self.myKrange[0] * self.Nv * self.Nc * self.spins
+            iS0 = self.myKrange[0] * self.Nv * self.Nc * self.nspins
 
         df_S = np.reshape(df_Ksmn, -1)
         # multiply by 2 when spin-paired and no SOC
-        df_S *= 2.0 / self.nK / self.spins / self.so
+        df_S *= 2.0 / self.nK / self.nspins / so
         deps_s = np.reshape(deps_ksmn, -1)
-        H_sS = np.reshape(H_ksmnKsmn, (self.mySsize, self.nS))
-        for iS in range(self.mySsize):
+        H_sS = np.reshape(H_ksmnKsmn, (mySsize, self.nS))
+        for iS in range(mySsize):
             # Multiply by occupations and adiabatic coupling
             H_sS[iS] *= df_S[iS0 + iS]
             # add bare transition energies
@@ -502,10 +514,10 @@ class BSEBackend:
         return BSEMatrix(rhoG0_S, df_S, H_sS)
 
     @timer('add_direct_kernel')
-    def add_direct_kernel(self, kptpair_factory, pair_calc,
-                          screened_potential, spinors, H_ksmnKsmn):
+    def add_direct_kernel(self, kptpair_factory, pair_calc, screened_potential,
+                          update_progress, H_ksmnKsmn):
         for ik1, iK1 in enumerate(self.myKrange):
-            for s1 in range(self.spins):
+            for s1 in range(self.nspins):
                 kptv1 = kptpair_factory.get_k_point(
                     s1, iK1, self.vi_s[s1], self.vf_s[s1])
                 kptc1 = kptpair_factory.get_k_point(
@@ -525,11 +537,11 @@ class BSEBackend:
                     rho4_nnG, iq = self.get_density_matrix(
                         pair_calc, screened_potential, kptc1, kptc2)
 
-                    if spinors is not None:
-                        rho3_mmG = spinors.rho_valence_valence(
+                    if self.spinors:
+                        rho3_mmG = self.spinors_data.rho_valence_valence(
                             rho3_mmG, kptv1.K, kptv2.K)
 
-                        rho4_nnG = spinors.rho_conduction_conduction(
+                        rho4_nnG = self.spinors_data.rho_conduction_conduction(
                             rho4_nnG, kptc1.K, kptc2.K)
 
                     self.context.timer.start('Screened exchange')
@@ -539,30 +551,24 @@ class BSEBackend:
                         screened_potential.W_qGG[iq],
                         rho4_nnG,
                         optimize='optimal')
-                    W_mnmn *= self.spins * self.so
+                    W_mnmn *= self.nspins * (self.spinors + 1)
                     H_ksmnKsmn[ik1, s1, :, :, iK2, s1] -= 0.5 * W_mnmn
                     self.context.timer.stop('Screened exchange')
 
             if iK1 % (self.myKsize // 5 + 1) == 0:
-                dt = time() - self.t0
-                tleft = dt * self.myKsize / (iK1 + 1) - dt
-                self.context.print(
-                    '  Finished %s pair orbitals in %s - Estimated %s left'
-                    % ((iK1 + 1) * self.Nv * self.Nc * self.spins * world.size,
-                       timedelta(seconds=round(dt)),
-                       timedelta(seconds=round(tleft))))
+                update_progress(iK1=iK1)
 
     @timer('add_indirect_kernel')
     def add_indirect_kernel(self, kptpair_factory, rhoex_KsmnG, H_ksmnKsmn):
         for ik1, iK1 in enumerate(self.myKrange):
-            for s1 in range(self.spins):
+            for s1 in range(self.nspins):
                 kptv1 = kptpair_factory.get_k_point(
                     s1, iK1, self.vi_s[s1], self.vf_s[s1])
                 rho1_mnG = rhoex_KsmnG[iK1, s1]
                 # rhoex_KsnmG
 
                 rho1ccV_mnG = rho1_mnG.conj()[:, :] * self.v_G
-                for s2 in range(self.spins):
+                for s2 in range(self.nspins):
                     for Q_c in self.qd.bzk_kc:
                         iK2 = self.kd.find_k_plus_q(Q_c, [kptv1.K])[0]
                         rho2_mnG = rhoex_KsmnG[iK2, s2]
@@ -759,7 +765,7 @@ class BSEBackend:
         myKrange = range(rank * myKsize,
                          min((rank + 1) * myKsize, nK))
         myKsize = len(myKrange)
-        mySsize = myKsize * self.nv * self.nc * self.spins
+        mySsize = myKsize * self.nv * self.nc * self.nspins
         mySsize *= (1 + self.spinors)**2
         return myKrange, myKsize, mySsize
 
