@@ -10,6 +10,7 @@ from ase.units import Hartree
 from gpaw.utilities.blas import mmmx
 
 from gpaw.response import ResponseGroundStateAdapter, ResponseContext, timer
+from gpaw.response.symmetry import SymmetryAnalyzer
 from gpaw.response.frequencies import ComplexFrequencyDescriptor
 from gpaw.response.pw_parallelization import PlaneWaveBlockDistributor
 from gpaw.response.matrix_elements import (PlaneWaveMatrixElementCalculator,
@@ -485,9 +486,10 @@ class SelfEnhancementCalculator(GeneralizedSuscetibilityCalculator):
         self.rshelmax = rshelmax
         self.rshewmin = rshewmin
 
-        assert 'disable_time_reversal' not in kwargs
+        assert 'symmetry_analyzer' not in kwargs
         super().__init__(gs, context=context,
-                         disable_time_reversal=True,
+                         symmetry_analyzer=SymmetryAnalyzer(
+                             point_group=True, time_reversal=False),
                          **kwargs)
 
     def create_matrix_element_calculators(self):
