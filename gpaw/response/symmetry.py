@@ -246,7 +246,8 @@ class PWSymmetryAnalyzer:
 
         return K_gk
 
-    def get_reduced_kd(self, *, pbc_c):
+    def get_tetrahedron_ikpts(self, *, pbc_c):
+        """Find irreducible k-points for tetrahedron integration."""
         # Get the little group of q
         U_scc = []
         for s in self.s_s:
@@ -274,7 +275,17 @@ class PWSymmetryAnalyzer:
             elif len(k_kc):
                 ik_kc = unique_rows(np.append(k_kc, ik_kc, axis=0))
 
-        return KPointDescriptor(ik_kc)
+        return ik_kc
+
+    def get_tetrahedron_kpt_domain(self, *, pbc_c):
+        ik_kc = self.get_tetrahedron_ikpts(pbc_c=pbc_c)
+        if pbc_c.all():
+            k_kc = ik_kc
+        else:
+            k_kc = np.append(ik_kc,
+                             ik_kc + (~pbc_c).astype(int),
+                             axis=0)
+        return k_kc
 
     def get_kpoint_weight(self, k_c):
         K = self.kptfinder.find(k_c)

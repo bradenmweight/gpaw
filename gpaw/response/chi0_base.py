@@ -292,17 +292,14 @@ class Chi0ComponentCalculator:
 
         if integrationmode is None:
             K_gK = analyzer.group_kpoints()
-            bzk_kc = np.array([self.gs.kd.bzk_kc[K_K[0]] for
-                               K_K in K_gK])
+            k_kc = np.array([self.gs.kd.bzk_kc[K_K[0]] for
+                             K_K in K_gK])
         elif integrationmode == 'tetrahedron integration':
-            bzk_kc = analyzer.get_reduced_kd(pbc_c=self.pbc).bzk_kc
-            if (~self.pbc).any():
-                bzk_kc = np.append(bzk_kc,
-                                   bzk_kc + (~self.pbc).astype(int),
-                                   axis=0)
+            k_kc = analyzer.get_tetrahedron_kpt_domain(
+                pbc_c=self.pbc)
 
         from gpaw.response.kpoints import ResponseKPointGrid
-        kpoints = ResponseKPointGrid(self.gs.kd, qpd.gd.icell_cv, bzk_kc)
+        kpoints = ResponseKPointGrid(self.gs.kd, qpd.gd.icell_cv, k_kc)
         # Two illogical things here:
         #  * Analyzer is for original kpoints, not those we just reduced
         #  * The kpoints object has another bzk_kc array than self.gs.kd.
