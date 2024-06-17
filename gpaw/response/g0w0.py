@@ -1098,12 +1098,14 @@ class G0W0(G0W0Calculator):
             (almost for free).
         truncation: str
             Coulomb truncation scheme. Can be either 2D, 1D, or 0D.
-        integrate_gamma: int
+        integrate_gamma: int or string
             Method to integrate the Coulomb interaction. 1 is a numerical
             integration at all q-points with G=[0,0,0] - this breaks the
             symmetry slightly. 0 is analytical integration at q=[0,0,0] only -
             this conserves the symmetry. integrate_gamma=2 is the same as 1,
             but the average is only carried out in the non-periodic directions.
+            'WS' is Wigner-Seitz truncated Coulomb interaction from
+            R. Sundararaman and T. A. Arias: Phys. Rev. B 87, 165122 (2013)
         E0: float
             Energy (in eV) used for fitting in the plasmon-pole approximation.
         q0_correction: bool
