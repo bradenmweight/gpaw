@@ -5,6 +5,7 @@ from ase import Atoms
 from gpaw import GPAW, PW, FermiDirac, Mixer
 from gpaw.utilities import compiled_with_sl
 from gpaw.response.df import DielectricFunction
+from gpaw.response.symmetry import SymmetryAnalyzer
 from gpaw.mpi import world
 
 # This test assures that some things that
@@ -35,18 +36,13 @@ def test_response_graphene(in_tmp_dir):
         {'symmetry': 'off', 'kpts': {'size': [3, 2, 1], 'gamma': True}},
         {'symmetry': {}, 'kpts': {'size': [3, 2, 1], 'gamma': True}}]
 
-    DFsettings = [{'disable_point_group': True,
-                   'disable_time_reversal': True},
-                  {'disable_point_group': False,
-                   'disable_time_reversal': True},
-                  {'disable_point_group': True,
-                   'disable_time_reversal': False},
-                  {'disable_point_group': False,
-                   'disable_time_reversal': False}]
+    DFsettings = [
+        {'symmetry_analyzer': SymmetryAnalyzer(pointgroup, timerev)}
+        for pointgroup in [False, True]
+        for timerev in [False, True]]
 
     if world.size > 1 and compiled_with_sl():
-        DFsettings.append({'disable_point_group': False,
-                           'disable_time_reversal': False,
+        DFsettings.append({'symmetry_analyzer': SymmetryAnalyzer(True, True),
                            'nblocks': 2})
 
     for GSkwargs in GSsettings:
@@ -78,20 +74,4 @@ def test_response_graphene(in_tmp_dir):
         while len(dfs):
             df = dfs.pop()
             for DFkwargs, df2 in zip(DFsettings[-len(dfs):], dfs):
-                try:
-                    assert np.allclose(df, df2)
-                    print('Ground state settings:', GSkwargs)
-                    print('DFkwargs1:', DFsettings[-len(dfs) - 1])
-                    print('DFkwargs2:', DFkwargs)
-                    print(np.max(np.abs((df - df2) / df)))
-                except AssertionError:
-                    print('Some symmetry or block-par. related problems')
-                    print('for calculation with following ground state')
-                    print('settings')
-                    print('Ground state settings:', GSkwargs)
-                    print('The following DF settings do not return the ' +
-                          'same results')
-                    print('DFkwargs1:', DFsettings[-len(dfs) - 1])
-                    print('DFkwargs2:', DFkwargs)
-                    print(np.max(np.abs((df - df2) / df)))
-                    raise AssertionError
+                assert np.allclose(df, df2)
