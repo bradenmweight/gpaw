@@ -77,6 +77,7 @@ class PWSymmetryAnalyzer:
         self.use_time_reversal = not self.disable_time_reversal
 
         self.kptfinder = kpoints.kptfinder
+
         self.initialize()
 
     @timer('Initialize')
@@ -102,7 +103,8 @@ class PWSymmetryAnalyzer:
         # Do the work
         self.analyze_symmetries()
         self.analyze_kpoints()
-        self.initialize_G_maps()
+
+        self.G_sG = self.initialize_G_maps()
 
         # Print info
         self.context.print(self.infostring)
@@ -376,7 +378,6 @@ class PWSymmetryAnalyzer:
 
         return U_scc[reds], sign
 
-    @timer('Initialize_G_maps')
     def initialize_G_maps(self):
         """Calculate the Gvector mappings."""
         qpd = self.qpd
@@ -404,7 +405,7 @@ class PWSymmetryAnalyzer:
                           'a G-vector was mapped outside the sphere')
                     raise IndexError
             G_sG[s] = np.array(G_G, dtype=np.int32)
-        self.G_sG = G_sG
+        return G_sG
 
     def unfold_ibz_kpoint(self, ik):
         """Return kpoints related to irreducible kpoint."""
