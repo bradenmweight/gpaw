@@ -17,13 +17,13 @@ def generate_si_systems():
     return [si1, si2]
 
 
-def run(gpw_filename, nblocks):
+def run(gpw_filename, nblocks, integrate_gamma):
     # This tests checks the actual numerical accuracy which is asserted below
     calc = GPAW(gpw_filename)
     e = calc.get_potential_energy()
 
     gw = G0W0(gpw_filename, 'gw_None',
-              nbands=8, integrate_gamma=0,
+              nbands=8, integrate_gamma=integrate_gamma,
               kpts=[(0, 0, 0), (0.5, 0.5, 0)],  # Gamma, X
               ecut=40, nblocks=nblocks,
               frequencies={'type': 'nonlinear',
@@ -39,22 +39,24 @@ def run(gpw_filename, nblocks):
     return output
 
 
-reference = pytest.approx([-9.253, 5.442, 2.389, 0.403, 0.000,
-                           6.261, 3.570, 1.323, 0.001], abs=0.0035)
-
+reference = {0: pytest.approx([-9.253, 5.442, 2.389, 0.403, 0.000,
+                               6.261, 3.570, 1.323, 0.001], abs=0.0035),
+            'WS': pytest.approx([-9.253, 5.442, 2.389, 0.403, 0.000,
+                                 6.284, 3.551, 1.285, 0.001], abs=0.0035)}
 
 @pytest.mark.response
 @pytest.mark.slow
 @pytest.mark.parametrize('si', [0, 1])
+@pytest.mark.parametrize('integrate_gamma', [0, 'WS'])
 @pytest.mark.parametrize('symm', ['all', 'no', 'tr', 'pg'])
 @pytest.mark.parametrize('nblocks',
                          [x for x in [1, 2, 4, 8] if x <= world.size])
-def test_response_gwsi(in_tmp_dir, si, symm, nblocks, scalapack,
-                       gpw_files, gpaw_new):
+def test_response_gwsi(in_tmp_dir, si, symm, nblocks, integrate_gamma, 
+                       scalapack, gpw_files, gpaw_new):
     if gpaw_new and world.size > 1:
         pytest.skip('Hybrids not working in parallel with GPAW_NEW=1')
     filename = gpw_files[f'si_gw_a{si}_{symm}']
-    assert run(filename, nblocks) == reference
+    assert run(filename, nblocks, integrate_gamma) == reference[integrate_gamma]
 
 
 @pytest.mark.response
@@ -66,7 +68,7 @@ def test_small_response_gwsi(in_tmp_dir, si, symm, scalapack,
     if gpaw_new and world.size > 1:
         pytest.skip('Hybrids not working in parallel with GPAW_NEW=1')
     filename = gpw_files[f'si_gw_a{si}_{symm}']
-    assert run(filename, 1) == reference
+    assert run(filename, 1, 0) == reference[0]
 
 
 @pytest.mark.response
