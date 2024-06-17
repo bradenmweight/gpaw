@@ -1157,6 +1157,7 @@ class G0W0(G0W0Calculator):
                     'nbands cannot be supplied with ecut-extrapolation.')
 
         if ppa:
+            assert integrate_gamma != 'WS', "TODO"
             # use small imaginary frequency to avoid dividing by zero:
             frequencies = [1e-10j, 1j * E0]
 

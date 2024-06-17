@@ -32,7 +32,6 @@ for ecut in [300, 400]:
               kpts=[0],
               bands=(3, 5),
               ecut=ecut,
-              integrate_gamma='WS',
               ppa=True,
               filename=f'C-g0w0_ppa_{ecut}')
 
