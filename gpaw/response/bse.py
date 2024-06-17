@@ -349,7 +349,8 @@ class BSEBackend:
     def _calculate(self, optical, spinors=None):
         # Parallelization stuff
         self.nK = self.kd.nbzkpts
-        self.myKrange, self.myKsize, self.mySsize = self.parallelisation_sizes()
+        self.myKrange, self.myKsize, self.mySsize = \
+            self.parallelisation_sizes()
 
         # Calculate exchange interaction
         qpd0 = SingleQPWDescriptor.from_q(self.q_c, self.ecut, self.gs.gd)
@@ -377,9 +378,12 @@ class BSEBackend:
         self.Nv = self.Nv
         self.Nc = self.Nc
         self.Ns = self.spins
-        rhoex_KsmnG = np.zeros((self.nK, self.Ns, self.Nv, self.Nc, len(self.v_G)), complex)
-        df_Ksmn = np.zeros((self.nK, self.Ns, self.Nv, self.Nc), float)  # -(ev - ec)
-        deps_ksmn = np.zeros((self.myKsize, self.Ns, self.Nv, self.Nc), float)  # -(fv - fc)
+        rhoex_KsmnG = np.zeros((self.nK, self.Ns, self.Nv,
+                                self.Nc, len(self.v_G)), complex)
+        df_Ksmn = np.zeros((self.nK, self.Ns, self.Nv,
+                            self.Nc), float)  # -(ev - ec)
+        deps_ksmn = np.zeros((self.myKsize, self.Ns, self.Nv,
+                              self.Nc), float)  # -(fv - fc)
 
         optical_limit = np.allclose(self.q_c, 0.0)
 
@@ -404,12 +408,13 @@ class BSEBackend:
             self.ci_s, self.cf_s = self.con_sn[:, 0], self.con_sn[:, -1] + 1
 
         # Calculate all properties diagonal in k-point
-        # These include the indirect kernel, pseudo-energies,
-        # and occupation numbers
+        # These include the indirect (exchange) kernel,
+        # pseudo-energies, and occupation numbers
         for ik, iK in enumerate(self.myKrange):
             for s in range(self.Ns):
                 pair = get_pair(qpd0, s, iK,
-                                self.vi_s[s], self.vf_s[s], self.ci_s[s], self.cf_s[s])
+                                self.vi_s[s], self.vf_s[s],
+                                self.ci_s[s], self.cf_s[s])
                 m_m = np.arange(self.vi_s[s], self.vf_s[s])
                 n_n = np.arange(self.ci_s[s], self.cf_s[s])
                 if self.gw_skn is not None:
@@ -454,8 +459,8 @@ class BSEBackend:
                     rhoex_KsmnG[iK, s] = rho_mnG
 
         if self.eshift is not None:
-            deps_ksmn[np.where(df_Ksmn[self.myKrange] > 1.0e-3)] += self.eshift
-            deps_ksmn[np.where(df_Ksmn[self.myKrange] < -1.0e-3)] -= self.eshift
+            deps_ksmn[np.where(df_Ksmn[self.myKrange] > 1e-3)] += self.eshift
+            deps_ksmn[np.where(df_Ksmn[self.myKrange] < -1e-3)] -= self.eshift
 
         world.sum(df_Ksmn)
         world.sum(rhoex_KsmnG)
@@ -468,13 +473,15 @@ class BSEBackend:
         self.t0 = time()
         self.context.print('Calculating {} matrix elements at q_c = {}'.format(
             self.mode, self.q_c))
-        
+
         # Hamiltonian buffer array
-        H_ksmnKsmn = np.zeros((self.myKsize, self.Ns, self.Nv, self.Nc, self.nK, self.Ns, self.Nv, self.Nc), complex)
+        H_ksmnKsmn = np.zeros((self.myKsize, self.Ns, self.Nv, self.Nc,
+                               self.nK, self.Ns, self.Nv, self.Nc), complex)
 
         # Add kernels to buffer array
         self.add_indirect_kernel(kptpair_factory, rhoex_KsmnG, H_ksmnKsmn)
-        self.add_direct_kernel(kptpair_factory, pair_calc, screened_potential, spinors, H_ksmnKsmn)
+        self.add_direct_kernel(kptpair_factory, pair_calc,
+                               screened_potential, spinors, H_ksmnKsmn)
 
         H_ksmnKsmn /= self.gs.volume
         self.context.timer.stop('Calculate Hamiltonian')
@@ -497,7 +504,8 @@ class BSEBackend:
         return BSEMatrix(rhoG0_S, df_S, H_sS)
 
     @timer('add_direct_kernel')
-    def add_direct_kernel(self, kptpair_factory, pair_calc, screened_potential, spinors, H_ksmnKsmn):
+    def add_direct_kernel(self, kptpair_factory, pair_calc,
+                          screened_potential, spinors, H_ksmnKsmn):
         for ik1, iK1 in enumerate(self.myKrange):
             for s1 in range(self.Ns):
                 kptv1 = kptpair_factory.get_k_point(
@@ -545,8 +553,9 @@ class BSEBackend:
                 tleft = dt * self.myKsize / (iK1 + 1) - dt
                 self.context.print(
                     '  Finished %s pair orbitals in %s - Estimated %s left'
-                    % ((iK1 + 1) * self.Nv * self.Nc * self.Ns * world.size, timedelta(
-                        seconds=round(dt)), timedelta(seconds=round(tleft))))
+                    % ((iK1 + 1) * self.Nv * self.Nc * self.Ns * world.size,
+                       timedelta(seconds=round(dt)),
+                       timedelta(seconds=round(tleft))))
 
     @timer('add_indirect_kernel')
     def add_indirect_kernel(self, kptpair_factory, rhoex_KsmnG, H_ksmnKsmn):
@@ -554,8 +563,6 @@ class BSEBackend:
             for s1 in range(self.Ns):
                 kptv1 = kptpair_factory.get_k_point(
                     s1, iK1, self.vi_s[s1], self.vf_s[s1])
-                kptc1 = kptpair_factory.get_k_point(
-                    s1, self.ikq_k[iK1], self.ci_s[s1], self.cf_s[s1])
                 rho1_mnG = rhoex_KsmnG[iK1, s1]
                 # rhoex_KsnmG
 
