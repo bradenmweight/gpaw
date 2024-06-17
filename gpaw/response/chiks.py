@@ -85,7 +85,7 @@ class GeneralizedSuscetibilityCalculator(PairFunctionIntegrator):
         self.matrix_element_calc1 = mecalc1
         self.matrix_element_calc2 = mecalc2
         if mecalc2 is not mecalc1:
-            assert self.disable_time_reversal, \
+            assert not self.symmetry_analyzer.time_reversal, \
                 'Cannot make use of time-reversal symmetry for generalized ' \
                 'susceptibilities with two different matrix elements'
 
@@ -167,7 +167,8 @@ class GeneralizedSuscetibilityCalculator(PairFunctionIntegrator):
         gd = self.gs.gd
 
         # Update to internal basis, if needed
-        if internal and self.gammacentered and not self.disable_symmetries:
+        if internal and self.gammacentered \
+           and not self.symmetry_analyzer.disabled:
             # In order to make use of the symmetries of the system to reduce
             # the k-point integration, the internal code assumes a plane wave
             # basis which is centered at q in reciprocal space.
@@ -370,7 +371,7 @@ class GeneralizedSuscetibilityCalculator(PairFunctionIntegrator):
             # Always output chiks with distribution 'ZgG'
             chiks = chiks.copy_with_distribution('ZgG')
 
-        if self.gammacentered and not self.disable_symmetries:
+        if self.gammacentered and not self.symmetry_analyzer.disabled:
             # Reduce the q-centered plane-wave basis used internally to the
             # gammacentered basis
             assert not chiks.qpd.gammacentered  # Internal qpd

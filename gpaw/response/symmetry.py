@@ -32,6 +32,10 @@ class SymmetryAnalyzer:
     point_group: bool = True
     time_reversal: bool = True
 
+    @property
+    def disabled(self):
+        return not (self.point_group or self.time_reversal)
+
     def analyze(self, kpoints, qpd, context):
         return PWSymmetryAnalyzer(
             kpoints, qpd, context, not self.point_group,

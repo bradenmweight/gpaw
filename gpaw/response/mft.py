@@ -7,6 +7,7 @@ import numpy as np
 from gpaw.response import (ResponseGroundStateAdapter, ResponseContext,
                            GPWFilename, TXTFilename,
                            ensure_gs, ensure_gs_and_context)
+from gpaw.response.symmetry import SymmetryAnalyzer
 from gpaw.response.frequencies import ComplexFrequencyDescriptor
 from gpaw.response.chiks import ChiKSCalculator, smat
 from gpaw.response.localft import LocalFTCalculator, add_LSDA_Wxc
@@ -352,8 +353,8 @@ class SingleParticleSiteSumRuleCalculator(PairFunctionIntegrator):
 
     def __init__(self, gs, sites, context):
         super().__init__(gs, context,
-                         disable_point_group=True,
-                         disable_time_reversal=True)
+                         symmetry_analyzer=SymmetryAnalyzer(
+                             point_group=False, time_reversal=False))
 
         # Set up calculator for the f^a matrix element
         self.sites = sites
@@ -493,8 +494,8 @@ class TwoParticleSiteSumRuleCalculator(PairFunctionIntegrator):
         if context is None:
             context = ResponseContext()
         super().__init__(gs, context,
-                         disable_point_group=True,
-                         disable_time_reversal=True)
+                         symmetry_analyzer=SymmetryAnalyzer(
+                             point_group=False, time_reversal=False))
         self.nbands = nbands
 
         # Set up calculators for the f^a and g^b matrix elements

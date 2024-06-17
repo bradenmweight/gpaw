@@ -6,6 +6,7 @@ from ase.units import Hartree
 from gpaw.utilities.progressbar import ProgressBar
 
 from gpaw.response import timer
+from gpaw.response.symmetry import SymmetryAnalyzer
 from gpaw.response.kspair import (KohnShamKPointPair,
                                   KohnShamKPointPairExtractor)
 from gpaw.response.pw_parallelization import block_partition
@@ -78,25 +79,23 @@ class PairFunctionIntegrator(ABC):
     generalization in the future.
     """
 
-    def __init__(self, gs, context, nblocks=1,
-                 disable_point_group=False,
-                 disable_time_reversal=False):
+    def __init__(self, gs, context, symmetry_analyzer=None, nblocks=1):
         """Construct the PairFunctionIntegrator
 
         Parameters
         ----------
         gs : ResponseGroundStateAdapter
         context : ResponseContext
+        symmetry_analyzer: SymmetryAnalyzer
         nblocks : int
             Distribute the pair function into nblocks. Useful when the pair
             function itself becomes a large array (read: memory limiting).
-        disable_point_group : bool
-            Do not use the point group symmetry operators.
-        disable_time_reversal : bool
-            Do not use time reversal symmetry.
         """
         self.gs = gs
         self.context = context
+        if symmetry_analyzer is None:
+            symmetry_analyzer = SymmetryAnalyzer()
+        self.symmetry_analyzer = symmetry_analyzer
 
         # Communicators for distribution of memory and work
         (self.blockcomm,
@@ -112,14 +111,6 @@ class PairFunctionIntegrator(ABC):
             # k-points through intrablockcomm.
             transitions_blockcomm=self.blockcomm,
             kpts_blockcomm=self.intrablockcomm)
-
-        # Symmetry flags
-        self.disable_point_group = disable_point_group
-        self.disable_time_reversal = disable_time_reversal
-        if disable_time_reversal and disable_point_group:
-            self.disable_symmetries = True
-        else:
-            self.disable_symmetries = False
 
     @timer('Integrate pair function')
     def _integrate(self, out: PairFunction, transitions: PairTransitions):
@@ -213,12 +204,8 @@ class PairFunctionIntegrator(ABC):
         return qpd
 
     def get_pw_symmetry_analyzer(self, qpd):
-        from gpaw.response.symmetry import PWSymmetryAnalyzer
-
-        return PWSymmetryAnalyzer(
-            self.gs.kpoints, qpd, self.context,
-            disable_point_group=self.disable_point_group,
-            disable_time_reversal=self.disable_time_reversal)
+        return self.symmetry_analyzer.analyze(
+            self.gs.kpoints, qpd, self.context)
 
     def get_band_and_spin_transitions(self, spincomponent, nbands=None,
                                       bandsummation='pairwise'):
