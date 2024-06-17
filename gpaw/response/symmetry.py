@@ -121,8 +121,7 @@ class PWSymmetryAnalyzer:
                     s = x + y * nx
                     if s == ns:
                         break
-                    tmp = self.get_symmetry_operator(self.s_s[s])
-                    op_cc, sign, TR, shift_c, ft_c = tmp
+                    op_cc, sign = self.get_symmetry_operator(self.s_s[s])
                     op_c = sign * op_cc[c]
                     tisl.append(f'  ({op_c[0]:2d} {op_c[1]:2d} {op_c[2]:2d})')
                 tisl.append('\n')
@@ -251,7 +250,7 @@ class PWSymmetryAnalyzer:
         # Get the little group of q
         U_scc = []
         for s in self.s_s:
-            U_cc, sign, _, _, _ = self.get_symmetry_operator(s)
+            U_cc, sign = self.get_symmetry_operator(s)
             U_scc.append(sign * U_cc)
         U_scc = np.array(U_scc)
 
@@ -296,7 +295,8 @@ class PWSymmetryAnalyzer:
             # tmp2_GG = np.zeros_like(A_GG)
 
             for s in self.s_s:
-                G_G, sign, _ = self.G_sG[s]
+                G_G = self.G_sG[s]
+                _, sign = self.get_symmetry_operator(s)
                 GG_shuffle(G_G, sign, A_GG, tmp_GG)
 
                 # This is the exact operation that GG_shuffle does.
@@ -326,8 +326,8 @@ class PWSymmetryAnalyzer:
 
         tmp_wxvG = np.zeros_like(A_wxvG)
         for s in self.s_s:
-            G_G, sign, shift_c = self.G_sG[s]
-            U_cc, _, TR, shift_c, ft_c = self.get_symmetry_operator(s)
+            G_G = self.G_sG[s]
+            U_cc, sign = self.get_symmetry_operator(s)
             M_vv = np.dot(np.dot(A_cv.T, U_cc.T), iA_cv)
             if sign == 1:
                 tmp = sign * np.dot(M_vv.T, A_wxvG[..., G_G])
@@ -348,8 +348,7 @@ class PWSymmetryAnalyzer:
             AT_wvv = np.transpose(A_wvv, (0, 2, 1))
 
         for s in self.s_s:
-            G_G, sign, shift_c = self.G_sG[s]
-            U_cc, _, TR, shift_c, ft_c = self.get_symmetry_operator(s)
+            U_cc, sign = self.get_symmetry_operator(s)
             M_vv = np.dot(np.dot(A_cv.T, U_cc.T), iA_cv)
             if sign == 1:
                 tmp = np.dot(np.dot(M_vv.T, A_wvv), M_vv)
@@ -368,19 +367,14 @@ class PWSymmetryAnalyzer:
     def get_symmetry_operator(self, s):
         """Return symmetry operator s."""
         U_scc = self.kd.symmetry.op_scc
-        ft_sc = self.kd.symmetry.ft_sc
 
         reds = s % self.nU
         if self.timereversal(s):
-            TR = np.conj
             sign = -1
         else:
             sign = 1
 
-            def TR(x):
-                return x
-
-        return U_scc[reds], sign, TR, self.shift_sc[s], ft_sc[reds]
+        return U_scc[reds], sign
 
     @timer('Initialize_G_maps')
     def initialize_G_maps(self):
@@ -392,12 +386,10 @@ class PWSymmetryAnalyzer:
         Q_G = qpd.Q_qG[0]
 
         G_sG = [None] * self.nsym
-        UG_sGc = [None] * self.nsym
-        Q_sG = [None] * self.nsym
         for s in self.s_s:
-            U_cc, sign, TR, shift_c, ft_c = self.get_symmetry_operator(s)
+            U_cc, sign = self.get_symmetry_operator(s)
             iU_cc = np.linalg.inv(U_cc).T
-            UG_Gc = np.dot(G_Gc - shift_c, sign * iU_cc)
+            UG_Gc = np.dot(G_Gc - self.shift_sc[s], sign * iU_cc)
 
             assert np.allclose(UG_Gc.round(), UG_Gc)
             UQ_G = np.ravel_multi_index(UG_Gc.round().astype(int).T,
@@ -411,12 +403,7 @@ class PWSymmetryAnalyzer:
                     print('This should not be possible but' +
                           'a G-vector was mapped outside the sphere')
                     raise IndexError
-            UG_sGc[s] = UG_Gc
-            Q_sG[s] = UQ_G
-            G_sG[s] = [np.array(G_G, dtype=np.int32), sign, shift_c]
-        self.G_Gc = G_Gc
-        self.UG_sGc = UG_sGc
-        self.Q_sG = Q_sG
+            G_sG[s] = np.array(G_G, dtype=np.int32)
         self.G_sG = G_sG
 
     def unfold_ibz_kpoint(self, ik):
