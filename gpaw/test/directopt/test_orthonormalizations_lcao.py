@@ -6,7 +6,7 @@ from gpaw import GPAW
 from ase import Atoms
 
 
-@ pytest.mark.do
+@pytest.mark.do
 def test_orthonormalizations_lcao(in_tmp_dir):
     """
     Test Loewdin and Gram-Schmidt orthonormalization
@@ -35,8 +35,7 @@ def test_orthonormalizations_lcao(in_tmp_dir):
                 mixer={'backend': 'no-mixing'},
                 nbands='nao',
                 symmetry='off',
-                txt=None
-                )
+                txt=None)
     atoms.calc = calc
     atoms.get_potential_energy()
 
