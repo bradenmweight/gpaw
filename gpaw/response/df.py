@@ -8,6 +8,7 @@ from ase.units import Hartree
 
 import gpaw.mpi as mpi
 
+from gpaw.response.symmetry import SymmetryAnalyzer
 from gpaw.response.pw_parallelization import Blocks1D
 from gpaw.response.coulomb_kernels import CoulombKernel
 from gpaw.response.dyson import DysonEquation
@@ -701,14 +702,17 @@ class DielectricFunction(DielectricFunctionCalculator):
         gs, context = get_gs_and_context(calc, txt, world, timer=None)
         wd = get_frequency_descriptor(frequencies, gs=gs, nbands=nbands)
 
+        symmetry_analyzer = SymmetryAnalyzer(
+            point_group=not disable_point_group,
+            time_reversal=not disable_time_reversal)
+
         chi0calc = Chi0Calculator(
             gs, context, nblocks=nblocks,
             wd=wd,
             ecut=ecut, nbands=nbands, eta=eta,
             hilbert=hilbert,
             intraband=intraband,
-            disable_point_group=disable_point_group,
-            disable_time_reversal=disable_time_reversal,
+            symmetry_analyzer=symmetry_analyzer,
             integrationmode=integrationmode,
             rate=rate, eshift=eshift
         )
