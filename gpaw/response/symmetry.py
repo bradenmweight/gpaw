@@ -100,8 +100,8 @@ class PWSymmetryAnalyzer:
         if self.disable_symmetries:
             self.infostring += 'All symmetries have been disabled. '
 
-        # Do the work
-        self.analyze_symmetries()
+        self.s_s, self.shift_sc = self.analyze_symmetries()
+        self.infostring += f'Found {len(self.s_s)} allowed symmetries. '
         self.analyze_kpoints()
 
         self.G_sG = self.initialize_G_maps()
@@ -206,9 +206,7 @@ class PWSymmetryAnalyzer:
 
 #        s_s = stmp_s
 
-        self.infostring += f'Found {len(s_s)} allowed symmetries. '
-        self.s_s = s_s
-        self.shift_sc = shift_sc
+        return s_s, shift_sc
 
     def is_not_point_group(self, s):
         U_scc = self.kd.symmetry.op_scc
