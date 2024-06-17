@@ -13,6 +13,7 @@ from ase.units import Hartree
 from gpaw import GPAW
 import gpaw.mpi as mpi
 from gpaw.response import ResponseGroundStateAdapter
+from gpaw.response.symmetry import SymmetryAnalyzer
 from gpaw.response.frequencies import ComplexFrequencyDescriptor
 from gpaw.response.jdos import JDOSCalculator
 from gpaw.response.symmetry import KPointFinder
@@ -38,7 +39,7 @@ def test_jdos(in_tmp_dir, gpw_files, system, qrel):
     zd = ComplexFrequencyDescriptor.from_array(omega_w + 1.j * eta)
 
     # Calculation parameters (which should not affect the result)
-    disable_syms_s = [True, False]
+    usesym_s = [True, False]
     bandsummation_b = ['double', 'pairwise']
 
     # ---------- Script ---------- #
@@ -57,12 +58,13 @@ def test_jdos(in_tmp_dir, gpw_files, system, qrel):
                                        nbands=nbands)
 
     # Calculate the jdos using the PairFunctionIntegrator module
-    for disable_syms in disable_syms_s:
+    for usesym in usesym_s:
+        symmetry_analyzer = SymmetryAnalyzer(
+            point_group=usesym, time_reversal=usesym)
         for bandsummation in bandsummation_b:
             jdos_calc = JDOSCalculator(gs,
                                        nbands=nbands,
-                                       disable_time_reversal=disable_syms,
-                                       disable_point_group=disable_syms,
+                                       symmetry_analyzer=symmetry_analyzer,
                                        bandsummation=bandsummation)
             jdos = jdos_calc.calculate(spincomponent, q_c, zd)
             jdos_w = jdos.array
