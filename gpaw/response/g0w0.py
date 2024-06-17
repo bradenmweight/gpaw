@@ -1,8 +1,9 @@
 from __future__ import annotations
 import pickle
 import warnings
-from math import pi
+from math import pi, isclose
 from pathlib import Path
+from collections.abc import Iterable
 
 import numpy as np
 
@@ -30,41 +31,45 @@ from contextlib import ExitStack
 from ase.parallel import broadcast
 
 
-def compare_dicts(dict1, dict2, rel_tol=1e-14, abs_tol=1e-14):
+def compare_inputs(inp1, inp2, rel_tol=1e-14, abs_tol=1e-14):
     """
-    Compare each key-value pair within dictionaries that contain nested data
-    structures of arbitrary depth. If a kvp contains floats, you may specify
-    the tolerance (abs or rel) to which the floats are compared. Individual
-    elements within lists are not compared to floating point precision.
+    Compares nested structures of dictionarys, lists, etc. and
+    makes sure the nested structure is the same, and also that all
+    floating points match within the given tolerances.
 
-    :params dict1: Dictionary containing kvp to compare with other dictionary.
-    :params dict2: Second dictionary.
+    :params inp1: Structure 1 to compare.
+    :params inp2: Structure 2 to compare.
     :params rel_tol: Maximum difference for being considered "close",
     relative to the magnitude of the input values as defined by math.isclose().
     :params abs_tol: Maximum difference for being considered "close",
     regardless of the magnitude of the input values as defined by
     math.isclose().
 
-    :returns: bool indicating kvp's don't match (False) or do match (True)
+    :returns: bool indicating if structures don't match (False) or do match
+    (True)
     """
-    from math import isclose
-    if dict1.keys() != dict2.keys():
-        return False
-
-    for key in dict1.keys():
-        val1 = dict1[key]
-        val2 = dict2[key]
-
-        if isinstance(val1, dict) and isinstance(val2, dict):
-            # recursive func call to ensure nested structures are also compared
-            if not compare_dicts(val1, val2, rel_tol, abs_tol):
+    if isinstance(inp1, dict):
+        if inp1.keys() != inp2.keys():
+            return False
+        for key in inp1.keys() & inp2.keys():
+            val1 = inp1[key]
+            val2 = inp2[key]
+            if not compare_inputs(val1, val2,
+                                  rel_tol=rel_tol, abs_tol=abs_tol):
                 return False
-        elif isinstance(val1, float) and isinstance(val2, float):
-            if not isclose(val1, val2, rel_tol=rel_tol, abs_tol=abs_tol):
+    elif isinstance(inp1, float):
+        if not isclose(inp1, inp2, rel_tol=rel_tol, abs_tol=abs_tol):
+            return False
+    elif not isinstance(inp1, str) and isinstance(inp1, Iterable):
+        if len(inp1) != len(inp2):
+            return False
+        for val1, val2 in zip(inp1, inp2):
+            if not compare_inputs(val1, val2,
+                                  rel_tol=rel_tol, abs_tol=abs_tol):
                 return False
-        else:
-            if val1 != val2:
-                return False
+    else:
+        if inp1 != inp2:
+            return False
 
     return True
 
@@ -92,8 +97,8 @@ class Sigma:
         return self
 
     def validate_inputs(self, inputs):
-        equals = compare_dicts(inputs, self.inputs, rel_tol=1e-12,
-                               abs_tol=1e-12)
+        equals = compare_inputs(inputs, self.inputs, rel_tol=1e-12,
+                                abs_tol=1e-12)
         if not equals:
             raise RuntimeError('There exists a cache with mismatching input '
                                f'parameters: {inputs} != {self.inputs}.')
