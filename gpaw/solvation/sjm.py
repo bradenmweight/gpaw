@@ -506,7 +506,7 @@ class SJM(SolvationGPAW):
                 and p.always_adjust):
                 return
 
-        msg = (f'Potential could not be reached after {iteration-1:d} '
+        msg = (f'Potential could not be reached after {iteration - 1:d} '
                'iterations. This may indicate your workfunction is noisier '
                'than your potential tol. You may try setting the '
                'convergence["workfunction"] keyword. The last values of '
