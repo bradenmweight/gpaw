@@ -348,16 +348,16 @@ class BSEBackend:
 
     def _calculate(self, optical, spinors=None):
         # Parallelization stuff
-        nK = self.kd.nbzkpts
-        myKrange, myKsize, mySsize = self.parallelisation_sizes()
+        self.nK = self.kd.nbzkpts
+        self.myKrange, self.myKsize, self.mySsize = self.parallelisation_sizes()
 
         # Calculate exchange interaction
         qpd0 = SingleQPWDescriptor.from_q(self.q_c, self.ecut, self.gs.gd)
-        ikq_k = self.kd.find_k_plus_q(self.q_c)
-        v_G = self.coulomb.V(qpd=qpd0, q_v=None)
+        self.ikq_k = self.kd.find_k_plus_q(self.q_c)
+        self.v_G = self.coulomb.V(qpd=qpd0, q_v=None)
 
         if optical:
-            v_G[0] = 0.0
+            self.v_G[0] = 0.0
 
         kptpair_factory = KPointPairFactory(
             gs=self.gs,
@@ -368,16 +368,18 @@ class BSEBackend:
 
         if self.mode != 'RPA':
             screened_potential = self.calculate_screened_potential()
+        else:
+            screened_potential = None
 
         # Calculate pair densities, eigenvalues and occupations
         self.context.timer.start('Pair densities')
-        so = self.spinors + 1
-        Nv = self.Nv
-        Nc = self.Nc
-        Ns = self.spins
-        rhoex_KsmnG = np.zeros((nK, Ns, Nv, Nc, len(v_G)), complex)
-        df_Ksmn = np.zeros((nK, Ns, Nv, Nc), float)  # -(ev - ec)
-        deps_ksmn = np.zeros((myKsize, Ns, Nv, Nc), float)  # -(fv - fc)
+        self.so = self.spinors + 1
+        self.Nv = self.Nv
+        self.Nc = self.Nc
+        self.Ns = self.spins
+        rhoex_KsmnG = np.zeros((self.nK, self.Ns, self.Nv, self.Nc, len(self.v_G)), complex)
+        df_Ksmn = np.zeros((self.nK, self.Ns, self.Nv, self.Nc), float)  # -(ev - ec)
+        deps_ksmn = np.zeros((self.myKsize, self.Ns, self.Nv, self.Nc), float)  # -(fv - fc)
 
         optical_limit = np.allclose(self.q_c, 0.0)
 
@@ -393,20 +395,23 @@ class BSEBackend:
             # (vv, vc, cv, and cc) in this 10x10 basis
             # from which they are then transformed into
             # to SOC basis.
-            vi_s = spinors.vi_s
-            vf_s = spinors.vf_s
-            ci_s = spinors.ci_s
-            cf_s = spinors.cf_s
+            self.vi_s = spinors.vi_s
+            self.vf_s = spinors.vf_s
+            self.ci_s = spinors.ci_s
+            self.cf_s = spinors.cf_s
         else:
-            vi_s, vf_s = self.val_sn[:, 0], self.val_sn[:, -1] + 1
-            ci_s, cf_s = self.con_sn[:, 0], self.con_sn[:, -1] + 1
+            self.vi_s, self.vf_s = self.val_sn[:, 0], self.val_sn[:, -1] + 1
+            self.ci_s, self.cf_s = self.con_sn[:, 0], self.con_sn[:, -1] + 1
 
-        for ik, iK in enumerate(myKrange):
-            for s in range(Ns):
+        # Calculate all properties diagonal in k-point
+        # These include the indirect kernel, pseudo-energies,
+        # and occupation numbers
+        for ik, iK in enumerate(self.myKrange):
+            for s in range(self.Ns):
                 pair = get_pair(qpd0, s, iK,
-                                vi_s[s], vf_s[s], ci_s[s], cf_s[s])
-                m_m = np.arange(vi_s[s], vf_s[s])
-                n_n = np.arange(ci_s[s], cf_s[s])
+                                self.vi_s[s], self.vf_s[s], self.ci_s[s], self.cf_s[s])
+                m_m = np.arange(self.vi_s[s], self.vf_s[s])
+                n_n = np.arange(self.ci_s[s], self.cf_s[s])
                 if self.gw_skn is not None:
                     iKq = self.gs.kd.find_k_plus_q(self.q_c, [iK])[0]
                     epsv_m = self.gw_skn[s, iK, :self.nv]
@@ -449,8 +454,8 @@ class BSEBackend:
                     rhoex_KsmnG[iK, s] = rho_mnG
 
         if self.eshift is not None:
-            deps_ksmn[np.where(df_Ksmn[myKrange] > 1.0e-3)] += self.eshift
-            deps_ksmn[np.where(df_Ksmn[myKrange] < -1.0e-3)] -= self.eshift
+            deps_ksmn[np.where(df_Ksmn[self.myKrange] > 1.0e-3)] += self.eshift
+            deps_ksmn[np.where(df_Ksmn[self.myKrange] < -1.0e-3)] -= self.eshift
 
         world.sum(df_Ksmn)
         world.sum(rhoex_KsmnG)
@@ -460,54 +465,56 @@ class BSEBackend:
 
         # Calculate Hamiltonian
         self.context.timer.start('Calculate Hamiltonian')
-        t0 = time()
+        self.t0 = time()
         self.context.print('Calculating {} matrix elements at q_c = {}'.format(
             self.mode, self.q_c))
-        H_ksmnKsmn = np.zeros((myKsize, Ns, Nv, Nc, nK, Ns, Nv, Nc), complex)
-        indirect_ksmnKsmn = np.zeros((myKsize, Ns, Nv, Nc, nK, Ns, Nv, Nc),
-                                     complex)
+        
+        # Hamiltonian buffer array
+        H_ksmnKsmn = np.zeros((self.myKsize, self.Ns, self.Nv, self.Nc, self.nK, self.Ns, self.Nv, self.Nc), complex)
 
-        for ik1, iK1 in enumerate(myKrange):
-            for s1 in range(Ns):
+        # Add kernels to buffer array
+        self.add_indirect_kernel(kptpair_factory, rhoex_KsmnG, H_ksmnKsmn)
+        self.add_direct_kernel(kptpair_factory, pair_calc, screened_potential, spinors, H_ksmnKsmn)
+
+        H_ksmnKsmn /= self.gs.volume
+        self.context.timer.stop('Calculate Hamiltonian')
+
+        self.mySsize = self.myKsize * self.Nv * self.Nc * self.Ns
+        if self.myKsize > 0:
+            iS0 = self.myKrange[0] * self.Nv * self.Nc * self.Ns
+
+        df_S = np.reshape(df_Ksmn, -1)
+        # multiply by 2 when spin-paired and no SOC
+        df_S *= 2.0 / self.nK / self.Ns / self.so
+        deps_s = np.reshape(deps_ksmn, -1)
+        H_sS = np.reshape(H_ksmnKsmn, (self.mySsize, self.nS))
+        for iS in range(self.mySsize):
+            # Multiply by occupations and adiabatic coupling
+            H_sS[iS] *= df_S[iS0 + iS]
+            # add bare transition energies
+            H_sS[iS, iS0 + iS] += deps_s[iS]
+
+        return BSEMatrix(rhoG0_S, df_S, H_sS)
+
+    @timer('add_direct_kernel')
+    def add_direct_kernel(self, kptpair_factory, pair_calc, screened_potential, spinors, H_ksmnKsmn):
+        for ik1, iK1 in enumerate(self.myKrange):
+            for s1 in range(self.Ns):
                 kptv1 = kptpair_factory.get_k_point(
-                    s1, iK1, vi_s[s1], vf_s[s1])
+                    s1, iK1, self.vi_s[s1], self.vf_s[s1])
                 kptc1 = kptpair_factory.get_k_point(
-                    s1, ikq_k[iK1], ci_s[s1], cf_s[s1])
-                rho1_mnG = rhoex_KsmnG[iK1, s1]
-                # rhoex_KsnmG
+                    s1, self.ikq_k[iK1], self.ci_s[s1], self.cf_s[s1])
 
-                rho1ccV_mnG = rho1_mnG.conj()[:, :] * v_G
-                for s2 in range(Ns):
-                    for Q_c in self.qd.bzk_kc:
-                        iK2 = self.kd.find_k_plus_q(Q_c, [kptv1.K])[0]
-                        rho2_mnG = rhoex_KsmnG[iK2, s2]
-                        self.context.timer.start('Coulomb')
-                        indirect_ksmnKsmn[
-                            ik1, s1, :, :, iK2, s2, :, :] += np.einsum(
-                                'ijG,mnG->ijmn', rho1ccV_mnG, rho2_mnG,
-                                optimize='optimal')
-                        self.context.timer.stop('Coulomb')
-
-        H_ksmnKsmn += indirect_ksmnKsmn
-        for ik1, iK1 in enumerate(myKrange):
-            for s1 in range(Ns):
-                kptv1 = kptpair_factory.get_k_point(
-                    s1, iK1, vi_s[s1], vf_s[s1])
-                kptc1 = kptpair_factory.get_k_point(
-                    s1, ikq_k[iK1], ci_s[s1], cf_s[s1])
-
-                for s2 in range(Ns):
-                    for Q_c in self.qd.bzk_kc:
-                        iK2 = self.kd.find_k_plus_q(Q_c, [kptv1.K])[0]
-
+                for Q_c in self.qd.bzk_kc:
+                    iK2 = self.kd.find_k_plus_q(Q_c, [kptv1.K])[0]
+                    for s2 in range(self.Ns):
                         if self.mode == 'RPA' or s1 != s2:
                             continue
 
-                        ikq = ikq_k[iK2]
                         kptv2 = kptpair_factory.get_k_point(
-                            s1, iK2, vi_s[s1], vf_s[s1])
+                            s1, iK2, self.vi_s[s1], self.vf_s[s1])
                         kptc2 = kptpair_factory.get_k_point(
-                            s1, ikq, ci_s[s1], cf_s[s1])
+                            s1, self.ikq_k[iK2], self.ci_s[s1], self.cf_s[s1])
 
                         rho3_mmG, iq = self.get_density_matrix(
                             pair_calc, screened_potential, kptv1, kptv2)
@@ -529,37 +536,40 @@ class BSEBackend:
                             screened_potential.W_qGG[iq],
                             rho4_nnG,
                             optimize='optimal')
-                        W_mnmn *= Ns * so
+                        W_mnmn *= self.Ns * self.so
                         H_ksmnKsmn[ik1, s1, :, :, iK2, s1] -= 0.5 * W_mnmn
                         self.context.timer.stop('Screened exchange')
 
-            if iK1 % (myKsize // 5 + 1) == 0:
-                dt = time() - t0
-                tleft = dt * myKsize / (iK1 + 1) - dt
+            if iK1 % (self.myKsize // 5 + 1) == 0:
+                dt = time() - self.t0
+                tleft = dt * self.myKsize / (iK1 + 1) - dt
                 self.context.print(
                     '  Finished %s pair orbitals in %s - Estimated %s left'
-                    % ((iK1 + 1) * Nv * Nc * Ns * world.size, timedelta(
+                    % ((iK1 + 1) * self.Nv * self.Nc * self.Ns * world.size, timedelta(
                         seconds=round(dt)), timedelta(seconds=round(tleft))))
 
-        H_ksmnKsmn /= self.gs.volume
-        self.context.timer.stop('Calculate Hamiltonian')
+    @timer('add_indirect_kernel')
+    def add_indirect_kernel(self, kptpair_factory, rhoex_KsmnG, H_ksmnKsmn):
+        for ik1, iK1 in enumerate(self.myKrange):
+            for s1 in range(self.Ns):
+                kptv1 = kptpair_factory.get_k_point(
+                    s1, iK1, self.vi_s[s1], self.vf_s[s1])
+                kptc1 = kptpair_factory.get_k_point(
+                    s1, self.ikq_k[iK1], self.ci_s[s1], self.cf_s[s1])
+                rho1_mnG = rhoex_KsmnG[iK1, s1]
+                # rhoex_KsnmG
 
-        mySsize = myKsize * Nv * Nc * Ns
-        if myKsize > 0:
-            iS0 = myKrange[0] * Nv * Nc * Ns
-
-        df_S = np.reshape(df_Ksmn, -1)
-        # multiply by 2 when spin-paired and no SOC
-        df_S *= 2.0 / nK / Ns / so
-        deps_s = np.reshape(deps_ksmn, -1)
-        H_sS = np.reshape(H_ksmnKsmn, (mySsize, self.nS))
-        for iS in range(mySsize):
-            # Multiply by occupations and adiabatic coupling
-            H_sS[iS] *= df_S[iS0 + iS]
-            # add bare transition energies
-            H_sS[iS, iS0 + iS] += deps_s[iS]
-
-        return BSEMatrix(rhoG0_S, df_S, H_sS)
+                rho1ccV_mnG = rho1_mnG.conj()[:, :] * self.v_G
+                for s2 in range(self.Ns):
+                    for Q_c in self.qd.bzk_kc:
+                        iK2 = self.kd.find_k_plus_q(Q_c, [kptv1.K])[0]
+                        rho2_mnG = rhoex_KsmnG[iK2, s2]
+                        self.context.timer.start('Coulomb')
+                        H_ksmnKsmn[
+                            ik1, s1, :, :, iK2, s2, :, :] += np.einsum(
+                                'ijG,mnG->ijmn', rho1ccV_mnG, rho2_mnG,
+                                optimize='optimal')
+                        self.context.timer.stop('Coulomb')
 
     @timer('get_density_matrix')
     def get_density_matrix(self, pair_calc, screened_potential, kpt1, kpt2):
