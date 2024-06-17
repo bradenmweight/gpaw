@@ -136,7 +136,7 @@ class ModelInteraction:
 
         assert nk == self.gs.kd.nbzkpts
         assert bandrange[1] - bandrange[0] == nband
-        wd = chi0calc.chi0_body_calc.wd
+        wd = chi0calc.wd
         nfreq = len(wd)
 
         # Find frequency range for block distributed arrays

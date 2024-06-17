@@ -9,7 +9,7 @@ import numpy as np
 
 @pytest.mark.response
 def test_response_gw_hBN_extrapolate(in_tmp_dir, scalapack, gpw_files,
-                                     needs_ase_master, gpaw_new):
+                                     gpaw_new):
     if gpaw_new and world.size > 1:
         pytest.skip('Hybrids not working in parallel with GPAW_NEW=1')
     ecuts = [20, 25, 30]

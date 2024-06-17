@@ -1,6 +1,6 @@
 """This module defines Coulomb and XC kernels for the response model.
 """
-
+import warnings
 import numpy as np
 from ase.dft import monkhorst_pack
 from gpaw.response.pair_functions import SingleQPWDescriptor
@@ -30,10 +30,18 @@ class CoulombKernel:
         self.pbc_c = pbc_c
         self.kd = kd
 
-    def from_gs(gs, *, truncation):
-        return CoulombKernel(truncation, N_c=gs.kd.N_c,
-                             pbc_c=gs.atoms.get_pbc(),
-                             kd=gs.kd)
+    @classmethod
+    def from_gs(cls, gs, *, truncation):
+        return cls(truncation,
+                   N_c=gs.kd.N_c,
+                   pbc_c=gs.atoms.get_pbc(),
+                   kd=gs.kd)
+
+    def new(self, *, truncation):
+        return CoulombKernel(truncation,
+                             N_c=self.N_c,
+                             pbc_c=self.pbc_c,
+                             kd=self.kd)
 
     def description(self):
         if self.truncation is None:
@@ -41,14 +49,17 @@ class CoulombKernel:
         else:
             return f'{self.truncation} Coulomb truncation'
 
-    def sqrtV(self, qpd, q_v):
-        return self.V(qpd, q_v)**0.5
+    def sqrtV(self, qpd, q_v=None):
+        return self.V(qpd, q_v=q_v)**0.5
 
-    def V(self, qpd, q_v):
+    def V(self, qpd, q_v=None):
         assert isinstance(qpd, SingleQPWDescriptor)
         return get_coulomb_kernel(
             qpd, self.N_c, pbc_c=self.pbc_c, q_v=q_v,
             truncation=self.truncation)
+
+    def kernel(self, qpd, q_v=None):
+        return np.diag(self.V(qpd, q_v=q_v))
 
     def integrated_kernel(self, qpd, reduced):
         return get_integrated_kernel(
@@ -66,7 +77,7 @@ def get_coulomb_kernel(qpd, N_c, q_v=None, truncation=None, *, pbc_c)\
         if q_v is not None:
             assert qpd.optical_limit
             qG_Gv += q_v
-        if qpd.kd.gamma and q_v is None:
+        if qpd.optical_limit and q_v is None:
             v_G = np.zeros(len(qpd.G2_qG[0]))
             v_G[0] = 4 * np.pi
             v_G[1:] = 4 * np.pi / (qG_Gv[1:]**2).sum(axis=1)
@@ -75,7 +86,7 @@ def get_coulomb_kernel(qpd, N_c, q_v=None, truncation=None, *, pbc_c)\
 
     elif truncation == '2D':
         v_G = calculate_2D_truncated_coulomb(qpd, pbc_c=pbc_c, q_v=q_v)
-        if qpd.kd.gamma and q_v is None:
+        if qpd.optical_limit and q_v is None:
             v_G[0] = 0.0
 
     elif truncation == '0D':
@@ -95,7 +106,7 @@ def get_coulomb_kernel(qpd, N_c, q_v=None, truncation=None, *, pbc_c)\
 def calculate_2D_truncated_coulomb(qpd, q_v=None, *, pbc_c):
     """ Simple 2D truncation of Coulomb kernel PRB 73, 205119.
 
-        Note: q_v is only added to qG_Gv if qpd.kd.gamma is True.
+        Note: q_v is only added to qG_Gv if qpd.optical_limit is True.
 
     """
 
@@ -120,7 +131,7 @@ def calculate_2D_truncated_coulomb(qpd, q_v=None, *, pbc_c):
     qGn_G = qG_Gv[:, Nn_c[0]]
 
     v_G = 4 * np.pi / (qG_Gv**2).sum(axis=1)
-    if np.allclose(qGn_G[0], 0) or qpd.kd.gamma:
+    if np.allclose(qGn_G[0], 0) or qpd.optical_limit:
         """sin(qGn_G * R) = 0 when R = L/2 and q_n = 0.0"""
         v_G *= 1.0 - np.exp(-qGp_G * R) * np.cos(qGn_G * R)
     else:
@@ -150,7 +161,8 @@ def get_integrated_kernel(qpd, N_c, truncation=None,
 
     if truncation is None:
         V_q = 4 * np.pi / np.sum(q_qv**2, axis=1)
-        assert len(Np_c) == 3
+        if len(Np_c) < 3:
+            warnings.warn(f"You should be using truncation='{len(Np_c)}D'")
     elif truncation == '2D':
         assert len(Np_c) == 2
 

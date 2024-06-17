@@ -15,7 +15,7 @@ class FragileG0W0(G0W0):
 
 
 @pytest.mark.response
-def test_restart_file(in_tmp_dir, gpw_files, needs_ase_master, gpaw_new):
+def test_restart_file(in_tmp_dir, gpw_files, gpaw_new):
     if gpaw_new and world.size > 1:
         pytest.skip('Hybrids not working in parallel with GPAW_NEW=1')
     kwargs = dict(bands=(3, 5),

@@ -21,8 +21,7 @@ kick_v = np.ones(3) * 1e-5
     {'name': 'GaussianPulse', 'strength': 1e-5, 'time0': 0, 'frequency': 8.6,
      'sigma': 0.5, 'sincos': 'sin'},
     {'name': 'SincPulse', 'strength': 1e-6, 'time0': 0, 'cutoff_freq': 15,
-     'relative_t0': False},
-])
+     'relative_t0': False}])
 def test_laser(gpw_files, in_tmp_dir, pulse):
     # Time-propagation calculation
     td_calc = LCAOTDDFT(gpw_files['na2_tddft_dzp'], txt='td.out')

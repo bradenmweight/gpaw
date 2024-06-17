@@ -69,9 +69,10 @@ def add_force_contributions(wfs: LCAOWaveFunctions,
     rhoT_MM = wfs.calculate_density_matrix().T
     erhoT_MM = wfs.calculate_density_matrix(eigs=True).T
 
-    add_kinetic_term(rhoT_MM, dTdR_vMM, F_av, indices)
+    add_kinetic_term(rhoT_MM, dTdR_vMM, F_av, indices, wfs.atomdist.indices)
     add_pot_term(potential.vt_sR[wfs.spin], wfs.basis, wfs.q, rhoT_MM, F_av)
-    add_den_mat_term(erhoT_MM, dThetadR_vMM, F_av, indices)
+    add_den_mat_term(erhoT_MM, dThetadR_vMM, F_av, indices,
+                     wfs.atomdist.indices)
     for b in wfs.atomdist.indices:
         add_den_mat_paw_term(b,
                              setups[b].dO_ii,
@@ -89,7 +90,7 @@ def add_force_contributions(wfs: LCAOWaveFunctions,
                                 F_av)
 
 
-def add_kinetic_term(rhoT_MM, dTdR_vMM, F_av, indices):
+def add_kinetic_term(rhoT_MM, dTdR_vMM, F_av, indices, mya):
     """Calculate Kinetic energy term in LCAO
 
     :::
@@ -103,9 +104,10 @@ def add_kinetic_term(rhoT_MM, dTdR_vMM, F_av, indices):
             """
 
     for a, M1, M2 in indices:
-        F_av[a, :] += 2 * np.einsum('vmM, Mm -> v',
-                                    dTdR_vMM[:, M1:M2],
-                                    rhoT_MM[:, M1:M2]).real
+        if a in mya:
+            F_av[a, :] += 2 * np.einsum('vmM, Mm -> v',
+                                        dTdR_vMM[:, M1:M2],
+                                        rhoT_MM[:, M1:M2]).real
 
 
 def add_pot_term(vt_R: UGArray,
@@ -128,7 +130,7 @@ def add_pot_term(vt_R: UGArray,
                                                q)
 
 
-def add_den_mat_term(erhoT_MM, dThetadR_vMM, F_av, indices):
+def add_den_mat_term(erhoT_MM, dThetadR_vMM, F_av, indices, mya):
     """Calculate density matrix term in LCAO"""
     # Density matrix contribution due to basis overlap
     #
@@ -140,9 +142,10 @@ def add_den_mat_term(erhoT_MM, dThetadR_vMM, F_av, indices):
     #         mu in a; nu
     #
     for a, M1, M2 in indices:
-        F_av[a, :] -= 2 * np.einsum('vmM, Mm -> v',
-                                    dThetadR_vMM[:, M1:M2],
-                                    erhoT_MM[:, M1:M2]).real
+        if a in mya:
+            F_av[a, :] -= 2 * np.einsum('vmM, Mm -> v',
+                                        dThetadR_vMM[:, M1:M2],
+                                        erhoT_MM[:, M1:M2]).real
 
 
 def add_den_mat_paw_term(b, dO_ii, P_Mi, dPdR_vMi, erhoT_MM, indices, F_av):

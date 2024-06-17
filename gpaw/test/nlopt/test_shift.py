@@ -36,11 +36,6 @@ def test_shift_spinpol(mme_files):
         shift[spinpol] = np.load(f'shift_xyz{tag}.npy')[1] * 1e9
         assert shift[spinpol] == pytest.approx(shift_values, abs=5e-2)
 
-    # import matplotlib.pyplot as plt
-    # plt.plot(freqs, shift['spinpaired'])
-    # plt.plot(freqs, shift['spinpol'])
-    # plt.show()
-
     # Assert that the difference between spectra from spinpaired and
     # spinpolarised calculations is small
 

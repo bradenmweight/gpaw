@@ -49,6 +49,12 @@ class Chi0Calculator:
             intraband=intraband, rate=rate, **kwargs)
 
     @property
+    def wd(self) -> FrequencyDescriptor:
+        wd = self.chi0_body_calc.wd
+        assert wd is self.chi0_opt_ext_calc.wd
+        return wd
+
+    @property
     def pair_calc(self) -> ActualPairDensityCalculator:
         # In a future refactor, we should find better ways to access the pair
         # density calculator (and the pair density paw corrections) XXX

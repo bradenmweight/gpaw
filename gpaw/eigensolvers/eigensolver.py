@@ -9,6 +9,7 @@ from ase.utils.timing import timer
 from gpaw.matrix import matrix_matrix_multiply as mmm
 from gpaw.utilities.mblas import multi_axpy
 from gpaw.xc.hybrid import HybridXC
+from gpaw.mpi import broadcast_exception
 
 
 def reshape(a_x, shape):
@@ -93,8 +94,12 @@ class Eigensolver:
                 wfs.world.broadcast(eps_skn, 0)
                 try:
                     # Find bandgap + positions of CBM:
-                    gap, _, (s, k, n) = _bandgap(eps_skn,
-                                                 spin=None, direct=False)
+                    try:
+                        gap, _, (s, k, n) = _bandgap(eps_skn, direct=False)
+                    except TypeError:
+                        # Old ASE:
+                        gap, _, (s, k, n) = _bandgap(eps_skn, spin=None,
+                                                     direct=False)
                 except ValueError:
                     gap = 0.0
 
@@ -129,13 +134,14 @@ class Eigensolver:
         weight_un = self.weights(wfs)
 
         error = 0.0
-        for kpt, weights in zip(wfs.kpt_u, weight_un):
-            if not wfs.orthonormalized:
-                wfs.orthonormalize(kpt)
-            e = self.iterate_one_k_point(ham, wfs, kpt, weights)
-            error += e
-            if self.orthonormalization_required:
-                wfs.orthonormalize(kpt)
+        with broadcast_exception(self.kpt_comm):
+            for kpt, weights in zip(wfs.kpt_u, weight_un):
+                if not wfs.orthonormalized:
+                    wfs.orthonormalize(kpt)
+                e = self.iterate_one_k_point(ham, wfs, kpt, weights)
+                error += e
+                if self.orthonormalization_required:
+                    wfs.orthonormalize(kpt)
 
         wfs.orthonormalized = True
         self.error = self.band_comm.sum_scalar(self.kpt_comm.sum_scalar(error))

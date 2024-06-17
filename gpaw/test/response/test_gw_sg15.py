@@ -6,7 +6,7 @@ import pytest
 
 
 @pytest.mark.response
-def test_gw_sg15(in_tmp_dir, add_cwd_to_setup_paths, needs_ase_master):
+def test_gw_sg15(in_tmp_dir, add_cwd_to_setup_paths):
     from gpaw.test.pseudopotential.H_sg15 import pp_text
     if world.rank == 0:
         with open('H_ONCV_PBE-1.0.upf', 'w') as pp_file:

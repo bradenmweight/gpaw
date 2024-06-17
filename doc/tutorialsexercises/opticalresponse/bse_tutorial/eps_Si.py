@@ -3,7 +3,6 @@ from gpaw.response.bse import BSE
 from gpaw.response.df import DielectricFunction
 
 ecut = 50
-eshift = 0.8
 eta = 0.2
 
 df = DielectricFunction('gs_Si.gpw',
@@ -13,7 +12,6 @@ df = DielectricFunction('gs_Si.gpw',
                         intraband=False,
                         hilbert=False,
                         eta=eta,
-                        eshift=eshift,
                         txt='rpa_Si.txt')
 
 df.get_dielectric_function(filename='eps_rpa_Si.csv')
@@ -23,7 +21,6 @@ bse = BSE('gs_Si.gpw',
           valence_bands=range(0, 4),
           conduction_bands=range(4, 8),
           nbands=50,
-          eshift=eshift,
           mode='BSE',
           integrate_gamma=0,
           txt='bse_Si.txt')

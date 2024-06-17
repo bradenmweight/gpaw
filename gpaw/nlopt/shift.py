@@ -1,9 +1,10 @@
 import numpy as np
-from ase.units import Bohr, _hbar, _e, _me
-from ase.utils.timing import Timer
 from ase.parallel import parprint
+from ase.units import _e, _hbar, Ha, J
+from ase.utils.timing import Timer
+
 from gpaw.mpi import world
-from gpaw.nlopt.matrixel import get_rml, get_derivative
+from gpaw.nlopt.matrixel import get_derivative, get_rml
 from gpaw.utilities.progressbar import ProgressBar
 
 
@@ -47,10 +48,15 @@ def get_shift(
     timer = Timer()
     parprint(f'Calculating shift current (in {world.size:d} cores).')
 
+    # Covert inputs in eV to Ha
+    nw = len(freqs)
+    w_l = np.array(freqs) / Ha
+    eta /= Ha
+    Etol /= Ha
+
     # Useful variables
     pol_v = ['xyz'.index(ii) for ii in pol]
-    w_l = np.array(freqs)
-    nw = len(freqs)
+
     parprint(f'Calculation for element {pol}.')
 
     # Load the required data
@@ -101,12 +107,12 @@ def get_shift(
     with timer('Gather data from cores'):
         world.sum(sum2_l)
 
-    # Make the output in SI unit
-    dim_init = -1j * _e**3 / (2 * _hbar * (2.0 * np.pi)**3)
-    dim_sum = (_hbar / (Bohr * 1e-10))**3 / \
-        (_e**4 * (Bohr * 1e-10)**3) * (_hbar / _me)**3
-    dim_SI = 1j * dim_init * dim_sum  # 1j due to imag in loop
-    sigma_l = dim_SI * sum2_l.real
+    # Multiply prefactors
+    prefactor = 1 / (2 * (2.0 * np.pi)**3)
+    # Convert to SI units [A / V^2] = [C^3 / (J^2 * s)]
+    prefactor *= _e**3 / (_hbar * (Ha / J))
+
+    sigma_l = prefactor * sum2_l.real
 
     # A multi-col output
     shift = np.vstack((freqs, sigma_l))

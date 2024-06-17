@@ -6,10 +6,10 @@ from gpaw.test.gpwfile import response_band_cutoff
 
 
 @pytest.mark.response
-@pytest.mark.later  # new code doesn't understand interpolation keyword
-@pytest.mark.parametrize('gs', list(response_band_cutoff.keys()))
-def test_response_band_cutoff(in_tmp_dir, gpw_files, gs):
-
+@pytest.mark.parametrize('gs', list(response_band_cutoff))
+def test_response_band_cutoff(in_tmp_dir, gpw_files, gs, gpaw_new):
+    if gpaw_new and gs == 'v2br4_pw':
+        pytest.skip('interpolation=3 not implemented')
     nbands = response_band_cutoff[gs]
     with ulmopen(gpw_files[gs]) as reader:
         eps_skn = reader.wave_functions.eigenvalues

@@ -11,16 +11,43 @@ implementation in GPAW, see :ref:`bse theory`.
 
 Absorption spectrum of bulk silicon
 =======================================
- 
-We start by calculating the ground state density and diagonalizing the resulting Hamiltonian.
-Below we will set up the Bethe-Salpeter Hamiltonian in a basis of the 4 valence bands and 4 conduction bands. However, the screened interaction that enters the Hamiltonian needs to be converged with respect the number of unoccupied bands. The calculaton is erfored with the following script :download:`gs_Si.py`. It takes a few minutes on a single CPU. The last line in the script creates a .gpw file which contains all the informations of the system, including the wavefunctions.
 
-Next we calculate the dynamical dielectric function using the Bethe-Salpeter equation. The imaginary part is proportional to the absorption spectrum. The calculation can be done with the script :download:`eps_Si.py`, which also calculates the dielectric function within the Random Phase Approximation (see :ref:`df_tutorial`). It takes about ~12 hours on a single CPU but parallelizes very well. Note the .csv output files that contains the spectre. The script also generates a .dat file that contains the eigenvalues of the BSE eigenvalues for easy application. The spectrum essentially consists of a number of peaks centered on the eigenvalues. It can be plottet with :download:`plot_Si.py` and the result is shown below
+We start by calculating the ground state density and diagonalizing the
+resulting Hamiltonian.  Below we will set up the Bethe-Salpeter Hamiltonian
+in a basis of the 4 valence bands and 4 conduction bands.  However, the
+screened interaction that enters the Hamiltonian needs to be converged with
+respect the number of unoccupied bands.  The calculaton is erfored with the
+following script :download:`gs_Si.py`. It takes a few minutes on a single
+CPU. The last line in the script creates a .gpw file which contains all the
+informations of the system, including the wavefunctions.
+
+Next we calculate the dynamical dielectric function using the
+Bethe-Salpeter equation.  The imaginary part is proportional to the
+absorption spectrum.  The calculation can be done with the script
+:download:`eps_Si.py`, which also calculates the dielectric function within
+the Random Phase Approximation (see :ref:`df_tutorial`). It takes about ~12
+hours on a single CPU but parallelizes very well.  Note the .csv output
+files that contains the spectre.  The script also generates a .dat file
+that contains the eigenvalues of the BSE eigenvalues for easy application.
+The spectrum essentially consists of a number of peaks centered on the
+eigenvalues.  It can be plottet with :download:`plot_Si.py` and the result
+is shown below
 
 .. image:: bse_Si.png
     :height: 400 px
 
-The parameters that need to be converged in the calculation are the k-points in the initial ground state calculation. In addition the following keywords in the BSE object should be converged: the plane wave cutoff ``ecut``, the numbers of bands used to calculate the screened interaction ``nbands``, the list of valence bands ``valence_bands`` and the list of conduction bands ``conduction_bands`` included in the Hamiltonian. It is also possible to provide an array ``gw_skn``, with GW eigenvalues to be used in the non-interacting part of th Hamiltonian. Here, the indices denote spin, k-points and bands, which has to match the spin, k-point sampling and the number of specified valence and conduction bands in the ground state calculation.
+The parameters that need to be converged in the calculation are the
+k-points in the initial ground state calculation.  In addition the
+following keywords in the BSE object should be converged: the plane wave
+cutoff ``ecut``, the numbers of bands used to calculate the screened
+interaction ``nbands``, the list of valence bands ``valence_bands`` and the
+list of conduction bands ``conduction_bands`` included in the Hamiltonian.
+It is also possible to provide an array ``gw_skn``, with GW eigenvalues to
+be used in the non-interacting part of th Hamiltonian.  Here, the indices
+denote spin, k-points and bands, which has to match the spin, k-point
+sampling and the number of specified valence and conduction bands in the
+ground state calculation.
+
 
 Excitons in monolayer MoS2 with Spin-orbit Coupling
 ===================================================
@@ -51,7 +78,7 @@ The script :download:`get_2d_eps.py` carries out this calculations with and with
 
 Mott-Wannier model for excitons in 2D materials
 -----------------------------------------------
- 
+
 In 3D materials the Mott-Wannier model of excitons has been highly succesful and simply regards the exciton as a "hydrogen atom" with bindings energies that has been rescaled by the exciton effective mass and dielectric screening. Thus in atomic units the binding energy is
 
 .. math:: E_B^{3D}=\frac{\mu}{2\epsilon_0^2}

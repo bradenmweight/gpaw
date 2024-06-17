@@ -71,8 +71,7 @@ class BuildingBlock:
         self.direction = direction
 
         self.df = df  # dielectric function object
-        assert self.df.coulomb.truncation == '2D'
-        self.wd = self.df.wd
+        self.wd = self.df.chi0calc.wd
 
         self.context = self.df.context.with_txt(txt)
 
@@ -187,28 +186,19 @@ class BuildingBlock:
             if q_inf is not None:
                 qstr = '(' + ', '.join(['%.3f' % x for x in q_inf]) + ')'
                 self.context.print('    and q_inf=%s' % qstr, flush=False)
-            qpd, chi0_wGG, \
-                chi_wGG = self.df.get_dielectric_matrix(
-                    symmetric=False,
-                    calculate_chi=True,
-                    q_c=q_c,
-                    q_v=q_inf,
-                    direction=self.direction)
+            chi0_dyson_eqs = self.df.get_chi0_dyson_eqs(q_c, truncation='2D')
+            qpd, chi_wGG, wblocks = chi0_dyson_eqs.rpa_density_response(
+                qinf_v=q_inf, direction=self.direction)
             self.context.print('calculated chi!')
-
-            nw = len(self.wd)
-            comm = self.context.comm
-            w1 = min(self.df.blocks1d.blocksize * comm.rank, nw)
 
             chiM_w, chiD_w, chiDM_w, chiMD_w, drhoM_z, drhoD_z = \
                 self.get_chi_2D(qpd, chi_wGG)
-            chiM_w = self.collect(chiM_w)
-            chiD_w = self.collect(chiD_w)
-            chiDM_w = self.collect(chiDM_w)
-            chiMD_w = self.collect(chiMD_w)
+            chiM_w = wblocks.all_gather(chiM_w)
+            chiD_w = wblocks.all_gather(chiD_w)
+            chiDM_w = wblocks.all_gather(chiDM_w)
+            chiMD_w = wblocks.all_gather(chiMD_w)
 
             if self.context.comm.rank == 0:
-                assert w1 == 0  # drhoM and drhoD in static limit
                 self.update_building_block(chiM_w[np.newaxis, :],
                                            chiD_w[np.newaxis, :],
                                            chiDM_w[np.newaxis, :],
@@ -474,16 +464,6 @@ class BuildingBlock:
         self.drhoD_qz = drhoD_qz
 
         self.save_chi_file(filename=self.filename + '_int')
-
-    def collect(self, a_w):
-        comm = self.context.comm
-        mynw = self.df.blocks1d.blocksize
-        b_w = np.zeros(mynw, a_w.dtype)
-        b_w[:self.df.blocks1d.nlocal] = a_w
-        nw = len(self.wd)
-        A_w = np.empty(comm.size * mynw, a_w.dtype)
-        comm.all_gather(b_w, A_w)
-        return A_w[:nw]
 
     def clear_temp_files(self):
         if not self.savechi0:

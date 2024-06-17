@@ -5,7 +5,6 @@ from gpaw.tddft import TDDFT, DipoleMomentWriter, photoabsorption_spectrum
 from gpaw.tddft.abc import PML, LinearAbsorbingBoundary, P4AbsorbingBoundary
 
 
-@pytest.mark.later
 def test_tddft_td_na2(in_tmp_dir, gpw_files):
     """Sodium dimer, Na2."""
     atoms = GPAW(gpw_files['na2_fd']).atoms

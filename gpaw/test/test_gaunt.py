@@ -45,7 +45,7 @@ def test_selection_rules(lmax: int = 3):
                 # following conditions should be met
                 if abs(G_LLL[L1, L2, L3]) > 1e-10:
                     assert (l1 + l2 + l3) % 2 == 0, \
-                        f'l1 + l2 + l3 = {l1+l2+l3} should be an even integer'
+                        f'l1+l2+l3 = {l1 + l2 + l3} should be an even integer'
                     assert abs(l1 - l2) <= l3 <= l1 + l2, f'{l1, l2, l3}'
                     assert m1 + m2 + m3 == 0 or \
                         m1 + m2 - m3 == 0 or \
@@ -107,7 +107,7 @@ def test_super_selection_rules(lmax: int = 2):
                     # following conditions should be met
                     if abs(G_LLLL[L1, L2, L3, L4]) > 1e-10:
                         assert (l1 + l2 + l3 + l4) % 2 == 0, \
-                            f'l1 + l2 + l3 + l4 = {l1+l2+l3+l4} ' \
+                            f'l1 + l2 + l3 + l4 = {l1 + l2 + l3 + l4} ' \
                             'should be an even integer'
                         # The allowed l' range governs the allowed l4 range
                         lp_range = np.arange(abs(l1 - l2), l1 + l2 + 1)

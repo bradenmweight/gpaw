@@ -193,7 +193,7 @@ def all_gpw_files(request, gpw_files, pytestconfig):
                    'nicl2_pw', 'nicl2_pw_evac',
                    'v2br4_pw', 'v2br4_pw_nosym',
                    'sih4_xc_gllbsc_fd', 'sih4_xc_gllbsc_lcao',
-                   'na2_isolated'}
+                   'na2_isolated', 'h2o_xas'}
     if gpaw_new and request.param in skip_if_new:
         pytest.xfail(f'{request.param} gpwfile not yet working with GPAW_NEW')
 
@@ -203,7 +203,7 @@ def all_gpw_files(request, gpw_files, pytestconfig):
 
 @pytest.fixture(scope='session')
 def mme_files(request, gpw_files):
-    "Reuse mme files"
+    """Reuse mme files"""
     cache = request.config.cache
     mme_cachedir = cache.mkdir('gpaw_test_mmefiles')
 

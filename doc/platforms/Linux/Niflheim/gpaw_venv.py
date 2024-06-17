@@ -18,7 +18,12 @@ version = '3.11'
 fversion = 'cpython-311'
 
 # Niflheim login hosts, with the oldest architecture as the first
-nifllogin = ['sylg', 'svol', 'surt', 'fjorm']
+nifllogin = ['sylg',  # broadwell (xeon24)
+             'svol',  # skylake (xeon40)
+             'surt',  # icelake (xeon56)
+             'fjorm',  # epyc9004 (epyc96)
+             'thul',  # skylake_el8 (xeon40el8)
+             'slid2']  # broadwell_el8 (xeon24el8)
 
 # Easybuild uses a hierarchy of toolchains for the main foss and intel
 # chains.  The order in the tuples before are
@@ -49,7 +54,7 @@ toolchains = {
 module_cmds_all = """\
 module purge
 unset PYTHONPATH
-module load GPAW-setups/0.9.20000
+module load GPAW-setups/24.1.0
 module load ELPA/2023.05.001-{fullchain}
 module load Wannier90/3.1.0-{fullchain}
 module load Python-bundle-PyPI/2023.06-{corechain}

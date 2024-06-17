@@ -123,7 +123,7 @@ class Chi0Integrand(Integrand):
         if self.integrationmode is None:
             n_nmG *= weight
 
-        df_nm = kptpair.get_occupation_differences(n_n, m_m)
+        df_nm = kptpair.get_occupation_differences()
         df_nm[df_nm <= 1e-20] = 0.0
         n_nmG *= df_nm[..., np.newaxis]**0.5
 

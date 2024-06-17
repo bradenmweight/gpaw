@@ -55,7 +55,7 @@ def create_node(obj, include):
     attrs = []
     arrows = []
     for key, value in obj.__dict__.items():
-        if key[0] != '_':
+        if key[:2] != '__':
             if not include(value):
                 attrs.append(key)
             else:

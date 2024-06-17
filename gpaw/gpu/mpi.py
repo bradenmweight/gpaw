@@ -29,6 +29,9 @@ class CuPyMPI:
     def min_scalar(self, a, root=-1):
         return self.comm.min_scalar(a, root)
 
+    def max_scalar(self, a, root=-1):
+        return self.comm.max_scalar(a, root)
+
     def max(self, array):
         self.comm.max(array)
 

@@ -8,6 +8,9 @@ class PoissonSolver:
               rhot) -> float:
         raise NotImplementedError
 
+    def dipole_layer_correction(self) -> float:
+        raise NotImplementedError
+
 
 class PoissonSolverWrapper(PoissonSolver):
     def __init__(self, solver):
@@ -22,3 +25,9 @@ class PoissonSolverWrapper(PoissonSolver):
               rhot) -> float:
         self.solver.solve(vHt.data, rhot.data)
         return nan
+
+    def dipole_layer_correction(self) -> float:
+        try:
+            return self.solver.correction
+        except AttributeError:
+            raise NotImplementedError

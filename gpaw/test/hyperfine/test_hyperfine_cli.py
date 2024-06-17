@@ -5,7 +5,6 @@ import numpy as np
 from gpaw.hyperfine import main
 
 
-@pytest.mark.later
 @pytest.mark.parametrize('option', ['', '-x', '-d'])
 @pytest.mark.serial
 def test_hyperfine_cli(gpw_files, capsys, option):

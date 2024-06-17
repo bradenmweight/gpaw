@@ -100,7 +100,7 @@ def check_wavefunctions():
     test1 = [[20, 20, 20, 1, 4], [20, 20, 20, 2, 4], [20, 20, 20, 3, 4]]
     test2 = [0.0656, 0.0634, 0.0437]
     for i in range(3):
-        with open(f"UNK0000{i+1}.1") as f:
+        with open(f"UNK0000{i + 1}.1") as f:
             l1 = f.readline()
             l1 = l1.split(' ')
             l1 = [int(i) for i in l1]

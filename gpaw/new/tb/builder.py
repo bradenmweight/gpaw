@@ -25,6 +25,7 @@ from gpaw.setup import Setup
 from gpaw.spline import Spline
 from gpaw.utilities.timing import NullTimer
 from gpaw.typing import Array3D
+from gpaw.new.scf import SCFContext
 
 
 class TBHamiltonianMatrixCalculator(CollinearHamiltonianMatrixCalculator):
@@ -64,6 +65,7 @@ class NoGrid(Domain):
             N_c=[0, 0, 0],
             dv=0.0)
         self.size = (0, 0, 0)
+        self.zerobc_c = np.zeros(3, bool)
 
     def empty(self, shape=(), comm=serial_comm, xp=None):
         return DummyFunctions(self, shape, comm)
@@ -143,11 +145,14 @@ class TBPotentialCalculator(PotentialCalculator):
         vol = abs(np.linalg.det(atoms.cell[atoms.pbc][:, atoms.pbc]))
         self.stress_vv = stress_vv / vol * Bohr**atoms.pbc.sum() / Ha
 
-        return {'kinetic': 0.0,
-                'coulomb': 0.0,
-                'zero': 0.0,
-                'xc': energy,
-                'external': 0.0}, vt_sR, None, vHt_r
+        return ({'kinetic': 0.0,
+                 'coulomb': 0.0,
+                 'zero': 0.0,
+                 'xc': energy,
+                 'external': 0.0},
+                vt_sR,
+                None,
+                DummyFunctions(density.nt_sR.desc))
 
     def _move(self, fracpos_ac, ndensities):
         self.atoms.set_scaled_positions(fracpos_ac)
@@ -187,9 +192,16 @@ class TBSCFLoop:
                 log=None):
         self.eigensolver.iterate(state, self.hamiltonian)
         state.ibzwfs.calculate_occs(self.occ_calc)
-        yield
+        yield SCFContext(
+            log,
+            1,
+            state,
+            0.0, 0.0,
+            self.comm, calculate_forces,
+            pot_calc)
+
         state.potential, _ = pot_calc.calculate(
-            state.density, state.potential.vHt_x)
+            state.density, None, state.potential.vHt_x)
 
 
 class DummyBasis:

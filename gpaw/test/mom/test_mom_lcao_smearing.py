@@ -1,28 +1,11 @@
 import pytest
-from ase.build import molecule
 from gpaw import GPAW, restart
 
 
 @pytest.mark.mom
-def test_mom_lcao_smearing(in_tmp_dir):
-    atoms = molecule('CO')
-    atoms.center(vacuum=2)
-
-    calc = GPAW(mode='lcao',
-                basis='dzp',
-                nbands=7,
-                h=0.24,
-                xc='PBE',
-                spinpol=True,
-                symmetry='off',
-                convergence={'energy': 100,
-                             'density': 1e-3})
-
-    atoms.calc = calc
-    # Ground-state calculation
-    E_gs = atoms.get_potential_energy()
-
-    calc.write('co_lcao_gs.gpw', 'all')
+def test_mom_lcao_smearing(in_tmp_dir, gpw_files):
+    calc = GPAW(gpw_files['co_mom'])
+    E_gs = calc.get_potential_energy()
 
     f_sn = []
     for spin in range(calc.get_number_of_spins()):
@@ -35,7 +18,7 @@ def test_mom_lcao_smearing(in_tmp_dir):
 
     # Test both MOM and fixed occupations with Gaussian smearing
     for i in [True, False]:
-        atoms, calc = restart('co_lcao_gs.gpw', txt='-')
+        atoms, calc = restart(gpw_files['co_mom'], txt='-')
 
         # Excited-state calculation with Gaussian
         # smearing of the occupation numbers

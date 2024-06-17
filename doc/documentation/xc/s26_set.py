@@ -1,12 +1,16 @@
 import sys
+
 from ase import Atoms
-from ase.parallel import paropen
-from ase.data.s22 import data
+from ase.build.connected import connected_indices
 from ase.calculators.vdwcorrection import vdWTkatchenko09prl
+from ase.data.s22 import data
+from ase.parallel import paropen
+
 from gpaw import GPAW, FermiDirac
-from gpaw.utilities.adjust_cell import adjust_cell
 from gpaw.analyse.hirshfeld import HirshfeldPartitioning
 from gpaw.analyse.vdwradii import vdWradii
+from gpaw.utilities.adjust_cell import adjust_cell
+
 try:
     from dftd4 import D4_model
 except ModuleNotFoundError:
@@ -28,8 +32,8 @@ for molecule in data:
     ss = Atoms(data[molecule]['symbols'],
                data[molecule]['positions'])
     # split the structures
-    s1 = ss.find_connected(0)
-    s2 = ss.find_connected(-1)
+    s1 = ss[connected_indices(ss, 0)]
+    s2 = ss[connected_indices(ss, -1)]
     assert len(ss) == len(s1) + len(s2)
     if xc == 'TS09' or xc == 'TPSS' or xc == 'M06-L' or xc == 'dftd4':
         c = GPAW(mode='fd', xc='PBE', h=h, nbands=-6,

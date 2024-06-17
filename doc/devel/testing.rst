@@ -175,18 +175,3 @@ GPAW web-pages should start with a special ``# web-page:`` comment like this::
 
 .. _workflow: https://myqueue.readthedocs.io/en/latest/
     workflows.html
-
-
-.. _code coverage:
-
-Code coverage
-=============
-
-We use the coverage_ tool to generate a `coverage report`_ every night. It
-is not 100% accurate because it does not include coverage from running our test
-suite in parallel.  Also not included are the :ref:`agts` and building this
-web-page which would add some extra coverage.
-
-
-.. _coverage:  https://coverage.readthedocs.io/
-.. _coverage report: https://wiki.fysik.dtu.dk/gpaw/htmlcov/index.html

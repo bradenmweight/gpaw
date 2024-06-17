@@ -1042,7 +1042,8 @@ class PAWSetupGenerator:
         aea = self.aea
 
         from gpaw.setup_data import SetupData
-        setup = SetupData(aea.symbol, aea.xc.name, tag, readxml=False)
+        setup = SetupData(aea.symbol, aea.xc.name, tag, readxml=False,
+                          generator_version=3)
 
         setup.id_j = []
 

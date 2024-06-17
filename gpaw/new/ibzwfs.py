@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import Generator, TypeVar, Generic
+from typing import Generator, Generic, TypeVar, TYPE_CHECKING
 
 import numpy as np
-from ase.dft.bandgap import bandgap
 from ase.io.ulm import Writer
 from ase.units import Bohr, Ha
-from gpaw.gpu import synchronize, as_np
+from gpaw.gpu import as_np, synchronize
 from gpaw.gpu.mpi import CuPyMPI
 from gpaw.mpi import MPIComm, serial_comm
 from gpaw.new import zips
@@ -18,6 +17,8 @@ from gpaw.new.pwfd.wave_functions import PWFDWaveFunctions
 from gpaw.new.wave_functions import WaveFunctions
 from gpaw.typing import Array1D, Array2D, Self
 
+if TYPE_CHECKING:
+    from gpaw.new.density import Density
 
 WFT = TypeVar('WFT', bound=WaveFunctions)
 
@@ -121,6 +122,12 @@ class IBZWaveFunctions(Generic[WFT]):
             return tuple(shape)
         return max(wfs.array_shape() for wfs in self)
 
+    @property
+    def fermi_level(self) -> float:
+        fl = self.fermi_levels
+        assert fl is not None and len(fl) == 1
+        return fl[0]
+
     def __str__(self):
         shape = self.get_max_shape(global_shape=True)
         wfs = self.wfs_qs[0][0]
@@ -208,6 +215,9 @@ class IBZWaveFunctions(Generic[WFT]):
         self.kpt_comm.sum(D_asii.data)
         self.band_comm.sum(nt_sR.data)
         self.band_comm.sum(D_asii.data)
+
+    def normalize_density(self, density: Density) -> None:
+        pass  # overwritten in LCAOIBZWaveFunctions class
 
     def add_to_ked(self, taut_sR) -> None:
         for wfs in self:
@@ -395,9 +405,9 @@ class IBZWaveFunctions(Generic[WFT]):
     def write_summary(self, log):
         fl = self.fermi_levels * Ha
         if len(fl) == 1:
-            log(f'\nFermi level: {fl[0]:.3f} eV')
+            log(f'\nFermi level: {fl[0]:.3f}')
         else:
-            log(f'\nFermi levels: {fl[0]:.3f}, {fl[1]:.3f} eV')
+            log(f'\nFermi levels: {fl[0]:.3f}, {fl[1]:.3f}')
 
         ibz = self.ibz
 
@@ -444,14 +454,19 @@ class IBZWaveFunctions(Generic[WFT]):
                         f'    {e2:10.3f}   {f2:9.3f}')
 
         try:
+            from ase.dft.bandgap import GapInfo
+        except ImportError:
+            log('No gapinfo -- requires new ASE')
+            return
+
+        try:
             log()
-            bandgap(eigenvalues=eig_skn,
-                    efermi=fl[0],
-                    output=log.fd,
-                    kpts=ibz.kpt_kc)
+            fermilevel = fl[0]
+            gapinfo = GapInfo(eigenvalues=eig_skn - fermilevel)
+            log(gapinfo.description(ibz_kpoints=ibz.kpt_kc))
         except ValueError:
             # Maybe we only have the occupied bands and no empty bands
-            pass
+            log('Could not find a gap')
 
     def make_sure_wfs_are_read_from_gpw_file(self):
         for wfs in self:

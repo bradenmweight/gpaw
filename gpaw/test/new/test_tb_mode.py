@@ -1,7 +1,6 @@
 import pytest
 from ase import Atoms
 from ase.optimize import BFGS
-from ase.filters import ExpCellFilter
 from gpaw.new.ase_interface import GPAW
 # from gpaw import GPAW
 
@@ -32,6 +31,7 @@ def test_tb_mode_bulk():
         kpts=(2, 2, 2))
     atoms.get_potential_energy()
     return
+    from ase.filters import ExpCellFilter
     from ase.calculators.test import numeric_stress
     f = atoms.get_forces()
     assert abs(f).max() < 0.0001

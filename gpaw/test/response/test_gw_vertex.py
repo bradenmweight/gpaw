@@ -10,7 +10,7 @@ from gpaw.mpi import world
     ('GWS', 4.988230),
     ('GWG', 4.894904)])
 def test_fxc_mode(in_tmp_dir, gpw_files, fxc_mode, ref_gap, scalapack,
-                  needs_ase_master, gpaw_new):
+                  gpaw_new):
     if gpaw_new and world.size > 1:
         pytest.skip('Hybrids not working in parallel with GPAW_NEW=1')
 

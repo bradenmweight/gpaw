@@ -247,6 +247,20 @@ class GPWFiles(CachedFilesHandler):
         return h.calc
 
     @gpwfile
+    def h_shift(self):
+        # Check for Hydrogen atom
+        atoms = Atoms('H', cell=(3 * np.eye(3)), pbc=True)
+
+        # Do a GS and save it
+        calc = GPAW(
+            mode=PW(600), symmetry={'point_group': False},
+            kpts={'size': (2, 2, 2)}, nbands=5, txt=None)
+        atoms.calc = calc
+        atoms.get_potential_energy()
+
+        return atoms.calc
+
+    @gpwfile
     def h2_chain(self):
         a = 2.5
         k = 4
@@ -367,6 +381,27 @@ class GPWFiles(CachedFilesHandler):
         return atoms.calc
 
     @gpwfile
+    def co_mom(self):
+        atoms = molecule('CO')
+        atoms.center(vacuum=2)
+
+        calc = GPAW(mode='lcao',
+                    basis='dzp',
+                    nbands=7,
+                    h=0.24,
+                    xc='PBE',
+                    spinpol=True,
+                    symmetry='off',
+                    convergence={'energy': 100,
+                                 'density': 1e-3},
+                    txt=self.folder / 'co_mom.txt')
+
+        atoms.calc = calc
+        # Ground-state calculation
+        atoms.get_potential_energy()
+        return atoms.calc
+
+    @gpwfile
     def co_lcao(self):
         d = 1.1
         co = Atoms('CO', positions=[[0, 0, 0], [d, 0, 0]])
@@ -433,9 +468,9 @@ class GPWFiles(CachedFilesHandler):
         t = pi / 180 * 104.51
         H2O = Atoms(
             [
-                Atom("O", (0, 0, 0)),
-                Atom("H", (d, 0, 0)),
-                Atom("H", (d * cos(t), d * sin(t), 0)),
+                Atom('O', (0, 0, 0)),
+                Atom('H', (d, 0, 0)),
+                Atom('H', (d * cos(t), d * sin(t), 0)),
             ],
             cell=(a, a, a),
             pbc=False,
@@ -443,10 +478,10 @@ class GPWFiles(CachedFilesHandler):
         H2O.center()
         calc = GPAW(
             txt=self.folder / 'h2o_xas.txt',
-            mode="fd",
+            mode='fd',
             nbands=10,
             h=0.2,
-            setups={"O": "h2o_xas_hch1s"},
+            setups={'O': 'h2o_xas_hch1s'},
             poissonsolver=FDPoissonSolver(use_charge_center=True),
         )
         H2O.calc = calc
@@ -505,6 +540,23 @@ class GPWFiles(CachedFilesHandler):
         si.get_potential_energy()
         return si.calc
 
+    @gpwfile
+    def si_qpoint_rounding_bug(self):
+        # Test system for guarding against inconsistent kpoints as in #1178.
+        from ase.calculators.calculator import kpts2kpts
+        atoms = bulk('Si')
+        kpts = kpts2kpts(kpts={'gamma': True, 'size': (6, 1, 1)}, atoms=atoms)
+
+        # Error happened when qpoint was ~1e-17 yet was not considered gamma.
+        # Add a bit of noise on purpose so we are sure to hit such a case,
+        # even if the underlying implementation changes:
+        kpts.kpts += np.linspace(1e-16, 1e-15, 18).reshape(6, 3)
+
+        calc = GPAW(mode=PW(340), kpts=kpts)
+        atoms.calc = calc
+        atoms.get_potential_energy()
+        return calc
+
     @property
     def testing_setup_path(self):
         # Some calculations in gpwfile fixture like to use funny setups.
@@ -544,7 +596,7 @@ class GPWFiles(CachedFilesHandler):
         si = Atoms('Si', cell=(a, a, a), pbc=True)
 
         calc = GPAW(mode='fd',
-                    txt=self.folder / "si_corehole_pw.txt",
+                    txt=self.folder / 'si_corehole_pw.txt',
                     nbands=None,
                     h=0.25,
                     occupations=FermiDirac(width=0.05),
@@ -575,14 +627,14 @@ class GPWFiles(CachedFilesHandler):
 
         a = 5.43095
         si_nonortho = Atoms(
-            [Atom("Si", (0, 0, 0)), Atom("Si", (a / 4, a / 4, a / 4))],
+            [Atom('Si', (0, 0, 0)), Atom('Si', (a / 4, a / 4, a / 4))],
             cell=[(a / 2, a / 2, 0), (a / 2, 0, a / 2), (0, a / 2, a / 2)],
             pbc=True,
         )
         # calculation with full symmetry
         calc = GPAW(
-            mode="fd",
-            txt=self.folder / f"si_corehole_{tag}_hch1s.txt",
+            mode='fd',
+            txt=self.folder / f'si_corehole_{tag}_hch1s.txt',
             nbands=-10,
             h=0.25,
             kpts=(2, 2, 2),
@@ -762,7 +814,7 @@ class GPWFiles(CachedFilesHandler):
         atoms.center(vacuum=6.0)
         # Larger grid spacing, LDA is ok
         gs_calc = GPAW(mode='fd',
-                       txt=self.folder / "na2_fd.txt",
+                       txt=self.folder / 'na2_fd.txt',
                        nbands=1, h=0.35, xc='LDA',
                        setups={'Na': '1'},
                        symmetry={'point_group': False})
@@ -792,8 +844,8 @@ class GPWFiles(CachedFilesHandler):
     def na2_isolated(self):
         # Permittivity file
         if world.rank == 0:
-            fo = open("ed.txt", "w")
-            fo.writelines(["1.20 0.20 25.0"])
+            fo = open('ed.txt', 'w')
+            fo.writelines(['1.20 0.20 25.0'])
             fo.close()
         world.barrier()
 
@@ -809,7 +861,7 @@ class GPWFiles(CachedFilesHandler):
 
         # Quantum subsystem
         atom_center = np.array([10.0, 10.0, 20.0])
-        atoms = Atoms("Na2", [atom_center + [0.0, 0.0, -1.50],
+        atoms = Atoms('Na2', [atom_center + [0.0, 0.0, -1.50],
                               atom_center + [0.0, 0.0, +1.50]])
 
         # Classical subsystem
@@ -817,7 +869,7 @@ class GPWFiles(CachedFilesHandler):
         sphere_center = np.array([10.0, 10.0, 10.0])
         classical_material.add_component(
             PolarizableSphere(
-                permittivity=PermittivityPlus("ed.txt"),
+                permittivity=PermittivityPlus('ed.txt'),
                 center=sphere_center,
                 radius=5.0
             )
@@ -837,9 +889,9 @@ class GPWFiles(CachedFilesHandler):
             cell=large_cell,
             remove_moments=(1, 4),
             communicator=world,
-            potential_coupler="Refiner",
+            potential_coupler='Refiner',
         )
-        poissonsolver.set_calculation_mode("iterate")
+        poissonsolver.set_calculation_mode('iterate')
 
         # Combined system
         atoms.set_cell(large_cell)
@@ -865,30 +917,30 @@ class GPWFiles(CachedFilesHandler):
     @gpwfile
     def na3_pw_restart(self):
         params = dict(mode=PW(200), convergence={
-            "eigenstates": 1.24, "energy": 2e-1, "density": 1e-1})
+            'eigenstates': 1.24, 'energy': 2e-1, 'density': 1e-1})
         return self._na3_restart(params=params)
 
     @gpwfile
     def na3_fd_restart(self):
-        params = dict(mode="fd", h=0.30, convergence={
-            "eigenstates": 1.24, "energy": 2e-1, "density": 1e-1})
+        params = dict(mode='fd', h=0.30, convergence={
+            'eigenstates': 1.24, 'energy': 2e-1, 'density': 1e-1})
         return self._na3_restart(params=params)
 
     @gpwfile
     def na3_fd_kp_restart(self):
-        params = dict(mode="fd", h=0.30, kpts=(1, 1, 3), convergence={
-            "eigenstates": 1.24, "energy": 2e-1, "density": 1e-1})
+        params = dict(mode='fd', h=0.30, kpts=(1, 1, 3), convergence={
+            'eigenstates': 1.24, 'energy': 2e-1, 'density': 1e-1})
         return self._na3_restart(params=params)
 
     @gpwfile
     def na3_fd_density_restart(self):
-        params = dict(mode="fd", h=0.30, convergence={
-            "eigenstates": 1.e-3, "energy": 2e-1, "density": 1e-1})
+        params = dict(mode='fd', h=0.30, convergence={
+            'eigenstates': 1.e-3, 'energy': 2e-1, 'density': 1e-1})
         return self._na3_restart(params=params)
 
     def _na3_restart(self, params):
         d = 3.0
-        atoms = Atoms("Na3",
+        atoms = Atoms('Na3',
                       positions=[(0, 0, 0),
                                  (0, 0, d),
                                  (0, d * sqrt(3 / 4), d / 2)],
@@ -897,7 +949,7 @@ class GPWFiles(CachedFilesHandler):
                       pbc=True)
 
         atoms.calc = GPAW(nbands=3,
-                          setups={"Na": "1"},
+                          setups={'Na': '1'},
                           **params)
         atoms.get_potential_energy()
 
@@ -1171,7 +1223,7 @@ class GPWFiles(CachedFilesHandler):
         kpts = monkhorst_pack((3, 3, 3))
 
         calc = GPAW(mode='pw',
-                    txt=self.folder / "ni_pw_kpts333.txt",
+                    txt=self.folder / 'ni_pw_kpts333.txt',
                     kpts=kpts,
                     occupations=FermiDirac(0.001),
                     setups={'Ni': '10'},
@@ -1189,7 +1241,7 @@ class GPWFiles(CachedFilesHandler):
         atoms = bulk('C')
         atoms.center()
         calc = GPAW(mode=PW(150),
-                    txt=self.folder / "c_pw.txt",
+                    txt=self.folder / 'c_pw.txt',
                     convergence={'bands': 6},
                     nbands=12,
                     kpts={'gamma': True, 'size': (2, 2, 2)},
@@ -1489,7 +1541,7 @@ class GPWFiles(CachedFilesHandler):
         a = 4.043
         atoms = bulk('Al', 'fcc', a=a)
         calc = GPAW(mode='pw',
-                    txt=self.folder / "bse_al.txt",
+                    txt=self.folder / 'bse_al.txt',
                     kpts={'size': (4, 4, 4), 'gamma': True},
                     xc='LDA',
                     nbands=4,
@@ -1521,7 +1573,7 @@ class GPWFiles(CachedFilesHandler):
             occupations=FermiDirac(occw),
             convergence=conv,
             parallel={'domain': 1},
-            txt=self.folder / 'ag_pw.txt')
+            txt=self.folder / 'ag_plusU_pw.txt')
 
         atoms.get_potential_energy()
 

@@ -1,7 +1,9 @@
+from math import pi
 from gpaw.new.ibzwfs import IBZWaveFunctions
+from gpaw.new.density import Density
 
 
-class LCAOIBZWaveFunction(IBZWaveFunctions):
+class LCAOIBZWaveFunctions(IBZWaveFunctions):
     def move(self, fracpos_ac, atomdist):
         from gpaw.new.lcao.builder import tci_helper
 
@@ -27,3 +29,15 @@ class LCAOIBZWaveFunction(IBZWaveFunctions):
             wfs.S_MM = S_qMM[wfs.q]
             wfs.T_MM = T_qMM[wfs.q]
             wfs.P_aMi = P_qaMi[wfs.q]
+
+    def normalize_density(self, density: Density) -> None:
+        """Normalize density.
+
+        Basis functions may extend outside box!
+        """
+        pseudo_charge = density.nt_sR.integrate().sum()
+        ccc_aL = density.calculate_compensation_charge_coefficients()
+        comp_charge = (4 * pi)**0.5 * sum(float(ccc_L[0])
+                                          for ccc_L in ccc_aL.values())
+        comp_charge = ccc_aL.layout.atomdist.comm.sum_scalar(comp_charge)
+        density.nt_sR.data *= -comp_charge / pseudo_charge

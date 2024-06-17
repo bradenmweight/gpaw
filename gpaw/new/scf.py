@@ -149,8 +149,8 @@ class SCFContext:
         vacuum_level = self.state.potential.get_vacuum_level()
         (fermi_level,) = self.state.ibzwfs.fermi_levels
         wf = vacuum_level - fermi_level
-        delta = self.poisson_solver.correction
-        return np.array([wf + 0.5 * delta, wf - 0.5 * delta])
+        delta = self.poisson_solver.dipole_layer_correction()
+        return np.array([wf + delta, wf - delta])
 
 
 def create_convergence_criteria(criteria: dict[str, Any]

@@ -238,6 +238,11 @@ def main(args, parser):
         print()
         print(rcline)
         print()
+        print('Or if you prefer to use environment variables, you can')
+        print('set GPAW_SETUP_PATH. For example:')
+        print()
+        print(f'export GPAW_SETUP_PATH={setup_path}')
+        print()
     print('Installation complete.')
 
 

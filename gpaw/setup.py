@@ -172,9 +172,8 @@ class BaseSetup:
         """If f_j is specified, custom occupation numbers will be used.
 
         Hund rules disabled if so."""
-
         nao = self.nao
-        f_si = np.zeros((nspins, nao))
+        f_sI = np.zeros((nspins, nao))
 
         assert (not hund) or f_j is None
         if f_j is None:
@@ -217,7 +216,7 @@ class BaseSetup:
                 correct_occ_numbers(f_sj[0], deg_j, jsorted, -charge)
             else:
                 # ofdft degeneracy of one orbital is infinite
-                f_sj[0] += -charge
+                f_sj[0, 0] -= charge
         else:
             nval = f_j.sum() - charge
             if np.abs(magmom) > nval:
@@ -231,24 +230,19 @@ class BaseSetup:
             correct_occ_numbers(f_sj[0], deg_j, jsorted, nup - f_sj[0].sum())
             correct_occ_numbers(f_sj[1], deg_j, jsorted, ndn - f_sj[1].sum())
 
-        # Projector function indices:
-        nj = len(self.n_j)  # or l_j?  Seriously.
-
-        # distribute to the atomic wave functions
-        i = 0
-        j = 0
-        for phit in self.basis_functions_J:
-            l = phit.get_angular_momentum_number()
-
-            # Skip functions not in basis set:
-            while j < nj and self.l_orb_J[j] != l:
-                j += 1
-            if j < len(f_j):  # lengths of f_j and l_j may differ
-                f = f_j[j]
-                f_s = f_sj[:, j]
-            else:
-                f = 0
-                f_s = np.array([0, 0])
+        for j, (n1, l1, f, f_s) in enumerate(zip(self.n_j, self.l_j,
+                                                 f_j, f_sj.T)):
+            if not f_s.any():
+                continue
+            I = 0
+            for bf in self.basis.bf_j:
+                l = bf.l
+                n = bf.n
+                if (n, l) == (n1, l1):
+                    break
+                I += 2 * l + 1
+            else:  # no break
+                raise ValueError(f'Bad basis for {self.symbol}')
 
             degeneracy = 2 * l + 1
 
@@ -256,26 +250,22 @@ class BaseSetup:
                 # Use Hunds rules:
                 # assert f == int(f)
                 f = int(f)
-                f_si[0, i:i + min(f, degeneracy)] = 1.0      # spin up
-                f_si[1, i:i + max(f - degeneracy, 0)] = 1.0  # spin down
+                f_sI[0, I:I + min(f, degeneracy)] = 1.0      # spin up
+                f_sI[1, I:I + max(f - degeneracy, 0)] = 1.0  # spin down
                 if f < degeneracy:
                     magmom -= f
                 else:
                     magmom -= 2 * degeneracy - f
             else:
                 for s in range(nspins):
-                    f_si[s, i:i + degeneracy] = f_s[s] / degeneracy
-
-            i += degeneracy
-            j += 1
+                    f_sI[s, I:I + degeneracy] = f_s[s] / degeneracy
 
         if hund and magmom != 0:
             raise WrongMagmomForHundsRuleError(
                 f'Bad magnetic moment {magmom:g} for {self.symbol} atom!')
-        assert i == nao
 
         # print('fsi=', f_si)
-        return f_si
+        return f_sI
 
     def get_hunds_rule_moment(self, charge=0):
         for M in range(10):
@@ -287,38 +277,31 @@ class BaseSetup:
                 return M
         raise RuntimeError
 
-    def initialize_density_matrix(self, f_si):
-        nspins, nao = f_si.shape
+    def initialize_density_matrix(self, f_sI):
+        nspins, nao = f_sI.shape
         ni = self.ni
 
         D_sii = np.zeros((nspins, ni, ni))
         D_sp = np.zeros((nspins, ni * (ni + 1) // 2))
-        nj = len(self.pt_j)
-        j = 0
-        i = 0
-        ib = 0
-        for J, phit in enumerate(self.basis_functions_J):
-            l = phit.get_angular_momentum_number()
-            # Skip functions not in basis set:
-            while j < nj and self.l_j[j] != l:
-                i += 2 * self.l_j[j] + 1
-                j += 1
-            if j == nj:
-                break
 
-            n = self.n_j[j]
-            if n > 0:
-                nb = self.basis.bf_j[J].n
-                if nb is not None and nb != n:
-                    raise ValueError('Basis not compatible with PAW potential')
-            else:
-                assert (f_si[:, ib:ib + 2 * l + 1] == 0).all()
+        I = 0
+        for bf in self.basis.bf_j:
+            f_sm = f_sI[:, I:I + 2 * bf.l + 1]
+            if f_sm.any():
+                i = 0
+                for n, l in zip(self.n_j, self.l_j):
+                    if (n, l) == (bf.n, bf.l):
+                        break
+                    i += 2 * l + 1
+                else:  # no break
+                    raise ValueError(f'Bad basis for {self.symbol}')
 
-            for m in range(2 * l + 1):
-                D_sii[:, i + m, i + m] = f_si[:, ib + m]
-            j += 1
-            i += 2 * l + 1
-            ib += 2 * l + 1
+                if i < ni:
+                    for m in range(2 * l + 1):
+                        D_sii[:, i + m, i + m] = f_sm[:, m]
+
+            I += 2 * bf.l + 1
+
         for s in range(nspins):
             D_sp[s] = pack_density(D_sii[s])
         return D_sp
@@ -785,7 +768,8 @@ class Setup(BaseSetup):
 
         vbar_g = data.vbar_g
 
-        if float(data.version) < 0.7 and data.generator_version < 2:
+        # if float(data.version) < 0.7 and data.generator_version < 2:
+        if data.generator_version < 2:
             # Old-style Fourier-filtered datasets.
             # Find Fourier-filter cutoff radius:
             gcutfilter = rgd.get_cutoff(pt_jg[0])

@@ -579,8 +579,8 @@ class FFTPoissonSolver(BasePoissonSolver):
     relax_method = 0
     nn = 999
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self._initialized = False
 
     def get_description(self):

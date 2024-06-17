@@ -31,6 +31,15 @@ def do_if_converged(eigensolver_name, wfs, ham, dens, log):
                 solver.dm_helper.update_to_canonical_orbitals(
                     wfs, ham, kpt, False, False)
 
+        if sic_calc:
+            if hasattr(solver, 'constraints'):
+                constraints = solver.constraints
+            else:
+                constraints = None
+            # Sort orbitals according to orbital energies
+            sort_orbitals_according_to_energies(
+                ham, wfs, constraints, use_eps=False)
+
         solver.set_ref_orbitals_and_a_vec(wfs)
 
         log('\nOccupied states converged after'

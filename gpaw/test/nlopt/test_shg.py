@@ -37,11 +37,6 @@ def test_shg_spinpol(mme_files):
         assert shg[spinpol] == pytest.approx(shg_values, abs=1e-3), \
             np.max(np.abs(shg[spinpol] - shg_values))
 
-    # import matplotlib.pyplot as plt
-    # plt.plot(freqs, shg['spinpaired'])
-    # plt.plot(freqs, shg['spinpol'])
-    # plt.show()
-
     # Assert that the difference between spectra from spinpaired and
     # spinpolarised calculations is small
 

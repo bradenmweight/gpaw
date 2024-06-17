@@ -18,7 +18,7 @@ L = 8.0
 isolated_silicon = Atoms(
     symbols=['Si'],
     positions=[[0.5 * L, 0.5 * L, 0.5 * L]],
-    cell=([L, 0, 0], [0, L, 0], [0, 0, L]),
+    cell=[L + 0.1, L, L - 0.1],
     pbc=(1, 1, 1))
 
 isolated_calc = GPAW(
@@ -26,10 +26,10 @@ isolated_calc = GPAW(
     parallel={'domain': 1},
     xc='PBE',
     txt='si_isolated_rpa.init_pbe.txt',
-    occupations=FermiDirac(0.01, fixmagmom=True),
+    occupations=FermiDirac(0.01),  # fixmagmom=True),
     spinpol=True,
     hund=True,
-    convergence={'density': 1.e-6},
+    # convergence={'density': 1.e-6},
     mixer=Mixer(beta=0.05, nmaxold=5, weight=50.0))
 
 isolated_silicon.calc = isolated_calc

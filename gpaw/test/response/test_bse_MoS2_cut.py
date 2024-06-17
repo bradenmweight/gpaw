@@ -4,7 +4,6 @@ from gpaw.mpi import world
 from gpaw.test import findpeak
 from gpaw.response.bse import BSE
 from gpaw.response.df import read_response_function
-from ase.units import Bohr
 
 
 def create_bse(gpwfile, q_c=(0, 0, 0)):
@@ -55,9 +54,7 @@ def test_response_bse_MoS2_cut(in_tmp_dir, scalapack, gpw_files):
     outw_w, eels = bse.get_eels_spectrum(w_w=w_w)
 
     bse = create_bse(gpwfile)
-    pbc_c = bse.gs.pbc
-    V = bse.gs.nonpbc_cell_product()
-    factor = V * Bohr**(sum(~pbc_c)) / (4 * np.pi)
+    factor = bse.gs.cd.nonperiodic_hypervolume / (4 * np.pi)
     outw_w, pol = bse.get_polarizability(w_w=w_w)
     assert np.allclose(pol.imag / factor, eels)
 

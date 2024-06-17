@@ -6,7 +6,7 @@ import numpy as np
 
 
 @pytest.mark.do
-def test_constraints_directopt_lcao_sic(in_tmp_dir, needs_ase_master):
+def test_constraints_directopt_lcao_sic(in_tmp_dir):
     """
     test Perdew-Zunger Self-Interaction
     Correction  in LCAO mode using DirectMin
@@ -39,6 +39,22 @@ def test_constraints_directopt_lcao_sic(in_tmp_dir, needs_ase_master):
                 )
     H2O.calc = calc
     H2O.get_potential_energy()
+
+    test_restart = True
+    if test_restart:
+        from gpaw import restart
+        calc.write('h2o.gpw', mode='all')
+        H2O, calc = restart('h2o.gpw', txt='-')
+        H2O.calc.results.pop('energy')
+        H2O.calc.scf.converged = False
+        calc.set(eigensolver={'name': 'etdm-lcao',
+                              'functional': {'name': 'PZ-SIC',
+                                             'scaling_factor': (0.5, 0.5)},
+                              'need_init_orbs': False})
+        e = H2O.get_potential_energy()
+        niter = calc.get_number_of_iterations()
+        assert niter == pytest.approx(3, abs=3)
+        assert e == pytest.approx(-12.16353, abs=1.0e-3)
 
     homo = 3
     lumo = 4

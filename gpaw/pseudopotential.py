@@ -146,27 +146,27 @@ def figure_out_valence_states(ppdata):
 
 def generate_basis_functions(ppdata):
     class SimpleBasis(Basis):
-        def __init__(self, symbol, l_j):
+        def __init__(self, symbol, l_j, n_j):
             rgd = EquidistantRadialGridDescriptor(0.02, 160)
             Basis.__init__(self, symbol, 'simple', readxml=False, rgd=rgd)
             self.generatordata = 'simple'
             bf_j = self.bf_j
             rcgauss = rgd.r_g[-1] / 3.0
             gauss_g = np.exp(-(rgd.r_g / rcgauss)**2.0)
-            for l in l_j:
+            for l, n in zip(l_j, n_j):
                 phit_g = rgd.r_g**l * gauss_g
                 norm = (rgd.integrate(phit_g**2) / (4 * np.pi))**0.5
                 phit_g /= norm
-                bf = BasisFunction(None, l, rgd.r_g[-1], phit_g, 'gaussian')
+                bf = BasisFunction(n, l, rgd.r_g[-1], phit_g, 'gaussian')
                 bf_j.append(bf)
     # l_orb_J = [state.l for state in self.data['states']]
-    b1 = SimpleBasis(ppdata.symbol, ppdata.l_orb_J)
+    b1 = SimpleBasis(ppdata.symbol, ppdata.l_orb_J, ppdata.n_j)
     apaw = AtomPAW(ppdata.symbol, [ppdata.f_ln], h=0.05, rcut=9.0,
                    basis={ppdata.symbol: b1},
                    setups={ppdata.symbol: ppdata},
                    maxiter=60,
                    txt=None)
-    basis = apaw.extract_basis_functions()
+    basis = apaw.extract_basis_functions(ppdata.n_j, ppdata.l_j)
     return basis
 
 

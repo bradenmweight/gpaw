@@ -1,9 +1,10 @@
 import numpy as np
-from ase.units import Bohr, _hbar, _e, _me, _eps0
-from ase.utils.timing import Timer
 from ase.parallel import parprint
+from ase.units import _e, Bohr, Ha, J
+from ase.utils.timing import Timer
+
 from gpaw.mpi import world
-from gpaw.nlopt.matrixel import get_rml, get_derivative
+from gpaw.nlopt.matrixel import get_derivative, get_rml
 from gpaw.utilities.progressbar import ProgressBar
 
 
@@ -50,11 +51,16 @@ def get_shg(
     timer = Timer()
     parprint(f'Calculating SHG spectrum (in {world.size:d} cores).')
 
-    # Useful variables
-    pol_v = ['xyz'.index(ii) for ii in pol]
+    # Covert inputs in eV to Ha
     freqs = np.array(freqs)
     nw = len(freqs)
-    w_lc = freqs + 1e-12 + 1j * eta  # Add small value to avoid 0
+    w_lc = (freqs + 1e-12 + 1j * eta) / Ha  # Add small value to avoid 0
+    Etol /= Ha
+    eshift /= Ha
+
+    # Useful variables
+    pol_v = ['xyz'.index(ii) for ii in pol]
+
     # Use the TRS to reduce calculation time
     w_l = np.hstack((-w_lc[-1::-1], w_lc))
     nw = 2 * nw
@@ -237,7 +243,7 @@ def shg_length_gauge(
         pol_v           Tensor element
         band_n          Band list
         Etol, ftol      Tol. in energy and fermi to consider degeneracy
-        eshift          Bandgap correction
+        eshift          Band gap correction in eV
     Output:
         sum2_l, sum3_l  Output 2 and 3 bands terms
     """
@@ -318,7 +324,7 @@ def shg_length_gauge(
 
 def make_output(gauge, sum2_l, sum3_l):
     """
-    Make the output in SI unit and return chi
+    Multiply prefactors and return second-order chi in SI units [m / V]
 
     Input:
         gauge       Chosen gauge
@@ -327,21 +333,18 @@ def make_output(gauge, sum2_l, sum3_l):
     Output:
         chi_l       Output chi as an array
     """
-    # Make the output in SI unit
+
+    # 4 * pi from vacuum permittivty eps_0 in atomic units
+    prefactor = 4.0 * np.pi
+    # Pi factors from BZ volume
+    prefactor /= (2.0 * np.pi)**3
+    # atomic units [Bohr * elementary charge / Hartee] to SI units [m / V]
+    prefactor *= (Bohr * 1e-10 * _e) / (Ha / J)
+
     if gauge == 'lg':
-        dim_ee = _e**3 / (_eps0 * (2.0 * np.pi)**3)
-        dim_sum = (_hbar / (Bohr * 1e-10))**3 / \
-            (_e**5 * (Bohr * 1e-10)**3) * (_hbar / _me)**3
-        dim_SI = dim_ee * dim_sum
-        chi_l = dim_SI * (1j * sum2_l + sum3_l)
+        chi_l = prefactor * (1j * sum2_l + sum3_l)
     elif gauge == 'vg':
-        # Make the output in SI unit
-        dim_vg = _e**3 * _hbar**2 / (_me**3 * (2.0 * np.pi)**3)
-        dim_chi = 1j * _hbar / (_eps0 * 2.0 * _e)  # 2 beacuse of frequecny
-        dim_sum = (_hbar / (Bohr * 1e-10))**3 / \
-            (_e**4 * (Bohr * 1e-10)**3)
-        dim_SI = dim_chi * dim_vg * dim_sum
-        chi_l = dim_SI * (sum2_l + sum3_l)
+        chi_l = prefactor * 1j / 2 * (sum2_l + sum3_l)
     else:
         parprint('Gauge ' + gauge + ' not implemented.')
         raise NotImplementedError

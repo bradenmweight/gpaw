@@ -39,7 +39,7 @@ def gpwfile(in_tmp_dir):
 
 
 @pytest.mark.response
-def test_response_gw_MoS2_cut(scalapack, gpwfile, needs_ase_master, gpaw_new):
+def test_response_gw_MoS2_cut(scalapack, gpwfile, gpaw_new):
     if gpaw_new and world.size > 1:
         pytest.skip('Hybrids not working in parallel with GPAW_NEW=1')
     gw = G0W0(gpwfile,

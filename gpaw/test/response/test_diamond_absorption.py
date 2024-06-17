@@ -3,7 +3,7 @@ import numpy as np
 from ase.units import Bohr
 from ase.build import bulk
 from gpaw import GPAW, FermiDirac
-from gpaw.response.df import DielectricFunction
+from gpaw.response.df import DielectricFunction, read_response_function
 from gpaw.test import findpeak
 
 
@@ -30,83 +30,97 @@ def test_response_diamond_absorption(in_tmp_dir):
     w_ = 10.7532
     I_ = 5.98
 
-    # Macroscopic dielectric constant calculation
+    # Test the old interface to the dielectric constant
     df = DielectricFunction('C.gpw', frequencies=(0.,), eta=0.001, ecut=50,
                             hilbert=False)
     eM1, eM2 = df.get_macroscopic_dielectric_constant()
     assert eM1 == pytest.approx(eM1_, abs=0.01)
     assert eM2 == pytest.approx(eM2_, abs=0.01)
 
-    # Absorption spectrum calculation RPA
-    df = DielectricFunction('C.gpw',
-                            eta=0.25,
-                            ecut=50,
-                            frequencies=np.linspace(0, 24., 241),
-                            hilbert=False)
-    a0, a = df.get_dielectric_function(filename=None)
+    # ----- RPA dielectric function ----- #
+    dfcalc = DielectricFunction(
+        'C.gpw', eta=0.25, ecut=50,
+        frequencies=np.linspace(0, 24., 241), hilbert=False)
+    eps = dfcalc.get_literal_dielectric_function()
 
-    assert a0[0].real == pytest.approx(eM1_, abs=0.01)
-    assert a[0].real == pytest.approx(eM2_, abs=0.01)
-    w, I = findpeak(np.linspace(0, 24., 241), a0.imag)
-    assert w == pytest.approx(w0_, abs=0.01)
-    assert I / (4 * np.pi) == pytest.approx(I0_, abs=0.1)
-    w, I = findpeak(np.linspace(0, 24., 241), a.imag)
+    # Test the new interface to the dielectric constant
+    eM1, eM2 = eps.dielectric_constant()
+    assert eM1 == pytest.approx(eM1_, abs=0.01)
+    assert eM2 == pytest.approx(eM2_, abs=0.01)
+
+    # Test the macroscopic dielectric function
+    omega_w, eps0M_w, epsM_w = eps.macroscopic_dielectric_function().arrays
+    w0, I0 = findpeak(omega_w, eps0M_w.imag)
+    assert w0 == pytest.approx(w0_, abs=0.01)
+    assert I0 / (4 * np.pi) == pytest.approx(I0_, abs=0.1)
+    w, I = findpeak(omega_w, epsM_w.imag)
     assert w == pytest.approx(w_, abs=0.01)
     assert I / (4 * np.pi) == pytest.approx(I_, abs=0.1)
 
-    a0, a = df.get_polarizability(filename=None)
-
-    w, I = findpeak(np.linspace(0, 24., 241), a0.imag)
-    assert w == pytest.approx(w0_, abs=0.01)
-    assert I == pytest.approx(I0_, abs=0.01)
-    w, I = findpeak(np.linspace(0, 24., 241), a.imag)
+    # Test polarizability
+    omega_w, a0rpa_w, arpa_w = eps.polarizability().arrays
+    w0, I0 = findpeak(omega_w, a0rpa_w.imag)
+    assert w0 == pytest.approx(w0_, abs=0.01)
+    assert I0 == pytest.approx(I0_, abs=0.01)
+    w, I = findpeak(omega_w, arpa_w.imag)
     assert w == pytest.approx(w_, abs=0.01)
     assert I == pytest.approx(I_, abs=0.01)
 
+    # Test that the macroscopic dielectric function can be calculated also from
+    # the inverse dielectric function and the bare dielectric function
+    epsinv = dfcalc.get_inverse_dielectric_function()
+    _, _, epsM_frominv_w = epsinv.macroscopic_dielectric_function().arrays
+    assert epsM_frominv_w == pytest.approx(epsM_w, rel=1e-6)
+    epsbare = dfcalc.get_bare_dielectric_function()
+    _, _, epsM_frombare_w = epsbare.macroscopic_dielectric_function().arrays
+    assert epsM_frombare_w == pytest.approx(epsM_w, rel=1e-6)
+
+    # ----- TDDFT absorption spectra ----- #
+
     # Absorption spectrum calculation ALDA
-    w0_ = 10.7931
-    I0_ = 5.36
     w_ = 10.7562
     I_ = 5.8803
 
-    df.get_polarizability(xc='ALDA', filename='ALDA_pol.csv')
+    epsinv = dfcalc.get_inverse_dielectric_function(xc='ALDA', rshelmax=0)
     # Here we base the check on a written results file
-    df.context.comm.barrier()
-    d = np.loadtxt('ALDA_pol.csv', delimiter=',')
+    epsinv.polarizability().write(filename='ALDA_pol.csv')
+    dfcalc.context.comm.barrier()
+    omega_w, a0alda_w, aalda_w = read_response_function('ALDA_pol.csv')
 
-    w, I = findpeak(d[:, 0], d[:, 2])
-    assert w == pytest.approx(w0_, abs=0.01)
-    assert I == pytest.approx(I0_, abs=0.1)
-    w, I = findpeak(d[:, 0], d[:, 4])
+    assert a0alda_w == pytest.approx(a0rpa_w, rel=1e-4)
+    w, I = findpeak(omega_w, aalda_w.imag)
     assert w == pytest.approx(w_, abs=0.01)
     assert I == pytest.approx(I_, abs=0.1)
 
     # Absorption spectrum calculation long-range kernel
-    w0_ = 10.2189
-    I0_ = 5.14
     w_ = 10.2906
     I_ = 5.6955
 
-    a0, a = df.get_polarizability(filename=None, xc='LR0.25')
+    epsinv = dfcalc.get_inverse_dielectric_function(xc='LR0.25')
+    omega_w, a0lr_w, alr_w = epsinv.polarizability().arrays
 
-    w, I = findpeak(np.linspace(0, 24., 241), a0.imag)
-    assert w == pytest.approx(w0_, abs=0.01)
-    assert I == pytest.approx(I0_, abs=0.1)
-    w, I = findpeak(np.linspace(0, 24., 241), a.imag)
+    assert a0lr_w == pytest.approx(a0rpa_w, rel=1e-4)
+    w, I = findpeak(omega_w, alr_w.imag)
     assert w == pytest.approx(w_, abs=0.01)
     assert I == pytest.approx(I_, abs=0.1)
 
     # Absorption spectrum calculation Bootstrap
-    w0_ = 10.37
-    I0_ = 5.27
     w_ = 10.4600
     I_ = 6.0263
 
-    a0, a = df.get_polarizability(filename=None, xc='Bootstrap')
+    epsinv = dfcalc.get_inverse_dielectric_function(xc='Bootstrap')
+    omega_w, a0btsr_w, abtsr_w = epsinv.polarizability().arrays
 
-    w, I = findpeak(np.linspace(0, 24., 241), a0.imag)
-    assert w == pytest.approx(w0_, abs=0.02)
-    assert I == pytest.approx(I0_, abs=0.2)
-    w, I = findpeak(np.linspace(0, 24., 241), a.imag)
+    assert a0btsr_w == pytest.approx(a0rpa_w, rel=1e-4)
+    w, I = findpeak(omega_w, abtsr_w.imag)
     assert w == pytest.approx(w_, abs=0.02)
     assert I == pytest.approx(I_, abs=0.2)
+
+    # import matplotlib.pyplot as plt
+    # plt.plot(omega_w, a0rpa_w.imag, label='IP')
+    # plt.plot(omega_w, arpa_w.imag, label='RPA')
+    # plt.plot(omega_w, aalda_w.imag, label='ALDA')
+    # plt.plot(omega_w, alr_w.imag, label='LR0.25')
+    # plt.plot(omega_w, abtsr_w.imag, label='Bootstrap')
+    # plt.legend()
+    # plt.show()

@@ -11,7 +11,7 @@ systems = [(row.name, row.toatoms())
            for row in db1.select() if row.formula != 'C5H12']
 
 for opt in all_optimizers:
-    if opt == 'Berny':
+    if opt in {'Berny', 'CellAwareBFGS'}:
         continue
     optimizer = get_optimizer(opt)
     test_optimizer(systems, optimizer, EMT, 'emt-', db)
