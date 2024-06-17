@@ -41,8 +41,9 @@ def run(gpw_filename, nblocks, integrate_gamma):
 
 reference = {0: pytest.approx([-9.253, 5.442, 2.389, 0.403, 0.000,
                                6.261, 3.570, 1.323, 0.001], abs=0.0035),
-            'WS': pytest.approx([-9.253, 5.442, 2.389, 0.403, 0.000,
-                                 6.284, 3.551, 1.285, 0.001], abs=0.0035)}
+             'WS': pytest.approx([-9.253, 5.442, 2.389, 0.403, 0.000,
+                                  6.284, 3.551, 1.285, 0.001], abs=0.0035)}
+
 
 @pytest.mark.response
 @pytest.mark.slow
@@ -51,12 +52,13 @@ reference = {0: pytest.approx([-9.253, 5.442, 2.389, 0.403, 0.000,
 @pytest.mark.parametrize('symm', ['all', 'no', 'tr', 'pg'])
 @pytest.mark.parametrize('nblocks',
                          [x for x in [1, 2, 4, 8] if x <= world.size])
-def test_response_gwsi(in_tmp_dir, si, symm, nblocks, integrate_gamma, 
+def test_response_gwsi(in_tmp_dir, si, symm, nblocks, integrate_gamma,
                        scalapack, gpw_files, gpaw_new):
     if gpaw_new and world.size > 1:
         pytest.skip('Hybrids not working in parallel with GPAW_NEW=1')
     filename = gpw_files[f'si_gw_a{si}_{symm}']
-    assert run(filename, nblocks, integrate_gamma) == reference[integrate_gamma]
+    assert run(filename, nblocks, integrate_gamma) ==\
+           reference[integrate_gamma]
 
 
 @pytest.mark.response
