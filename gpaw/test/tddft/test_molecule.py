@@ -118,7 +118,6 @@ def test_dipole_moment_values(time_propagation_reference,
     check_dm('dm2.dat', module_tmp_path / 'dm2.dat', rtol=rtol, atol=atol)
 
 
-@pytest.mark.later
 @pytest.mark.parametrize('parallel', parallel_i)
 @pytest.mark.parametrize('propagator', [
     'SICN', 'ECN', 'ETRSCN', 'SIKE'])

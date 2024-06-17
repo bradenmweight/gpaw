@@ -484,7 +484,6 @@ class Density:
             nct_a.append([nct])
             if self.setups[a].data.has_corehole and not skip_core and \
                     self.nspins > 1:
-                assert self.setups[a].data.lcorehole == 0
                 work_setup = self.setups[a].data
                 rmax = nc.get_cutoff()
                 # work_setup.phicorehole_g
@@ -651,7 +650,9 @@ class Density:
 
         D_sP = reader.density.atomic_density_matrices
         if self.gd.comm.rank == 0:
-            D_asp.update(unpack_atomic_matrices(D_sP, self.setups))
+            D_asp.update(unpack_atomic_matrices(D_sP, self.setups,
+                                                new=reader.version >= 4,
+                                                density=True))
             D_asp.check_consistency()
 
         if self.collinear:

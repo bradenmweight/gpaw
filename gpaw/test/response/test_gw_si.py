@@ -50,7 +50,7 @@ reference = pytest.approx([-9.253, 5.442, 2.389, 0.403, 0.000,
 @pytest.mark.parametrize('nblocks',
                          [x for x in [1, 2, 4, 8] if x <= world.size])
 def test_response_gwsi(in_tmp_dir, si, symm, nblocks, scalapack,
-                       needs_ase_master, gpw_files, gpaw_new):
+                       gpw_files, gpaw_new):
     if gpaw_new and world.size > 1:
         pytest.skip('Hybrids not working in parallel with GPAW_NEW=1')
     filename = gpw_files[f'si_gw_a{si}_{symm}']
@@ -62,7 +62,7 @@ def test_response_gwsi(in_tmp_dir, si, symm, nblocks, scalapack,
 @pytest.mark.parametrize('si', [0, 1])
 @pytest.mark.parametrize('symm', ['all'])
 def test_small_response_gwsi(in_tmp_dir, si, symm, scalapack,
-                             needs_ase_master, gpw_files, gpaw_new):
+                             gpw_files, gpaw_new):
     if gpaw_new and world.size > 1:
         pytest.skip('Hybrids not working in parallel with GPAW_NEW=1')
     filename = gpw_files[f'si_gw_a{si}_{symm}']
@@ -71,7 +71,7 @@ def test_small_response_gwsi(in_tmp_dir, si, symm, scalapack,
 
 @pytest.mark.response
 @pytest.mark.ci
-def test_few_freq_response_gwsi(in_tmp_dir, scalapack, needs_ase_master,
+def test_few_freq_response_gwsi(in_tmp_dir, scalapack,
                                 gpw_files, gpaw_new):
     if gpaw_new and world.size > 1:
         pytest.skip('Hybrids not working in parallel with GPAW_NEW=1')

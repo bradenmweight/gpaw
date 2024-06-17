@@ -605,24 +605,14 @@ class WaveFunctions:
             u = kpt.s * self.kd.nibzkpts + kpt.q
             f_sn[u] = kpt.f_n
 
-        log("For SIC calculations there are\n"
-            "diagonal elements of Lagrange matrix and "
-            "its eigenvalues.\n"
-            "Eigenvalues are printed above. \n"
-            "Labeling here corresponds "
-            "to how optimal orbitals are sorted "
-            "in array\n")
+        log("Diagonal elements of Lagrange matrix:")
         if self.nspins == 1:
             header = " Band         L_ii  " \
                      "Occupancy"
             log(header)
 
-            lagr_labeled = {}
-            for c, x in enumerate(pot.lagr_diag_s[0]):
-                lagr_labeled[str(round(x, 12))] = c
-            lagr = sorted(pot.lagr_diag_s[0])
-            for x in lagr:
-                i = lagr_labeled[str(round(x, 12))]
+            lagr = pot.lagr_diag_s[0]
+            for i, x in enumerate(lagr):
                 log('%5d  %11.5f  %9.5f' % (
                     i, Ha * x, f_sn[0][i]))
 
@@ -691,7 +681,6 @@ class WaveFunctions:
                          Ha * y,
                          f_sn[1][i1]))
 
-        log("\n")
         log(flush=True)
 
         sic_n = pot.e_sic_by_orbitals
@@ -727,11 +716,16 @@ class WaveFunctions:
 
         if self.kd.comm.rank == 0:
             for s in range(self.nspins):
-                log('Spin: %3d ' % (s))
+                if self.nspins == 2:
+                    log('Spin: %3d ' % (s))
                 header = """\
             Self-Har.  Self-XC   Hartree + XC  Scaling
             energy:    energy:   energy:       Factors:"""
                 log(header)
+
+                occupied = f_sn[s] > 1.0e-10
+                f_sn_occ = f_sn[s][occupied]
+                occupied_indices = np.where(occupied)[0]
                 u_s = 0.0
                 xc_s = 0.0
                 for i in range(len(sic_n[s])):
@@ -744,16 +738,16 @@ class WaveFunctions:
                         f = (pot.beta_c, pot.beta_x)
 
                     log('band: %3d ' %
-                        (i), end='')
+                        (occupied_indices[i]), end='')
                     log('%11.6f%11.6f%11.6f %8.3f%7.3f' %
-                        (-Ha * u / (f[0] * f_sn[s][i]),
-                         -Ha * xc / (f[1] * f_sn[s][i]),
-                         -Ha * (u / (f[0] * f_sn[s][i]) +
-                                xc / (f[1] * f_sn[s][i])),
+                        (-Ha * u / (f[0] * f_sn_occ[i]),
+                         -Ha * xc / (f[1] * f_sn_occ[i]),
+                         -Ha * (u / (f[0] * f_sn_occ[i]) +
+                                xc / (f[1] * f_sn_occ[i])),
                          f[0], f[1]), end='')
                     log(flush=True)
-                    u_s += u / (f[0] * f_sn[s][i])
-                    xc_s += xc / (f[1] * f_sn[s][i])
+                    u_s += u / (f[0] * f_sn_occ[i])
+                    xc_s += xc / (f[1] * f_sn_occ[i])
                 log('--------------------------------'
                     '-------------------------')
                 log('Total     ', end='')

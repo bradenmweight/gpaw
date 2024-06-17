@@ -117,7 +117,7 @@ class ETDMHelperLCAO(DirectLCAO):
         elif self.func.name == 'PZ-SIC':
             self.func.get_lagrange_matrices(
                 h_mm, kpt.C_nM, kpt.f_n, kpt, wfs,
-                update_eigenvalues=True, update_wfs=False)
+                update_eigenvalues=True)
 
         with wfs.timer('Calculate projections'):
             self.update_projections(wfs, kpt)
@@ -141,13 +141,17 @@ class ETDMHelperLCAO(DirectLCAO):
         diagonal elements of hamiltonian matrix in orbital representation
         """
 
-        h_mm = self.calculate_hamiltonian_matrix(ham, wfs, kpt)
-        tri2full(h_mm)
-        # you probably need only diagonal terms?
-        # wouldn't "for" be faster?
-        h_mm = kpt.C_nM.conj() @ h_mm.conj() @ kpt.C_nM.T
+        if self.func.name == 'ks':
+            h_mm = self.calculate_hamiltonian_matrix(ham, wfs, kpt)
+            tri2full(h_mm)
+            # you probably need only diagonal terms?
+            # wouldn't "for" be faster?
+            h_mm = kpt.C_nM.conj() @ h_mm.conj() @ kpt.C_nM.T
+            energies = h_mm.diagonal().real.copy()
+        elif self.func.name == 'PZ-SIC':
+            energies = self.func.lagr_diag_s[wfs.eigensolver.kpointval(kpt)]
 
-        return h_mm.diagonal().real.copy()
+        return energies
 
     def kpointval(self, kpt):
         return self.nkpts * kpt.s + kpt.q

@@ -5,7 +5,6 @@ from gpaw.poisson import FFTPoissonSolver, FDPoissonSolver, FastPoissonSolver
 import numpy as np
 
 
-@pytest.mark.later
 @pytest.mark.parametrize('poisson', [FFTPoissonSolver, FDPoissonSolver,
                                      FastPoissonSolver])
 def test_poisson_cell_change(poisson):

@@ -11,11 +11,11 @@ cmds = """\
 python3 -m venv venv
 . venv/bin/activate
 pip install -U pip wheel -qq
-# search bronken in sphinx-6.0:
+# search broken in sphinx-6.0:
 pip install "sphinx<6.0"
-pip install sphinx-rtd-theme pillow pytest graphviz
+pip install sphinx-rtd-theme pillow graphviz
 pip install -q git+https://gitlab.com/ase/ase.git
-git clone http://gitlab.com/gpaw/gpaw.git
+git clone https://gitlab.com/gpaw/gpaw.git
 cd gpaw
 pip install -e .
 python setup.py sdist
@@ -49,11 +49,9 @@ def build_all():
     tar = next(
         Path('/tmp/gpaw-docs-ok/gpaw/dist/').glob('gpaw-*.tar.gz'))
     webpage = Path('/tmp/gpaw-docs-ok/gpaw/doc/gpaw-web-page')
-    coverage = Path('/tmp/gpaw-test-ok/gpaw/htmlcov')
     home = Path.home() / 'web-pages'
     cmds = ' && '.join(
-        [f'cp -r {coverage} {webpage}',
-         f'cp {tar} {webpage}',
+        [f'cp {tar} {webpage}',
          f'find {webpage} -name install.html | '
          f'xargs sed -i s/snapshot.tar.gz/{tar.name}/g',
          f'cd {webpage}/_sources/setups',  # backwards compatibility

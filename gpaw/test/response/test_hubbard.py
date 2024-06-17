@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 
+from gpaw.mpi import world
 from gpaw.response.g0w0 import G0W0
-
 
 reference_kn = [[0.69806561, 2.58472004, 2.58472066,
                  2.58469313, 3.60859825, 3.60859883],
@@ -12,10 +12,11 @@ reference_kn = [[0.69806561, 2.58472004, 2.58472066,
                  4.59771405, 4.59774543, 8.67625318]]
 
 
-@pytest.mark.later  # Need to implement Hubbard U first
 @pytest.mark.response
-def test_hubbard_GW(in_tmp_dir, gpw_files, needs_ase_master):
+def test_hubbard_GW(in_tmp_dir, gpw_files, gpaw_new):
     # This tests checks the actual numerical accuracy which is asserted below
+    if gpaw_new and world.size > 1:
+        pytest.skip('Parallelization bug for new-gpaw')
     gw = G0W0(gpw_files['ag_plusU_pw'], 'gw',
               integrate_gamma=0,
               frequencies={'type': 'nonlinear',

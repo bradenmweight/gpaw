@@ -97,6 +97,7 @@ def cupy_eigh(a: cupy.ndarray, UPLO: str) -> tuple[cupy.ndarray, cupy.ndarray]:
     eigs, evals = eigh(cupy.asnumpy(a),
                        lower=(UPLO == 'L'),
                        check_finite=False)
+
     return cupy.asarray(eigs), cupy.asarray(evals)
 
 

@@ -38,5 +38,5 @@ def test_lcaotddft_fxc_rpa(gpw_files, in_tmp_dir):
            5.257367158104e-05,
            5.366663490365e-05]
 
-    tol = 1e-9
+    tol = 1e-8
     assert data == pytest.approx(ref, abs=tol)

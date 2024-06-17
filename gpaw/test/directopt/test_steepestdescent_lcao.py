@@ -4,7 +4,7 @@ from gpaw import GPAW
 from ase import Atoms
 
 
-@ pytest.mark.do
+@pytest.mark.do
 def test_steepestdescent_lcao(in_tmp_dir):
     """
     Test steepest descent and conjugate gradients
@@ -30,8 +30,7 @@ def test_steepestdescent_lcao(in_tmp_dir):
                 occupations={'name': 'fixed-uniform'},
                 mixer={'backend': 'no-mixing'},
                 nbands='nao',
-                symmetry='off',
-                )
+                symmetry='off')
     atoms.calc = calc
 
     for sd_algo in ['sd', 'fr-cg']:

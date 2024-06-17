@@ -239,7 +239,11 @@ class FDWaveFunctions(FDPWWaveFunctions):
     def read(self, reader):
         FDPWWaveFunctions.read(self, reader)
 
-        if 'values' not in reader.wave_functions:
+        if 'values' in reader.wave_functions:
+            name = 'values'
+        elif 'coefficients' in reader.wave_functions:
+            name = 'coefficients'
+        else:
             return
 
         c = reader.bohr**1.5
@@ -250,7 +254,7 @@ class FDWaveFunctions(FDPWWaveFunctions):
             # We may not be able to keep all the wave
             # functions in memory - so psit_nG will be a special type of
             # array that is really just a reference to a file:
-            psit_nG = reader.wave_functions.proxy('values', kpt.s, kpt.k)
+            psit_nG = reader.wave_functions.proxy(name, kpt.s, kpt.k)
             psit_nG.scale = c
 
             kpt.psit = UniformGridWaveFunctions(

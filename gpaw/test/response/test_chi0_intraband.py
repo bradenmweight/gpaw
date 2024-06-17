@@ -32,12 +32,12 @@ class Helper:
     @cached_property
     def wp(self):
         chi0_drude = self.df.chi0calc.chi0_opt_ext_calc.drude_calc.calculate(
-            self.df.wd, 0.1)
+            self.df.chi0calc.chi0_opt_ext_calc.wd, 0.1)
         return chi0_drude.plasmafreq_vv[0, 0]**0.5
 
     @cached_property
     def w_w(self):
-        return self.df.wd.omega_w
+        return self.df.chi0calc.chi0_opt_ext_calc.wd.omega_w
 
     def _compare_peak(self, calc, axis):
         df1LFCx = self.lfc[axis]

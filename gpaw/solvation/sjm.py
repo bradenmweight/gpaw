@@ -14,7 +14,6 @@ import ase.io
 from ase.units import Bohr, Ha
 from ase.calculators.calculator import (Parameters, equal, InputError,
                                         PropertyNotPresent)
-from ase.dft.bandgap import bandgap
 from ase.parallel import paropen
 
 import gpaw.mpi
@@ -507,7 +506,7 @@ class SJM(SolvationGPAW):
                 and p.always_adjust):
                 return
 
-        msg = (f'Potential could not be reached after {iteration-1:d} '
+        msg = (f'Potential could not be reached after {iteration - 1:d} '
                'iterations. This may indicate your workfunction is noisier '
                'than your potential tol. You may try setting the '
                'convergence["workfunction"] keyword. The last values of '
@@ -565,13 +564,7 @@ class SJM(SolvationGPAW):
         self.density.summary(self.atoms, self.results.get('magmom', 0.0),
                              self.log)
         self.wfs.summary(self.log)
-        if len(self.wfs.fermi_levels) == 1:
-            try:
-                bandgap(self,
-                        output=self.log.fd,
-                        efermi=self.wfs.fermi_level * Ha)
-            except ValueError:
-                pass
+        self._print_gapinfo()
         self.log.fd.flush()
 
     def _create_jellium(self):

@@ -10,7 +10,7 @@ from ase.autoneb import AutoNEB
 
 
 @pytest.mark.skip(reason='TODO')
-def test_autoneb(needs_ase_master):
+def test_autoneb():
     from ase.mep.neb import NEBTools
     size = mpi.world.size
     rank = mpi.world.rank

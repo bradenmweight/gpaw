@@ -5,7 +5,7 @@ from gpaw.mpi import world
 
 
 @pytest.mark.response
-def test_gw_anisotropic(in_tmp_dir, gpw_files, needs_ase_master, gpaw_new):
+def test_gw_anisotropic(in_tmp_dir, gpw_files, gpaw_new):
     if gpaw_new and world.size > 1:
         pytest.skip('Hybrids not working in parallel with GPAW_NEW=1')
     print(gpw_files)

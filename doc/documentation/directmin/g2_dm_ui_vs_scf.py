@@ -11,11 +11,15 @@ saved_results = \
     {0: tools_and_data.read_data(tools_and_data.data_g2_scf),
      1: tools_and_data.read_data(tools_and_data.data_g2_dm)}
 
-calc_args = {'xc': 'PBE', 'h': 0.15,
+calc_args = {'xc': 'PBE',
+             'h': 0.15,
              'convergence': {'density': 1.0e-6,
                              'eigenstates': 100},
-             'maxiter': 333, 'basis': 'dzp',
-             'mode': LCAO(), 'symmetry': 'off'}
+             'maxiter': 333,
+             'basis': {'default': 'dzp',
+                       'Be': 'pvalence.dz'},
+             'mode': LCAO(),
+             'symmetry': 'off'}
 
 eig_string = ['scf', 'dm']
 with paropen('dm-g2-results.txt', 'w') as fdm, \

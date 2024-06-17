@@ -2,7 +2,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from ase.parallel import parprint
-from ase.units import Ha
 from ase.utils.timing import Timer
 from pathlib import Path
 import numpy as np
@@ -196,9 +195,6 @@ def make_nlodata(calc: ASECalculator | str | Path,
     with timer('Get energies and fermi levels'):
 
         E_skn, f_skn = ibzwfs.get_all_eigs_and_occs()
-        # Energy is returned in Ha. For now we will change
-        # it to eV avoid altering the module too much.
-        E_skn *= Ha
 
         w_sk = np.array([ibzwfs.ibz.weight_k for _ in range(gs.ndensities)])
         w_sk *= gs.bzvol * ibzwfs.spin_degeneracy

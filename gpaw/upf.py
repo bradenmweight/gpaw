@@ -517,7 +517,8 @@ class UPFSetupData:
             phit_g = divrl(phit_g, 1, rgd.r_g)
             icut = len(phit_g) - 1  # XXX correct or off-by-one?
             rcut = rgd.r_g[icut]
-            bf = BasisFunction(None, state.l, rcut, phit_g, 'pregenerated')
+            bf = BasisFunction(self.n_j[j], state.l, rcut, phit_g,
+                               'pregenerated')
             b.bf_j.append(bf)
         return b
 

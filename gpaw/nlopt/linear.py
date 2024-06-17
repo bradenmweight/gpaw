@@ -1,5 +1,5 @@
 import numpy as np
-from ase.units import Bohr, _hbar, _e, _me, _eps0
+from ase.units import Ha
 
 from gpaw.mpi import world
 
@@ -37,9 +37,12 @@ def get_chi_tensor(
 
     """
 
+    # Covert inputs in eV to Ha
     freqs = np.array(freqs)
     nw = len(freqs)
-    w_lc = freqs + 1j * eta
+    w_lc = (freqs + 1j * eta) / Ha
+    Etol /= Ha
+    eshift /= Ha
 
     # Load the required data
     k_info = nlodata.distribute()
@@ -67,13 +70,9 @@ def get_chi_tensor(
 
     world.sum(sum_vvl)
 
-    # Make the output in SI unit
-    dim_sigma = 1j * _e**2 * _hbar / (_me**2 * (2 * np.pi)**3)
-    dim_chi = 1j * _hbar / (_eps0 * _e)
-    dim_sum = (_hbar / (Bohr * 1e-10))**2 / \
-        (_e**2 * (Bohr * 1e-10)**3)
-    dim_SI = dim_sigma * dim_chi * dim_sum
-    chi_vvl = dim_SI * sum_vvl
+    # Multiply prefactors (4pi from eps0, 8pi^3 from BZ)
+    prefactor = 4 * np.pi / (2 * np.pi)**3
+    chi_vvl = prefactor * sum_vvl
 
     # Save it to the file
     if world.rank == 0 and out_name is not None:
@@ -122,6 +121,6 @@ def calc_chi(
             # *2 for real, /2 for TRS, *2 for m<n
             sum_l += 2 * fnm * np.real(
                 p_vnn[pol_v[0], nni, mmi] * p_vnn[pol_v[1], mmi, nni]) \
-                / (Emn * (w_l**2 - Emn**2))
+                / (Emn * (Emn**2 - w_l**2))
 
     return sum_l

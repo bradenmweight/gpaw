@@ -74,13 +74,27 @@ def check_atoms_too_close_to_boundary(atoms: Atoms,
             raise AtomsTooClose('Atoms too close to boundary')
 
 
-def unpack_atomic_matrices(M_sP, setups):
+def unpack_atomic_matrices(M_sP, setups, new=False, density=False):
     M_asp = {}
     P1 = 0
     for a, setup in enumerate(setups):
         ni = setup.ni
         P2 = P1 + ni * (ni + 1) // 2
-        M_asp[a] = M_sP[:, P1:P2].copy()
+        M_sp = M_sP[:, P1:P2]
+        if new:
+            M2_sp = np.empty_like(M_sp)
+            pnew = 0
+            for c in range(ni):
+                for r in range(c + 1):
+                    pold = c - r + r * (2 * ni - r + 1) // 2
+                    if density and r < c:
+                        M2_sp[:, pold] = 2 * M_sp[:, pnew]
+                    else:
+                        M2_sp[:, pold] = M_sp[:, pnew]
+                    pnew += 1
+            M_asp[a] = M2_sp
+        else:
+            M_asp[a] = M_sp.copy()
         P1 = P2
     return M_asp
 

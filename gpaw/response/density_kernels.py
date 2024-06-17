@@ -1,44 +1,116 @@
 """XC density kernels for response function calculations."""
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
 
 import numpy as np
 
+from gpaw.response import ResponseGroundStateAdapter, ResponseContext
+from gpaw.response.pair_functions import SingleQPWDescriptor
 from gpaw.response.localft import LocalFTCalculator
 from gpaw.response.fxc_kernels import AdiabaticFXCCalculator
 
 
-def get_density_xc_kernel(qpd, gs, context, functional='ALDA',
-                          chi0_wGG=None, **xckwargs):
-    """Density-density xc kernels.
-    Factory function that calls the relevant functions below."""
+@dataclass
+class DensityXCKernel(ABC):
+    gs: ResponseGroundStateAdapter
+    context: ResponseContext
+    functional: str
 
-    p = context.print
-    nspins = len(gs.nt_sR)
-    assert nspins == 1
+    def __post_init__(self):
+        assert self.gs.nspins == 1
 
-    if functional[0] == 'A':
-        # Standard adiabatic kernel
-        p('Calculating %s kernel' % functional)
+    @staticmethod
+    def from_functional(gs, context, functional, **kwargs):
+        """Factory function creating DensityXCKernels.
+
+        Choose between ALDA, Bootstrap and LRalpha (long-range kernel), where
+        alpha is a user specified parameter (for example functional='LR0.25').
+        """
+        if functional[0] == 'A':
+            return AdiabaticDensityKernel(gs, context, functional, kwargs)
+        elif functional[:2] == 'LR':
+            return LRDensityKernel(gs, context, functional)
+        elif functional == 'Bootstrap':
+            return BootstrapDensityKernel(gs, context, functional)
+        raise ValueError(
+            'Invalid functional for the density-density xc kernel:'
+            f'{functional}')
+
+    def __call__(self, qpd: SingleQPWDescriptor, chi0_wGG=None):
+        self.context.print(f'Calculating {self}')
+        return self.calculate(qpd=qpd, chi0_wGG=chi0_wGG)
+
+    @abstractmethod
+    def __repr__(self):
+        """String representation of the density xc kernel."""
+
+    @abstractmethod
+    def calculate(self, *args, **kwargs):
+        """Calculate the xc kernel.
+
+        Since the exchange-correlation kernel is going to be rescaled according
+        to the bare Coulomb interaction,
+        ˷
+        K_xc(q) = v^(-1/2)(q) K_xc(q) v^(-1/2)(q)
+
+        and that the Coulomb interaction in the optical q→0 limit leaves the
+        long-range q-dependence out, see gpaw.response.coulomb_kernels,
+
+        v(q) = 4π/|G+q| -> 4π for G==0 and 4π/|G| otherwise if q==0,
+
+        we need to account to account for it here. That is,
+
+        For q→0, the head and wings of the returned K_xc(q) needs to be
+        rescaled according to K_xc(q) -> q K_xc(q) q
+        """
+
+
+@dataclass
+class AdiabaticDensityKernel(DensityXCKernel):
+    rshe_kwargs: dict
+
+    def __post_init__(self):
+        super().__post_init__()
         localft_calc = LocalFTCalculator.from_rshe_parameters(
-            gs, context, **xckwargs)
-        fxc_calculator = AdiabaticFXCCalculator(localft_calc)
-        fxc_kernel = fxc_calculator(functional, '00', qpd)
-        Kxc_GG = fxc_kernel.get_Kxc_GG()
+            self.gs, self.context, **self.rshe_kwargs)
+        self.fxc_calc = AdiabaticFXCCalculator(localft_calc)
 
+    def __repr__(self):
+        return f'{self.functional} kernel'
+
+    def calculate(self, qpd: SingleQPWDescriptor, **ignored):
+        fxc_kernel = self.fxc_calc(self.functional, '00', qpd)
+        Kxc_GG = fxc_kernel.get_Kxc_GG()
         if qpd.optical_limit:
             Kxc_GG[0, :] = 0.0
             Kxc_GG[:, 0] = 0.0
-        Kxc_sGG = np.array([Kxc_GG])
-    elif functional[:2] == 'LR':
-        p('Calculating LR kernel with alpha = %s' % functional[2:])
-        Kxc_sGG = calculate_lr_kernel(qpd, alpha=float(functional[2:]))
-    elif functional == 'Bootstrap':
-        p('Calculating Bootstrap kernel')
-        Kxc_sGG = get_bootstrap_kernel(qpd, chi0_wGG, context)
-    else:
-        raise ValueError('Invalid functional for the density-density '
-                         'xc kernel:', functional)
+        return Kxc_GG
 
-    return Kxc_sGG[0]
+
+@dataclass
+class LRDensityKernel(DensityXCKernel):
+
+    def __post_init__(self):
+        super().__post_init__()
+        self.alpha = float(self.functional[2:])
+
+    def __repr__(self):
+        return f'LR kernel with alpha = {self.alpha}'
+
+    def calculate(self, qpd: SingleQPWDescriptor, **ignored):
+        Kxc_sGG = calculate_lr_kernel(qpd, alpha=self.alpha)
+        return Kxc_sGG[0]
+
+
+@dataclass
+class BootstrapDensityKernel(DensityXCKernel):
+
+    def __repr__(self):
+        return 'Bootstrap kernel'
+
+    def calculate(self, qpd, *, chi0_wGG):
+        Kxc_sGG = get_bootstrap_kernel(qpd, chi0_wGG, self.context)
+        return Kxc_sGG[0]
 
 
 def calculate_lr_kernel(qpd, alpha=0.2):

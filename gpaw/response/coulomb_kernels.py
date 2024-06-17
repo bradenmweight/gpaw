@@ -30,10 +30,18 @@ class CoulombKernel:
         self.pbc_c = pbc_c
         self.kd = kd
 
-    def from_gs(gs, *, truncation):
-        return CoulombKernel(truncation, N_c=gs.kd.N_c,
-                             pbc_c=gs.atoms.get_pbc(),
-                             kd=gs.kd)
+    @classmethod
+    def from_gs(cls, gs, *, truncation):
+        return cls(truncation,
+                   N_c=gs.kd.N_c,
+                   pbc_c=gs.atoms.get_pbc(),
+                   kd=gs.kd)
+
+    def new(self, *, truncation):
+        return CoulombKernel(truncation,
+                             N_c=self.N_c,
+                             pbc_c=self.pbc_c,
+                             kd=self.kd)
 
     def description(self):
         if self.truncation is None:
@@ -49,6 +57,9 @@ class CoulombKernel:
         return get_coulomb_kernel(
             qpd, self.N_c, pbc_c=self.pbc_c, q_v=q_v,
             truncation=self.truncation)
+
+    def kernel(self, qpd, q_v=None):
+        return np.diag(self.V(qpd, q_v=q_v))
 
     def integrated_kernel(self, qpd, reduced):
         return get_integrated_kernel(

@@ -6,16 +6,19 @@ import gpaw.mpi as mpi
 from gpaw.test.gpwfile import response_band_cutoff
 
 
-@pytest.mark.later
 @pytest.mark.serial
-@pytest.mark.parametrize('gs', ['bi2i6_pw',
-                                'fancy_si_pw',
-                                'al_pw',
-                                'fe_pw',
-                                'co_pw',
-                                'gaas_pw',
-                                'v2br4_pw',
-                                'srvo3_pw'])
+@pytest.mark.parametrize(
+    'gs',
+    ['bi2i6_pw',
+     'fancy_si_pw',
+     'al_pw',
+     'fe_pw',
+     'co_pw',
+     'gaas_pw',
+     pytest.param(
+         'v2br4_pw',
+         marks=[pytest.mark.later]),  # interpolation=3 not implemented
+     'srvo3_pw'])
 def test_ibz2bz(in_tmp_dir, gpw_files, gs):
     """ Tests gpaw.ibz2bz.py
     Tests functionalities to take wavefunction and projections from

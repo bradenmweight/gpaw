@@ -209,11 +209,13 @@ class Davidson(Eigensolver):
             P3_ani.matrix.multiply(P_ani, opb='C', beta=1.0, out=M_nn)
             copy(S_NN.data[B:, :B])
 
-            if is_domain_band_master:
-                H_NN.data[:B, :B] = xp.diag(eig_N[:B])
-                S_NN.data[:B, :B] = xp.eye(B)
-                eig_N[:] = H_NN.eigh(S_NN)
-                wfs._eig_n = as_np(eig_N[:B])
+            with broadcast_exception(domain_comm):
+                with broadcast_exception(band_comm):
+                    if is_domain_band_master:
+                        H_NN.data[:B, :B] = xp.diag(eig_N[:B])
+                        S_NN.data[:B, :B] = xp.eye(B)
+                        eig_N[:] = H_NN.eigh(S_NN)
+                        wfs._eig_n = as_np(eig_N[:B])
             if domain_comm.rank == 0:
                 band_comm.broadcast(wfs.eig_n, 0)
             domain_comm.broadcast(wfs.eig_n, 0)

@@ -10,7 +10,7 @@ from ase.units import Ha
 
 @pytest.mark.later
 @pytest.mark.sic
-def test_pwsic(in_tmp_dir, needs_ase_master):
+def test_pwsic(in_tmp_dir):
     """
     test Perdew-Zunger Self-Interaction
     Correction  in PW mode using DirectMin

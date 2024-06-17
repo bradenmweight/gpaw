@@ -12,7 +12,7 @@ from gpaw.utilities.adjust_cell import adjust_cell
 
 
 @pytest.mark.later
-def test_vdw_ts09(in_tmp_dir, needs_ase_master):
+def test_vdw_ts09(in_tmp_dir):
     h = 0.4
     s = molecule('LiH')
     adjust_cell(s, 3., h=h)

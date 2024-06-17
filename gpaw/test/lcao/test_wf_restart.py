@@ -4,10 +4,12 @@
 import pytest
 from ase.build import molecule
 from gpaw import GPAW
+from gpaw.mpi import world
 
 
-@pytest.mark.later
-def test_restart(in_tmp_dir):
+def test_restart(in_tmp_dir, gpaw_new):
+    if gpaw_new and world.size > 1:
+        pytest.skip('LCAO get_ps_w_f() not parallelized')
     system = molecule('H2')
     system.center(vacuum=2.5)
 

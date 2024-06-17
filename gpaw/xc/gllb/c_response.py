@@ -569,11 +569,7 @@ class C_Response(Contribution):
         ae = self.ae
         njcore = ae.njcore
         w_ln = self.coefficients.get_coefficients_1d(smooth=True)
-        w_j = []
-        for w_n in w_ln:
-            for w in w_n:
-                w_j.append(w)
-        extra_data['w_j'] = w_j
+        extra_data['w_ln'] = w_ln
 
         w_j = self.coefficients.get_coefficients_1d()
         x_g = np.dot(w_j[:njcore], safe_sqr(ae.u_j[:njcore]))

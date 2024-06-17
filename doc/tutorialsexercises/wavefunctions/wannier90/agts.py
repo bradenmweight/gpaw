@@ -1,15 +1,18 @@
 from gpaw.wannier.w90 import read_wout_all
 from myqueue.workflow import run
 import numpy as np
+from ase.io import read
 
 
 def check():
     with open('GaAs.wout') as fd:
         dct = read_wout_all(fd)
-    x, y, z = dct['centers'].sum(axis=0)
+    center = dct['centers'].sum(axis=0)
+    cell = read('gs_GaAs.txt').cell
+    fractional = np.linalg.solve(cell.T, center) % 1
     w = dct['spreads'].sum()
-    a = 5.68
-    assert abs(np.array([x, y, z, w]) - [a, a, a, 4.499]).max() < 0.005
+    assert abs(fractional).max() < 1e-9
+    assert abs(w - 4.499) < 0.005
 
     with open('Fe.wout') as fd:
         dct = read_wout_all(fd)

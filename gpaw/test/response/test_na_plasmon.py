@@ -110,7 +110,7 @@ def test_response_na_plasmon(in_tmp_dir):
 
         # Compare plasmon frequencies and intensities: x, y, z
         # x values
-        w_w = df1.wd.omega_w
+        w_w = df1.chi0calc.wd.omega_w
         w1, I1 = findpeak(w_w, -(1. / df1LFCx).imag)
         w2, I2 = findpeak(w_w, -(1. / df2LFCx).imag)
         I_diff = abs(I1 - I2)

@@ -5,7 +5,8 @@ from gpaw.spline import Spline
 from gpaw.lfc import LocalizedFunctionsCollection as LFC
 from gpaw.response.pair_functions import SingleQPWDescriptor
 import numpy as np
-from gpaw.response.coulomb_kernels import get_coulomb_kernel
+from gpaw.response.coulomb_kernels import (get_coulomb_kernel,
+                                           get_integrated_kernel)
 from gpaw.kpt_descriptor import KPointDescriptor
 from gpaw.poisson_extravacuum import ExtraVacuumPoissonSolver
 from gpaw.poisson_moment import MomentCorrectionPoissonSolver
@@ -117,14 +118,15 @@ class Grid:
 @pytest.mark.serial
 @pytest.mark.response
 @pytest.mark.parametrize('gridparam', [(32, 1e-5), (64, 1e-7), (96, 1e-8)])
-@pytest.mark.parametrize('qtrunc', [(0, '2D'),
-                                    (1 / 3, '2D'),
-                                    (0, None),
-                                    (1 / 3, None),
-                                    (0, '0D')])
+@pytest.mark.parametrize('qtrunc', [
+    (0, '2D', 20.7454594963, 506.01293778),
+    (1 / 3, '2D', 13.174804153, 190.916278817),
+    (0, None, 20.228908696, 578.42826785),
+    (1 / 3, None, 13.5467930334, 214.823201910),
+    (0, '0D', 14.3596834829, 206.74182299)])
 def test_coulomb(gridparam, qtrunc):
     N, maxdev = gridparam
-    q, truncation = qtrunc
+    q, truncation, sqrtV0_dev, V0_dev = qtrunc
     L = 10
     print()
     # Slightly lower tolerance for 0D system, because it uses so localized
@@ -139,8 +141,13 @@ def test_coulomb(gridparam, qtrunc):
     # XXX It is silly that get_coulomb_kernel uses k-point numbers
     # per dim to determine non-periodic direction. It should just get
     # non_per_dir=2, etc.
-    v_G = get_coulomb_kernel(qpd, np.array([2, 2, 1]), truncation=truncation,
-                             pbc_c=grid.pbc_c)
+    N_c = np.array([2, 2, 1])
+    v_G = get_coulomb_kernel(qpd, N_c, truncation=truncation, pbc_c=grid.pbc_c)
+    V0, sqrtV0 = get_integrated_kernel(
+        qpd=qpd, N_c=N_c, truncation=truncation, pbc_c=grid.pbc_c)
+    assert V0 == pytest.approx(V0_dev, maxdev)
+    assert sqrtV0 == pytest.approx(sqrtV0_dev, maxdev)
+
     n_G = qpd.fft(grid.n_R * grid.periodicgd.plane_wave([-q, 0, 0]))
     Ec2 = n_G.conj() @ (v_G * n_G) / N**6 * L**3
     dev = np.abs(grid.Ec / Ec2 - 1)

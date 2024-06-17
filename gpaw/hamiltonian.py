@@ -186,6 +186,7 @@ class Hamiltonian:
                 vacuum = np.nan
 
         fermilevel = wfs.fermi_level
+
         wf1 = vacuum - fermilevel + dipole_correction
         wf2 = vacuum - fermilevel - dipole_correction
         return np.array([wf1, wf2])
@@ -254,11 +255,11 @@ class Hamiltonian:
         # (careful with array orderings/contents)
 
         if 0:
-            print('kinetic', atomic_energies[0], coarsegrid_e_kinetic)
-            print('coulomb', atomic_energies[1], finegrid_energies[0])
-            print('zero', atomic_energies[2], finegrid_energies[1])
-            print('xc', atomic_energies[4], finegrid_energies[3])
-            print('external', atomic_energies[3], finegrid_energies[2])
+            print('kinetic', coarsegrid_e_kinetic, atomic_energies[0])
+            print('coulomb', finegrid_energies[0], atomic_energies[1])
+            print('zero', finegrid_energies[1], atomic_energies[2])
+            print('xc', finegrid_energies[3], atomic_energies[4])
+            print('external', finegrid_energies[2], atomic_energies[3])
 
         energies = atomic_energies  # kinetic, coulomb, zero, external, xc
         energies[1:] += finegrid_energies  # coulomb, zero, external, xc
@@ -546,7 +547,8 @@ class Hamiltonian:
 
         if self.gd.comm.rank == 0:
             self.update_atomic_hamiltonians(
-                unpack_atomic_matrices(dH_sP, self.setups))
+                unpack_atomic_matrices(dH_sP, self.setups,
+                                       new=reader.version >= 4))
 
         if hasattr(self.poisson, 'read'):
             self.poisson.read(reader)
