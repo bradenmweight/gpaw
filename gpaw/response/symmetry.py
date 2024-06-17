@@ -247,21 +247,6 @@ class PWSymmetryAnalyzer:
 
         return K_gk
 
-    def get_BZ(self):
-        # Get the little group of q
-        U_scc = []
-        for s in self.s_s:
-            U_cc, sign, _, _, _ = self.get_symmetry_operator(s)
-            U_scc.append(sign * U_cc)
-        U_scc = np.array(U_scc)
-
-        # Determine the irreducible BZ
-        bzk_kc, ibzk_kc, _ = get_reduced_bz(self.qpd.gd.cell_cv,
-                                            U_scc,
-                                            False)
-
-        return bzk_kc
-
     def get_reduced_kd(self, *, pbc_c):
         # Get the little group of q
         U_scc = []
@@ -292,21 +277,6 @@ class PWSymmetryAnalyzer:
 
         return KPointDescriptor(ik_kc)
 
-    def unfold_kpoints(self, points_pv, tol=1e-8, mod=None):
-        points_pc = np.dot(points_pv, self.qpd.gd.cell_cv.T) / (2 * np.pi)
-
-        # Get the little group of q
-        U_scc = []
-        for s in self.s_s:
-            U_cc, sign, _, _, _ = self.get_symmetry_operator(s)
-            U_scc.append(sign * U_cc)
-        U_scc = np.array(U_scc)
-
-        points = np.concatenate(np.dot(points_pc, U_scc.transpose(0, 2, 1)))
-        points = unique_rows(points, tol=tol, mod=mod)
-        points = np.dot(points, self.qpd.gd.icell_cv) * (2 * np.pi)
-        return points
-
     def get_kpoint_weight(self, k_c):
         K = self.kptfinder.find(k_c)
         iK = self.kd.bz2ibz_k[K]
@@ -316,47 +286,6 @@ class PWSymmetryAnalyzer:
         for K_k in K_gK:
             if K in K_k:
                 return len(K_k)
-
-    def get_kpoint_mapping(self, K1, K2):
-        """Get index of symmetry for mapping between K1 and K2"""
-        s_s = self.s_s
-        bz2bz_ks = self.kd.bz2bz_ks
-        bzk2rbz_s = bz2bz_ks[K1][s_s]
-        try:
-            s = np.argwhere(bzk2rbz_s == K2)[0][0]
-        except IndexError:
-            self.context.print(f'K = {K1} cannot be mapped into '
-                               f'K = {K2}')
-            raise
-        return s_s[s]
-
-    def get_shift(self, K1, K2, U_cc, sign):
-        """Get shift for mapping between K1 and K2."""
-        kd = self.kd
-        k1_c = kd.bzk_kc[K1]
-        k2_c = kd.bzk_kc[K2]
-
-        shift_c = np.dot(U_cc, k1_c) - k2_c * sign
-        assert np.allclose(shift_c.round(), shift_c)
-        shift_c = shift_c.round().astype(int)
-
-        return shift_c
-
-    @timer('map_G')
-    def map_G(self, K1, K2, a_MG):
-        """Map a function of G from K1 to K2. """
-        if len(a_MG) == 0:
-            return []
-
-        if K1 == K2:
-            return a_MG
-
-        G_G, sign = self.map_G_vectors(K1, K2)
-
-        s = self.get_kpoint_mapping(K1, K2)
-        U_cc, _, TR, shift_c, ft_c = self.get_symmetry_operator(s)
-
-        return TR(a_MG[..., G_G])
 
     @timer('symmetrize_wGG')
     def symmetrize_wGG(self, A_wGG):
@@ -431,27 +360,6 @@ class PWSymmetryAnalyzer:
         # Overwrite the input
         A_wvv[:] = tmp_wvv / self.how_many_symmetries()
 
-    @timer('map_v')
-    def map_v(self, K1, K2, a_Mv):
-        """Map a function of v (cartesian component) from K1 to K2."""
-
-        if len(a_Mv) == 0:
-            return []
-
-        if K1 == K2:
-            return a_Mv
-
-        A_cv = self.qpd.gd.cell_cv
-        iA_cv = self.qpd.gd.icell_cv
-
-        # Get symmetry
-        s = self.get_kpoint_mapping(K1, K2)
-        U_cc, sign, TR, _, ft_c = self.get_symmetry_operator(s)
-
-        # Create cartesian operator
-        M_vv = np.dot(np.dot(A_cv.T, U_cc.T), iA_cv)
-        return sign * np.dot(TR(a_Mv), M_vv)
-
     def timereversal(self, s):
         """Is this a time-reversal symmetry?"""
         tr = bool(s // self.nU)
@@ -473,14 +381,6 @@ class PWSymmetryAnalyzer:
                 return x
 
         return U_scc[reds], sign, TR, self.shift_sc[s], ft_sc[reds]
-
-    @timer('map_G_vectors')
-    def map_G_vectors(self, K1, K2):
-        """Return G vector mapping."""
-        s = self.get_kpoint_mapping(K1, K2)
-        G_G, sign, shift_c = self.G_sG[s]
-
-        return G_G, sign
 
     @timer('Initialize_G_maps')
     def initialize_G_maps(self):
