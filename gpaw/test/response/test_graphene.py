@@ -74,20 +74,4 @@ def test_response_graphene(in_tmp_dir):
         while len(dfs):
             df = dfs.pop()
             for DFkwargs, df2 in zip(DFsettings[-len(dfs):], dfs):
-                try:
-                    assert np.allclose(df, df2)
-                    print('Ground state settings:', GSkwargs)
-                    print('DFkwargs1:', DFsettings[-len(dfs) - 1])
-                    print('DFkwargs2:', DFkwargs)
-                    print(np.max(np.abs((df - df2) / df)))
-                except AssertionError:
-                    print('Some symmetry or block-par. related problems')
-                    print('for calculation with following ground state')
-                    print('settings')
-                    print('Ground state settings:', GSkwargs)
-                    print('The following DF settings do not return the ' +
-                          'same results')
-                    print('DFkwargs1:', DFsettings[-len(dfs) - 1])
-                    print('DFkwargs2:', DFkwargs)
-                    print(np.max(np.abs((df - df2) / df)))
-                    raise AssertionError
+                assert np.allclose(df, df2)
