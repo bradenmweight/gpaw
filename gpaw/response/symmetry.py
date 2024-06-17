@@ -25,6 +25,17 @@ class KPointFinder:
         return k
 
 
+@dataclass
+class SymmetryAnalyzer:
+    point_group: bool = True
+    time_reversal: bool = True
+
+    def analyze(self, kpoints, qpd, context):
+        return PWSymmetryAnalyzer(
+            kpoints, qpd, context, not self.point_group,
+            not self.time_reversal)
+
+
 class PWSymmetryAnalyzer:
     """Class for handling planewave symmetries."""
 
