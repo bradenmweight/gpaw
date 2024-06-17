@@ -77,39 +77,44 @@ class PWSymmetryAnalyzer:
         self.use_time_reversal = not self.disable_time_reversal
 
         self.kptfinder = kpoints.kptfinder
-        self.initialize()
 
-    @timer('Initialize')
-    def initialize(self):
-        """Initialize relevant quantities."""
-        self.infostring = ''
+        self.s_s, self.shift_sc = self.analyze_symmetries()
+        self.G_sG = self.initialize_G_maps()
+
+        self.context.print(self.get_infostring())
+        self.context.print(self.symmetry_description())
+
+    def get_infostring(self):
+        txt = ''
 
         if self.disable_point_group:
-            self.infostring += 'Point group not included. '
+            txt += 'Point group not included. '
         else:
-            self.infostring += 'Point group included. '
+            txt += 'Point group included. '
 
         if self.disable_time_reversal:
-            self.infostring += 'Time reversal not included. '
+            txt += 'Time reversal not included. '
         else:
-            self.infostring += 'Time reversal included. '
+            txt += 'Time reversal included. '
 
-        self.infostring += 'Disabled non-symmorphic symmetries. '
+        txt += 'Disabled non-symmorphic symmetries. '
 
         if self.disable_symmetries:
-            self.infostring += 'All symmetries have been disabled. '
+            txt += 'All symmetries have been disabled. '
 
-        # Do the work
-        self.analyze_symmetries()
-        self.analyze_kpoints()
-        self.initialize_G_maps()
+        txt += f'Found {len(self.s_s)} allowed symmetries. '
 
-        # Print info
-        self.context.print(self.infostring)
-        self.print_symmetries()
+        # Maybe we can avoid calling this somehow, we're only using
+        # it to print:
+        K_gK = self.group_kpoints()
+        ng = len(K_gK)
+        txt += f'{ng} groups of equivalent kpoints. '
+        percent = (1. - (ng + 0.) / self.kd.nbzkpts) * 100
+        txt += f'{percent}% reduction. '
+        return txt
 
-    def print_symmetries(self):
-        """Handsome print function for symmetry operations."""
+    def symmetry_description(self) -> str:
+        """Return string description of symmetry operations."""
         isl = ['\n']
         nx = 6  # You are not allowed to use non-symmorphic syms (value 3)
         ns = len(self.s_s)
@@ -127,16 +132,7 @@ class PWSymmetryAnalyzer:
                 tisl.append('\n')
                 isl.append(''.join(tisl))
             isl.append('\n')
-        self.context.print(''.join(isl))  # flush output
-
-    @timer('Analyze')
-    def analyze_kpoints(self):
-        """Calculate the reduction in the number of kpoints."""
-        K_gK = self.group_kpoints()
-        ng = len(K_gK)
-        self.infostring += f'{ng} groups of equivalent kpoints. '
-        percent = (1. - (ng + 0.) / self.kd.nbzkpts) * 100
-        self.infostring += f'{percent}% reduction. '
+        return ''.join(isl)
 
     @timer('Analyze symmetries.')
     def analyze_symmetries(self):
@@ -204,9 +200,7 @@ class PWSymmetryAnalyzer:
 
 #        s_s = stmp_s
 
-        self.infostring += f'Found {len(s_s)} allowed symmetries. '
-        self.s_s = s_s
-        self.shift_sc = shift_sc
+        return s_s, shift_sc
 
     def is_not_point_group(self, s):
         U_scc = self.kd.symmetry.op_scc
@@ -376,7 +370,6 @@ class PWSymmetryAnalyzer:
 
         return U_scc[reds], sign
 
-    @timer('Initialize_G_maps')
     def initialize_G_maps(self):
         """Calculate the Gvector mappings."""
         qpd = self.qpd
@@ -404,7 +397,7 @@ class PWSymmetryAnalyzer:
                           'a G-vector was mapped outside the sphere')
                     raise IndexError
             G_sG[s] = np.array(G_G, dtype=np.int32)
-        self.G_sG = G_sG
+        return G_sG
 
     def unfold_ibz_kpoint(self, ik):
         """Return kpoints related to irreducible kpoint."""
