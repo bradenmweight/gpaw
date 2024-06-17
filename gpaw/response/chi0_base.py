@@ -165,7 +165,7 @@ class Chi0ComponentCalculator:
     """Base class for the Chi0XXXCalculator suite."""
 
     def __init__(self, gs, context, *, nblocks,
-                 qsymmetry: QSymmetryInput = None,
+                 qsymmetry: QSymmetryInput = True,
                  integrationmode=None):
         """Set up attributes common to all chi0 related calculators.
 

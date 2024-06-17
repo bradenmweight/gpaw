@@ -5,7 +5,7 @@ from ase import Atoms
 from gpaw import GPAW, PW, FermiDirac, Mixer
 from gpaw.utilities import compiled_with_sl
 from gpaw.response.df import DielectricFunction
-from gpaw.response.symmetry import SymmetryAnalyzer
+from gpaw.response.symmetry import QSymmetryAnalyzer
 from gpaw.mpi import world
 
 # This test assures that some things that
@@ -37,13 +37,12 @@ def test_response_graphene(in_tmp_dir):
         {'symmetry': {}, 'kpts': {'size': [3, 2, 1], 'gamma': True}}]
 
     DFsettings = [
-        {'symmetry_analyzer': SymmetryAnalyzer(pointgroup, timerev)}
+        {'qsymmetry': QSymmetryAnalyzer(pointgroup, timerev)}
         for pointgroup in [False, True]
         for timerev in [False, True]]
 
     if world.size > 1 and compiled_with_sl():
-        DFsettings.append({'symmetry_analyzer': SymmetryAnalyzer(True, True),
-                           'nblocks': 2})
+        DFsettings.append({'qsymmetry': True, 'nblocks': 2})
 
     for GSkwargs in GSsettings:
         calc = GPAW(mode=PW(200),

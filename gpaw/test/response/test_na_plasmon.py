@@ -7,7 +7,7 @@ from gpaw.mpi import world
 from gpaw.test import findpeak
 from gpaw.utilities import compiled_with_sl
 from gpaw.response.df import DielectricFunction
-from gpaw.response.symmetry import SymmetryAnalyzer
+from gpaw.response.symmetry import QSymmetryAnalyzer
 
 # Comparing the plasmon peaks found in bulk sodium for two different
 # atomic structures. Testing for identical plasmon peaks. Not using
@@ -59,14 +59,13 @@ def test_response_na_plasmon(in_tmp_dir):
 
     # Settings that should yield the same result
     settings = [
-        {'symmetry_analyzer': SymmetryAnalyzer(pointgroup, timerev)}
+        {'qsymmetry': QSymmetryAnalyzer(pointgroup, timerev)}
         for pointgroup in [False, True]
         for timerev in [False, True]]
 
     # Test block parallelization (needs scalapack)
     if world.size > 1 and compiled_with_sl():
-        settings.append({'symmetry_analyzer': SymmetryAnalyzer(True, True),
-                         'nblocks': 2})
+        settings.append({'qsymmetry': True, 'nblocks': 2})
 
     # Calculate the dielectric functions
     dfs0 = []  # Arrays to check for self-consistency
