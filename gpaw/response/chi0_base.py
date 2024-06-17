@@ -15,6 +15,7 @@ from gpaw.response.pw_parallelization import block_partition
 from gpaw.response.integrators import (
     Integrand, PointIntegrator, TetrahedronIntegrator, Domain)
 from gpaw.response.symmetry import PWSymmetryAnalyzer
+from gpaw.response.kpoints import KPointDomain
 
 if TYPE_CHECKING:
     from gpaw.response.pair import ActualPairDensityCalculator
@@ -258,7 +259,7 @@ class Chi0ComponentCalculator:
         kpoints, analyzer = self.get_kpoints(
             qpd, integrationmode=self.integrationmode)
 
-        domain = Domain(kpoints.bzk_kv, spins)
+        domain = Domain(kpoints.k_kv, spins)
 
         if self.integrationmode == 'tetrahedron integration':
             # If there are non-periodic directions it is possible that the
@@ -267,7 +268,7 @@ class Chi0ComponentCalculator:
             # integrated. We normalize by vol(BZ) / vol(domain) to make
             # sure that to fix this.
             domainvol = convex_hull_volume(
-                kpoints.bzk_kv) * analyzer.how_many_symmetries()
+                kpoints.k_kv) * analyzer.how_many_symmetries()
             bzvol = (2 * np.pi)**3 / self.gs.volume
             factor = bzvol / domainvol
         else:
@@ -278,7 +279,7 @@ class Chi0ComponentCalculator:
 
         if self.integrationmode is None:
             nbzkpts = self.gs.kd.nbzkpts
-            prefactor *= len(kpoints.bzk_kv) / nbzkpts
+            prefactor *= len(kpoints) / nbzkpts
 
         return domain, analyzer, prefactor
 
@@ -294,13 +295,8 @@ class Chi0ComponentCalculator:
             k_kc = analyzer.get_kpt_domain()
         elif integrationmode == 'tetrahedron integration':
             k_kc = analyzer.get_tetrahedron_kpt_domain(pbc_c=self.pbc)
+        kpoints = KPointDomain(k_kc, self.gs.gd.icell_cv)
 
-        from gpaw.response.kpoints import ResponseKPointGrid
-        kpoints = ResponseKPointGrid(self.gs.kd, qpd.gd.icell_cv, k_kc)
-        # Two illogical things here:
-        #  * Analyzer is for original kpoints, not those we just reduced
-        #  * The kpoints object has another bzk_kc array than self.gs.kd.
-        #    We could make a new kd, but I am not sure about ramifications.
         return kpoints, analyzer
 
     def get_gs_info_string(self, tab=''):
