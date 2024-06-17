@@ -83,36 +83,35 @@ class PWSymmetryAnalyzer:
     @timer('Initialize')
     def initialize(self):
         """Initialize relevant quantities."""
-        self.infostring = ''
+        txt = ''
 
         if self.disable_point_group:
-            self.infostring += 'Point group not included. '
+            txt += 'Point group not included. '
         else:
-            self.infostring += 'Point group included. '
+            txt += 'Point group included. '
 
         if self.disable_time_reversal:
-            self.infostring += 'Time reversal not included. '
+            txt += 'Time reversal not included. '
         else:
-            self.infostring += 'Time reversal included. '
+            txt += 'Time reversal included. '
 
-        self.infostring += 'Disabled non-symmorphic symmetries. '
+        txt += 'Disabled non-symmorphic symmetries. '
 
         if self.disable_symmetries:
-            self.infostring += 'All symmetries have been disabled. '
+            txt += 'All symmetries have been disabled. '
 
         self.s_s, self.shift_sc = self.analyze_symmetries()
-        self.infostring += f'Found {len(self.s_s)} allowed symmetries. '
+        txt += f'Found {len(self.s_s)} allowed symmetries. '
 
         K_gK = self.group_kpoints()
         ng = len(K_gK)
-        self.infostring += f'{ng} groups of equivalent kpoints. '
+        txt += f'{ng} groups of equivalent kpoints. '
         percent = (1. - (ng + 0.) / self.kd.nbzkpts) * 100
-        self.infostring += f'{percent}% reduction. '
+        txt += f'{percent}% reduction. '
 
         self.G_sG = self.initialize_G_maps()
 
-        # Print info
-        self.context.print(self.infostring)
+        self.context.print(txt)
         self.context.print(self.symmetry_description())
 
     def symmetry_description(self) -> str:
