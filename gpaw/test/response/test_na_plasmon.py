@@ -63,7 +63,6 @@ def test_response_na_plasmon(in_tmp_dir):
         for pointgroup in [False, True]
         for timerev in [False, True]]
 
-
     # Test block parallelization (needs scalapack)
     if world.size > 1 and compiled_with_sl():
         settings.append({'symmetry_analyzer': SymmetryAnalyzer(True, True),

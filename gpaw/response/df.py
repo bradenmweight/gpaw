@@ -8,7 +8,6 @@ from ase.units import Hartree
 
 import gpaw.mpi as mpi
 
-from gpaw.response.symmetry import SymmetryAnalyzer
 from gpaw.response.pw_parallelization import Blocks1D
 from gpaw.response.coulomb_kernels import CoulombKernel
 from gpaw.response.dyson import DysonEquation
