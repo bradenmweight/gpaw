@@ -477,8 +477,9 @@ class BSEBackend:
 
         # Add kernels to buffer array
         self.add_indirect_kernel(kptpair_factory, rhoex_KsmnG, H_ksmnKsmn)
-        self.add_direct_kernel(kptpair_factory, pair_calc,
-                               screened_potential, spinors, H_ksmnKsmn)
+        if not self.mode == 'RPA':
+            self.add_direct_kernel(kptpair_factory, pair_calc,
+                                   screened_potential, spinors, H_ksmnKsmn)
 
         H_ksmnKsmn /= self.gs.volume
         self.context.timer.stop('Calculate Hamiltonian')
@@ -513,7 +514,7 @@ class BSEBackend:
                 for Q_c in self.qd.bzk_kc:
                     iK2 = self.kd.find_k_plus_q(Q_c, [kptv1.K])[0]
                     for s2 in range(self.spins):
-                        if self.mode == 'RPA' or s1 != s2:
+                        if s1 != s2:
                             continue
 
                         kptv2 = kptpair_factory.get_k_point(
