@@ -513,38 +513,35 @@ class BSEBackend:
 
                 for Q_c in self.qd.bzk_kc:
                     iK2 = self.kd.find_k_plus_q(Q_c, [kptv1.K])[0]
-                    for s2 in range(self.spins):
-                        if s1 != s2:
-                            continue
 
-                        kptv2 = kptpair_factory.get_k_point(
-                            s1, iK2, self.vi_s[s1], self.vf_s[s1])
-                        kptc2 = kptpair_factory.get_k_point(
-                            s1, self.ikq_k[iK2], self.ci_s[s1], self.cf_s[s1])
+                    kptv2 = kptpair_factory.get_k_point(
+                        s1, iK2, self.vi_s[s1], self.vf_s[s1])
+                    kptc2 = kptpair_factory.get_k_point(
+                        s1, self.ikq_k[iK2], self.ci_s[s1], self.cf_s[s1])
 
-                        rho3_mmG, iq = self.get_density_matrix(
-                            pair_calc, screened_potential, kptv1, kptv2)
+                    rho3_mmG, iq = self.get_density_matrix(
+                        pair_calc, screened_potential, kptv1, kptv2)
 
-                        rho4_nnG, iq = self.get_density_matrix(
-                            pair_calc, screened_potential, kptc1, kptc2)
+                    rho4_nnG, iq = self.get_density_matrix(
+                        pair_calc, screened_potential, kptc1, kptc2)
 
-                        if spinors is not None:
-                            rho3_mmG = spinors.rho_valence_valence(
-                                rho3_mmG, kptv1.K, kptv2.K)
+                    if spinors is not None:
+                        rho3_mmG = spinors.rho_valence_valence(
+                            rho3_mmG, kptv1.K, kptv2.K)
 
-                            rho4_nnG = spinors.rho_conduction_conduction(
-                                rho4_nnG, kptc1.K, kptc2.K)
+                        rho4_nnG = spinors.rho_conduction_conduction(
+                            rho4_nnG, kptc1.K, kptc2.K)
 
-                        self.context.timer.start('Screened exchange')
-                        W_mnmn = np.einsum(
-                            'ijk,km,pqm->ipjq',
-                            rho3_mmG.conj(),
-                            screened_potential.W_qGG[iq],
-                            rho4_nnG,
-                            optimize='optimal')
-                        W_mnmn *= self.spins * self.so
-                        H_ksmnKsmn[ik1, s1, :, :, iK2, s1] -= 0.5 * W_mnmn
-                        self.context.timer.stop('Screened exchange')
+                    self.context.timer.start('Screened exchange')
+                    W_mnmn = np.einsum(
+                        'ijk,km,pqm->ipjq',
+                        rho3_mmG.conj(),
+                        screened_potential.W_qGG[iq],
+                        rho4_nnG,
+                        optimize='optimal')
+                    W_mnmn *= self.spins * self.so
+                    H_ksmnKsmn[ik1, s1, :, :, iK2, s1] -= 0.5 * W_mnmn
+                    self.context.timer.stop('Screened exchange')
 
             if iK1 % (self.myKsize // 5 + 1) == 0:
                 dt = time() - self.t0
