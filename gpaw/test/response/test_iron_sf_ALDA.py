@@ -36,14 +36,14 @@ def test_response_iron_sf_ALDA(in_tmp_dir, gpw_files, scalapack):
     eta = 0.1
 
     # Test different kernel, summation and symmetry strategies
-    # rshelmax, rshewmin, bandsummation, disable_syms
-    strat_sd = [(None, None, 'pairwise', False),
-                (-1, 0.001, 'pairwise', False),
-                (-1, 0.000001, 'pairwise', False),
-                (-1, 0.000001, 'double', False),
+    # rshelmax, rshewmin, bandsummation, qsymmetry
+    strat_sd = [(None, None, 'pairwise', True),
+                (-1, 0.001, 'pairwise', True),
+                (-1, 0.000001, 'pairwise', True),
                 (-1, 0.000001, 'double', True),
-                (-1, None, 'pairwise', False),
-                (3, None, 'pairwise', False)]
+                (-1, 0.000001, 'double', False),
+                (-1, None, 'pairwise', True),
+                (3, None, 'pairwise', True)]
     frq_sw = [np.linspace(0.320, 0.480, 21),
               np.linspace(0.420, 0.580, 21),
               np.linspace(0.420, 0.580, 21),
@@ -59,15 +59,14 @@ def test_response_iron_sf_ALDA(in_tmp_dir, gpw_files, scalapack):
     nbands = response_band_cutoff['fe_pw']
     gs = ResponseGroundStateAdapter(calc)
 
-    for s, ((rshelmax, rshewmin, bandsummation,
-             disable_syms), frq_w) in enumerate(zip(strat_sd, frq_sw)):
+    for s, ((rshelmax, rshewmin, bandsummation, qsymmetry),
+            frq_w) in enumerate(zip(strat_sd, frq_sw)):
         complex_frequencies = frq_w + 1.j * eta
         chiks_calc = ChiKSCalculator(gs,
                                      nbands=nbands,
                                      ecut=ecut,
                                      bandsummation=bandsummation,
-                                     disable_point_group=disable_syms,
-                                     disable_time_reversal=disable_syms,
+                                     qsymmetry=qsymmetry,
                                      nblocks=2)
         fxc_calculator = AdiabaticFXCCalculator.from_rshe_parameters(
             gs, chiks_calc.context,
