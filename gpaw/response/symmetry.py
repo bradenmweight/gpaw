@@ -83,6 +83,14 @@ class PWSymmetryAnalyzer:
     @timer('Initialize')
     def initialize(self):
         """Initialize relevant quantities."""
+
+        self.s_s, self.shift_sc = self.analyze_symmetries()
+        self.G_sG = self.initialize_G_maps()
+
+        self.context.print(self.get_infostring())
+        self.context.print(self.symmetry_description())
+
+    def get_infostring(self):
         txt = ''
 
         if self.disable_point_group:
@@ -100,19 +108,16 @@ class PWSymmetryAnalyzer:
         if self.disable_symmetries:
             txt += 'All symmetries have been disabled. '
 
-        self.s_s, self.shift_sc = self.analyze_symmetries()
         txt += f'Found {len(self.s_s)} allowed symmetries. '
 
+        # Maybe we can avoid calling this somehow, we're only using
+        # it to print:
         K_gK = self.group_kpoints()
         ng = len(K_gK)
         txt += f'{ng} groups of equivalent kpoints. '
         percent = (1. - (ng + 0.) / self.kd.nbzkpts) * 100
         txt += f'{percent}% reduction. '
-
-        self.G_sG = self.initialize_G_maps()
-
-        self.context.print(txt)
-        self.context.print(self.symmetry_description())
+        return txt
 
     def symmetry_description(self) -> str:
         """Return string description of symmetry operations."""
