@@ -29,6 +29,33 @@ class KPointFinder:
 
 
 @dataclass
+class QSymmetries:
+    U_scc: np.ndarray
+    s_s: np.ndarray
+    shift_sc: np.ndarray
+
+    def __post_init__(self):
+        self.nU = len(self.U_scc)
+
+    def __len__(self):
+        return len(self.s_s)
+
+    def timereversal(self, s):
+        """Is this a time-reversal symmetry?"""
+        return bool(s // self.nU)
+
+    def sign(self, s):
+        """Flip the sign under time-reversal."""
+        if self.timereversal(s):
+            return -1
+        return 1
+
+    def get_symmetry_operator(self, s):
+        """Return symmetry operator s."""
+        return self.U_scc[s % self.nU], self.sign(s)
+
+
+@dataclass
 class QSymmetryAnalyzer:
     """K-point symmetry analyzer for transitions k -> k + q.
 
@@ -48,9 +75,74 @@ class QSymmetryAnalyzer:
         return not (self.point_group or self.time_reversal)
 
     def analyze(self, kpoints, qpd, context):
+        symmetries = self.analyze_symmetries(qpd.q_c, kpoints.kd)
         return PWSymmetryAnalyzer(
+            symmetries,
             kpoints, qpd, context, not self.point_group,
             not self.time_reversal)
+
+    def analyze_symmetries(self, q_c, kd):
+        r"""Determine allowed symmetries.
+
+        An direct symmetry U must fulfill::
+
+          U \mathbf{q} = q + \Delta
+
+        Under time-reversal (indirect) it must fulfill::
+
+          -U \mathbf{q} = q + \Delta
+
+        where :math:`\Delta` is a reciprocal lattice vector.
+        """
+        U_scc = kd.symmetry.op_scc
+        nU = len(U_scc)
+        nsym = 2 * nU
+
+        shift_sc = np.zeros((nsym, 3), int)
+        conserveq_s = np.zeros(nsym, bool)
+
+        newq_sc = np.dot(U_scc, q_c)
+
+        # Direct symmetries
+        dshift_sc = (newq_sc - q_c[np.newaxis]).round().astype(int)
+        inds_s = np.argwhere((newq_sc == q_c[np.newaxis] + dshift_sc).all(1))
+        conserveq_s[inds_s] = True
+        shift_sc[:nU] = dshift_sc
+
+        # Time reversal
+        trshift_sc = (-newq_sc - q_c[np.newaxis]).round().astype(int)
+        trinds_s = np.argwhere((-newq_sc == q_c[np.newaxis] +
+                                trshift_sc).all(1)) + nU
+        conserveq_s[trinds_s] = True
+        shift_sc[nU:nsym] = trshift_sc
+
+        # The indices of the allowed symmetries
+        s_s = conserveq_s.nonzero()[0]
+
+        # Set up symmetry filters
+        def is_not_point_group(s):
+            return (U_scc[s % nU] == np.eye(3)).all()
+
+        def is_not_time_reversal(s):
+            return not bool(s // nU)
+
+        def is_not_non_symmorphic(s):
+            return not bool(kd.symmetry.ft_sc[s % nU].any())
+
+        # Filter out point-group symmetry, if disabled
+        if not self.point_group:
+            s_s = list(filter(is_not_point_group, s_s))
+
+        # Filter out time-reversal, if inapplicable or disabled
+        if not kd.symmetry.time_reversal or \
+           kd.symmetry.has_inversion or \
+           not self.time_reversal:
+            s_s = list(filter(is_not_time_reversal, s_s))
+
+        # We always filter out non-symmorphic symmetries
+        s_s = list(filter(is_not_non_symmorphic, s_s))
+
+        return QSymmetries(U_scc, s_s, shift_sc)
 
 
 QSymmetryInput = Union[QSymmetryAnalyzer, dict, bool]
@@ -69,7 +161,7 @@ def ensure_qsymmetry(qsymmetry: QSymmetryInput) -> QSymmetryAnalyzer:
 class PWSymmetryAnalyzer:
     """Class for handling planewave symmetries."""
 
-    def __init__(self, kpoints, qpd, context,
+    def __init__(self, symmetries, kpoints, qpd, context,
                  disable_point_group=False,
                  disable_time_reversal=False):
         """Creates a PWSymmetryAnalyzer object.
@@ -91,6 +183,7 @@ class PWSymmetryAnalyzer:
         disable_time_reversal:
             Switch for disabling time reversal.
         """
+        self.symmetries = symmetries
         self.qpd = qpd
         self.kd = kd = kpoints.kd
         self.context = context
@@ -110,19 +203,19 @@ class PWSymmetryAnalyzer:
                                    self.disable_time_reversal)
 
         # Number of symmetries
-        U_scc = kd.symmetry.op_scc
-        self.nU = len(U_scc)
-
-        self.nsym = 2 * self.nU
+        self.nsym = 2 * self.symmetries.nU
         self.use_time_reversal = not self.disable_time_reversal
 
         self.kptfinder = kpoints.kptfinder
 
-        self.s_s, self.shift_sc = self.analyze_symmetries()
         self.G_sG = self.initialize_G_maps()
 
         self.context.print(self.get_infostring())
         self.context.print(self.symmetry_description())
+
+    def how_many_symmetries(self):
+        # temporary backwards compatibility for external calls
+        return len(self.symmetries)
 
     def get_infostring(self):
         txt = ''
@@ -142,7 +235,7 @@ class PWSymmetryAnalyzer:
         if self.disable_symmetries:
             txt += 'All symmetries have been disabled. '
 
-        txt += f'Found {len(self.s_s)} allowed symmetries. '
+        txt += f'Found {len(self.symmetries.s_s)} allowed symmetries. '
 
         # Maybe we can avoid calling this somehow, we're only using
         # it to print:
@@ -157,7 +250,7 @@ class PWSymmetryAnalyzer:
         """Return string description of symmetry operations."""
         isl = ['\n']
         nx = 6  # You are not allowed to use non-symmorphic syms (value 3)
-        ns = len(self.s_s)
+        ns = len(self.symmetries)
         y = 0
         for y in range((ns + nx - 1) // nx):
             for c in range(3):
@@ -166,7 +259,9 @@ class PWSymmetryAnalyzer:
                     s = x + y * nx
                     if s == ns:
                         break
-                    op_cc, sign = self.get_symmetry_operator(self.s_s[s])
+                    op_cc, sign = self.symmetries.get_symmetry_operator(
+                        # little ugly this, symmetries can do the indexing XXX
+                        self.symmetries.s_s[s])
                     op_c = sign * op_cc[c]
                     tisl.append(f'  ({op_c[0]:2d} {op_c[1]:2d} {op_c[2]:2d})')
                 tisl.append('\n')
@@ -174,98 +269,12 @@ class PWSymmetryAnalyzer:
             isl.append('\n')
         return ''.join(isl)
 
-    @timer('Analyze symmetries.')
-    def analyze_symmetries(self):
-        r"""Determine allowed symmetries.
-
-        An direct symmetry U must fulfill::
-
-          U \mathbf{q} = q + \Delta
-
-        Under time-reversal (indirect) it must fulfill::
-
-          -U \mathbf{q} = q + \Delta
-
-        where :math:`\Delta` is a reciprocal lattice vector.
-        """
-        qpd = self.qpd
-
-        # Shortcuts
-        q_c = qpd.q_c
-        kd = self.kd
-
-        U_scc = kd.symmetry.op_scc
-        nU = self.nU
-        nsym = self.nsym
-
-        shift_sc = np.zeros((nsym, 3), int)
-        conserveq_s = np.zeros(nsym, bool)
-
-        newq_sc = np.dot(U_scc, q_c)
-
-        # Direct symmetries
-        dshift_sc = (newq_sc - q_c[np.newaxis]).round().astype(int)
-        inds_s = np.argwhere((newq_sc == q_c[np.newaxis] + dshift_sc).all(1))
-        conserveq_s[inds_s] = True
-
-        shift_sc[:nU] = dshift_sc
-
-        # Time reversal
-        trshift_sc = (-newq_sc - q_c[np.newaxis]).round().astype(int)
-        trinds_s = np.argwhere((-newq_sc == q_c[np.newaxis] +
-                                trshift_sc).all(1)) + nU
-        conserveq_s[trinds_s] = True
-        shift_sc[nU:nsym] = trshift_sc
-
-        # The indices of the allowed symmetries
-        s_s = conserveq_s.nonzero()[0]
-
-        # Filter out disabled symmetries
-        if self.disable_point_group:
-            s_s = list(filter(self.is_not_point_group, s_s))
-
-        if self.disable_time_reversal:
-            s_s = list(filter(self.is_not_time_reversal, s_s))
-
-        # You are not allowed to use non-symmorphic syms, sorry. So we remove
-        # the option and always filter those symmetries out.
-        s_s = list(filter(self.is_not_non_symmorphic, s_s))
-
-#        stmp_s = []
-#        for s in s_s:
-#            if self.kd.bz2bz_ks[0, s] == -1:
-#                assert (self.kd.bz2bz_ks[:, s] == -1).all()
-#            else:
-#                stmp_s.append(s)
-
-#        s_s = stmp_s
-
-        return s_s, shift_sc
-
-    def is_not_point_group(self, s):
-        U_scc = self.kd.symmetry.op_scc
-        nU = self.nU
-        return (U_scc[s % nU] == np.eye(3)).all()
-
-    def is_not_time_reversal(self, s):
-        nU = self.nU
-        return not bool(s // nU)
-
-    def is_not_non_symmorphic(self, s):
-        ft_sc = self.kd.symmetry.ft_sc
-        nU = self.nU
-        return not bool(ft_sc[s % nU].any())
-
-    def how_many_symmetries(self):
-        """Return number of symmetries."""
-        return len(self.s_s)
-
     @timer('Group kpoints')
     def group_kpoints(self, K_k=None):
         """Group kpoints according to the reduced symmetries"""
         if K_k is None:
             K_k = np.arange(self.kd.nbzkpts)
-        s_s = self.s_s
+        s_s = self.symmetries.s_s
         bz2bz_ks = self.kd.bz2bz_ks
         nk = len(bz2bz_ks)
         sbz2sbz_ks = bz2bz_ks[K_k][:, s_s]  # Reduced number of symmetries
@@ -289,8 +298,8 @@ class PWSymmetryAnalyzer:
         """Find irreducible k-points for tetrahedron integration."""
         # Get the little group of q
         U_scc = []
-        for s in self.s_s:
-            U_cc, sign = self.get_symmetry_operator(s)
+        for s in self.symmetries.s_s:
+            U_cc, sign = self.symmetries.get_symmetry_operator(s)
             U_scc.append(sign * U_cc)
         U_scc = np.array(U_scc)
 
@@ -344,9 +353,9 @@ class PWSymmetryAnalyzer:
             tmp_GG = np.zeros_like(A_GG, order='C')
             # tmp2_GG = np.zeros_like(A_GG)
 
-            for s in self.s_s:
+            for s in self.symmetries.s_s:
                 G_G = self.G_sG[s]
-                _, sign = self.get_symmetry_operator(s)
+                _, sign = self.symmetries.get_symmetry_operator(s)
                 GG_shuffle(G_G, sign, A_GG, tmp_GG)
 
                 # This is the exact operation that GG_shuffle does.
@@ -359,7 +368,7 @@ class PWSymmetryAnalyzer:
                 #     tmp2_GG += A_GG[G_G, :][:, G_G].T
 
             # assert np.allclose(tmp_GG, tmp2_GG)
-            A_GG[:] = tmp_GG / self.how_many_symmetries()
+            A_GG[:] = tmp_GG / len(self.symmetries)
 
     # Set up complex frequency alias
     symmetrize_zGG = symmetrize_wGG
@@ -375,9 +384,9 @@ class PWSymmetryAnalyzer:
             AT_wxvG = A_wxvG[:, ::-1]
 
         tmp_wxvG = np.zeros_like(A_wxvG)
-        for s in self.s_s:
+        for s in self.symmetries.s_s:
             G_G = self.G_sG[s]
-            U_cc, sign = self.get_symmetry_operator(s)
+            U_cc, sign = self.symmetries.get_symmetry_operator(s)
             M_vv = np.dot(np.dot(A_cv.T, U_cc.T), iA_cv)
             if sign == 1:
                 tmp = sign * np.dot(M_vv.T, A_wxvG[..., G_G])
@@ -386,7 +395,7 @@ class PWSymmetryAnalyzer:
             tmp_wxvG += np.transpose(tmp, (1, 2, 0, 3))
 
         # Overwrite the input
-        A_wxvG[:] = tmp_wxvG / self.how_many_symmetries()
+        A_wxvG[:] = tmp_wxvG / len(self.symmetries)
 
     @timer('symmetrize_wvv')
     def symmetrize_wvv(self, A_wvv):
@@ -397,8 +406,8 @@ class PWSymmetryAnalyzer:
         if self.use_time_reversal:
             AT_wvv = np.transpose(A_wvv, (0, 2, 1))
 
-        for s in self.s_s:
-            U_cc, sign = self.get_symmetry_operator(s)
+        for s in self.symmetries.s_s:
+            U_cc, sign = self.symmetries.get_symmetry_operator(s)
             M_vv = np.dot(np.dot(A_cv.T, U_cc.T), iA_cv)
             if sign == 1:
                 tmp = np.dot(np.dot(M_vv.T, A_wvv), M_vv)
@@ -407,24 +416,7 @@ class PWSymmetryAnalyzer:
             tmp_wvv += np.transpose(tmp, (1, 0, 2))
 
         # Overwrite the input
-        A_wvv[:] = tmp_wvv / self.how_many_symmetries()
-
-    def timereversal(self, s):
-        """Is this a time-reversal symmetry?"""
-        tr = bool(s // self.nU)
-        return tr
-
-    def get_symmetry_operator(self, s):
-        """Return symmetry operator s."""
-        U_scc = self.kd.symmetry.op_scc
-
-        reds = s % self.nU
-        if self.timereversal(s):
-            sign = -1
-        else:
-            sign = 1
-
-        return U_scc[reds], sign
+        A_wvv[:] = tmp_wvv / len(self.symmetries)
 
     def initialize_G_maps(self):
         """Calculate the Gvector mappings."""
@@ -435,10 +427,10 @@ class PWSymmetryAnalyzer:
         Q_G = qpd.Q_qG[0]
 
         G_sG = [None] * self.nsym
-        for s in self.s_s:
-            U_cc, sign = self.get_symmetry_operator(s)
+        for s in self.symmetries.s_s:
+            U_cc, sign = self.symmetries.get_symmetry_operator(s)
             iU_cc = np.linalg.inv(U_cc).T
-            UG_Gc = np.dot(G_Gc - self.shift_sc[s], sign * iU_cc)
+            UG_Gc = np.dot(G_Gc - self.symmetries.shift_sc[s], sign * iU_cc)
 
             assert np.allclose(UG_Gc.round(), UG_Gc)
             UQ_G = np.ravel_multi_index(UG_Gc.round().astype(int).T,
