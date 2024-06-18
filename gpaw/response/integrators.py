@@ -74,7 +74,7 @@ class PointIntegrator(Integrator):
         mydomain = self.mydomain(domain)
 
         prefactor = (2 * np.pi)**3 / self.vol / domain.nkpts
-        out_wxx /= prefactor
+        out_wxx /= prefactor * self.kncomm.size
 
         # Sum kpoints
         # Calculate integrations weight
@@ -87,10 +87,9 @@ class PointIntegrator(Integrator):
 
             task.run(wd, n_MG, deps_M, out_wxx)
 
-        # Sum over
-        # Can this really be valid, if the original input out_wxx is nonzero?
-        # This smells and should be investigated XXX
-        # There could also be similar errors elsewhere... XXX
+        # We have divided the broadcasted sum from previous update by
+        # kncomm.size, and thus here is will be back to its original value.
+        # This is to prevent allocating an extra large array.
         self.kncomm.sum(out_wxx)
 
         if self.blockcomm.size == 1 and task.symmetrizable_unless_blocked:
