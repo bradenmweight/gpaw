@@ -32,7 +32,7 @@ def test_residues(in_tmp_dir):
 
     rng = np.random.default_rng(seed=1)
     omegat_nGG = rng.random((npols, nG, nG)) * 0.05 + 5.5 - 0.01j
-    W_nGG[:] = rng.random((npols, nG, nG)) # * 0.05 + 1.5 - 0.01j
+    W_nGG[:] = rng.random((npols, nG, nG))
     W_nGG = np.ascontiguousarray(W_nGG)
 
     x_GG_py, dx_GG_py = mpa_py(omega, f, omegat_nGG, W_nGG, eta, factor)
