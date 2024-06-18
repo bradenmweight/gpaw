@@ -351,9 +351,7 @@ class SingleParticleSiteSumRuleCalculator(PairFunctionIntegrator):
     """
 
     def __init__(self, gs, sites, context):
-        super().__init__(gs, context,
-                         disable_point_group=True,
-                         disable_time_reversal=True)
+        super().__init__(gs, context, qsymmetry=False)
 
         # Set up calculator for the f^a matrix element
         self.sites = sites
@@ -492,9 +490,7 @@ class TwoParticleSiteSumRuleCalculator(PairFunctionIntegrator):
         """Construct the two-particle site sum rule calculator."""
         if context is None:
             context = ResponseContext()
-        super().__init__(gs, context,
-                         disable_point_group=True,
-                         disable_time_reversal=True)
+        super().__init__(gs, context, qsymmetry=False)
         self.nbands = nbands
 
         # Set up calculators for the f^a and g^b matrix elements

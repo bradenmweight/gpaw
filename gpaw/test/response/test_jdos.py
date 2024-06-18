@@ -38,7 +38,7 @@ def test_jdos(in_tmp_dir, gpw_files, system, qrel):
     zd = ComplexFrequencyDescriptor.from_array(omega_w + 1.j * eta)
 
     # Calculation parameters (which should not affect the result)
-    disable_syms_s = [True, False]
+    qsymmetry_s = [True, False]
     bandsummation_b = ['double', 'pairwise']
 
     # ---------- Script ---------- #
@@ -57,12 +57,11 @@ def test_jdos(in_tmp_dir, gpw_files, system, qrel):
                                        nbands=nbands)
 
     # Calculate the jdos using the PairFunctionIntegrator module
-    for disable_syms in disable_syms_s:
+    for qsymmetry in qsymmetry_s:
         for bandsummation in bandsummation_b:
             jdos_calc = JDOSCalculator(gs,
                                        nbands=nbands,
-                                       disable_time_reversal=disable_syms,
-                                       disable_point_group=disable_syms,
+                                       qsymmetry=qsymmetry,
                                        bandsummation=bandsummation)
             jdos = jdos_calc.calculate(spincomponent, q_c, zd)
             jdos_w = jdos.array

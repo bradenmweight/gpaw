@@ -1,3 +1,6 @@
+from typing import Union
+from dataclasses import dataclass
+
 import numpy as np
 from scipy.spatial import Delaunay, cKDTree
 
@@ -23,6 +26,44 @@ class KPointFinder:
                              'are commensurate with the k-point grid.')
 
         return k
+
+
+@dataclass
+class QSymmetryAnalyzer:
+    """K-point symmetry analyzer for transitions k -> k + q.
+
+    Parameters
+    ----------
+    point_group : bool
+        Use point group symmetry.
+    time_reversal : bool
+        Use time-reversal symmetry (if applicable).
+    """
+
+    point_group: bool = True
+    time_reversal: bool = True
+
+    @property
+    def disabled(self):
+        return not (self.point_group or self.time_reversal)
+
+    def analyze(self, kpoints, qpd, context):
+        return PWSymmetryAnalyzer(
+            kpoints, qpd, context, not self.point_group,
+            not self.time_reversal)
+
+
+QSymmetryInput = Union[QSymmetryAnalyzer, dict, bool]
+
+
+def ensure_qsymmetry(qsymmetry: QSymmetryInput) -> QSymmetryAnalyzer:
+    if not isinstance(qsymmetry, QSymmetryAnalyzer):
+        if isinstance(qsymmetry, dict):
+            qsymmetry = QSymmetryAnalyzer(**qsymmetry)
+        else:
+            qsymmetry = QSymmetryAnalyzer(
+                point_group=qsymmetry, time_reversal=qsymmetry)
+    return qsymmetry
 
 
 class PWSymmetryAnalyzer:

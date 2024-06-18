@@ -160,9 +160,7 @@ def test_Co_hcp(in_tmp_dir, gpw_files):
     # Initialize the exchange calculator with and without symmetry
     gs = ResponseGroundStateAdapter(calc)
     context = ResponseContext()
-    chiks_calc0 = ChiKSCalculator(gs, context,
-                                  disable_point_group=True,
-                                  disable_time_reversal=True,
+    chiks_calc0 = ChiKSCalculator(gs, context, qsymmetry=False,
                                   ecut=ecut, nbands=nbands, gammacentered=True)
     localft_calc = LocalPAWFTCalculator(gs, context)
     isoexch_calc0 = IsotropicExchangeCalculator(chiks_calc0, localft_calc)

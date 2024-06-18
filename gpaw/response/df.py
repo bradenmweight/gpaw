@@ -660,8 +660,8 @@ class DielectricFunction(DielectricFunctionCalculator):
                  hilbert=True,
                  nbands=None, eta=0.2,
                  intraband=True, nblocks=1, world=mpi.world, txt=sys.stdout,
-                 truncation=None, disable_point_group=False,
-                 disable_time_reversal=False,
+                 truncation=None,
+                 qsymmetry=True,
                  integrationmode=None, rate=0.0,
                  eshift: float | None = None):
         """Creates a DielectricFunction object.
@@ -707,8 +707,7 @@ class DielectricFunction(DielectricFunctionCalculator):
             ecut=ecut, nbands=nbands, eta=eta,
             hilbert=hilbert,
             intraband=intraband,
-            disable_point_group=disable_point_group,
-            disable_time_reversal=disable_time_reversal,
+            qsymmetry=qsymmetry,
             integrationmode=integrationmode,
             rate=rate, eshift=eshift
         )
