@@ -239,7 +239,7 @@ class PWSymmetryAnalyzer:
 
         self.kptfinder = kpoints.kptfinder
 
-        self.G_SG = self.initialize_G_maps()
+        self.G_sG = self.initialize_G_maps()
 
         self.context.print(self.get_infostring())
         self.context.print(self.symmetry_description())
@@ -383,8 +383,8 @@ class PWSymmetryAnalyzer:
             tmp_GG = np.zeros_like(A_GG, order='C')
             # tmp2_GG = np.zeros_like(A_GG)
 
-            for S in self.symmetries.S_s:
-                G_G = self.G_SG[S]
+            for s, S in enumerate(self.symmetries.S_s):
+                G_G = self.G_sG[s]
                 sign = self.symmetries.sign(S)
                 GG_shuffle(G_G, sign, A_GG, tmp_GG)
 
@@ -414,8 +414,8 @@ class PWSymmetryAnalyzer:
             AT_wxvG = A_wxvG[:, ::-1]
 
         tmp_wxvG = np.zeros_like(A_wxvG)
-        for S in self.symmetries.S_s:
-            G_G = self.G_SG[S]
+        for s, S in enumerate(self.symmetries.S_s):
+            G_G = self.G_sG[s]
             U_cc, sign = self.symmetries.get_symmetry_operator(S)
             M_vv = np.dot(np.dot(A_cv.T, U_cc.T), iA_cv)
             if sign == 1:
@@ -456,7 +456,7 @@ class PWSymmetryAnalyzer:
         G_Gc = np.dot(G_Gv, np.linalg.inv(B_cv))
         Q_G = qpd.Q_qG[0]
 
-        G_SG = [None] * self.nsym
+        G_sG = []
         for S in self.symmetries.S_s:
             U_cc, sign = self.symmetries.get_symmetry_operator(S)
             iU_cc = np.linalg.inv(U_cc).T
@@ -474,8 +474,8 @@ class PWSymmetryAnalyzer:
                     print('This should not be possible but' +
                           'a G-vector was mapped outside the sphere')
                     raise IndexError
-            G_SG[S] = np.array(G_G, dtype=np.int32)
-        return G_SG
+            G_sG.append(np.array(G_G, dtype=np.int32))
+        return np.array(G_sG)
 
     def unfold_ibz_kpoint(self, ik):
         """Return kpoints related to irreducible kpoint."""
