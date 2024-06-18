@@ -117,15 +117,19 @@ class WBaseCalculator():
         """
         V0 = None
         sqrtV0 = None
-        if self.integrate_gamma != 0:
+        if self.integrate_gamma in {1, 2}:
             reduced = (self.integrate_gamma == 2)
             V0, sqrtV0 = self.coulomb.integrated_kernel(qpd=chi0.qpd,
                                                         reduced=reduced)
-        elif self.integrate_gamma == 0 and chi0.optical_limit:
-            bzvol = (2 * np.pi)**3 / self.gs.volume / self.qd.nbzkpts
-            Rq0 = (3 * bzvol / (4 * np.pi))**(1. / 3.)
-            V0 = 16 * np.pi**2 * Rq0 / bzvol
-            sqrtV0 = (4 * np.pi)**(1.5) * Rq0**2 / bzvol / 2
+        elif self.integrate_gamma == 0:
+            if chi0.optical_limit:
+                bzvol = (2 * np.pi)**3 / self.gs.volume / self.qd.nbzkpts
+                Rq0 = (3 * bzvol / (4 * np.pi))**(1. / 3.)
+                V0 = 16 * np.pi**2 * Rq0 / bzvol
+                sqrtV0 = (4 * np.pi)**(1.5) * Rq0**2 / bzvol / 2
+        else:
+            raise KeyError('Unknown integrate_gamma option:'
+                           f'{self.integrate_gamma}. Expected 0, 1, 2 or WS.')
         return V0, sqrtV0
 
     def apply_gamma_correction(self, W_GG, einv_GG, V0, sqrtV0, sqrtV_G):
@@ -180,7 +184,15 @@ class WCalculator(WBaseCalculator):
                                            self.xckernel, fxc_mode)
         self.context.timer.start('Dyson eq.')
 
-        V0, sqrtV0 = self.get_V0sqrtV0(chi0)
+        if self.integrate_gamma == 'WS':
+            from gpaw.hybrids.wstc import WignerSeitzTruncatedCoulomb
+            wstc = WignerSeitzTruncatedCoulomb(chi0.qpd.gd.cell_cv,
+                                               dfc.coulomb.N_c)
+            sqrtV_G = wstc.get_potential(chi0.qpd)**0.5
+        else:
+            sqrtV_G = dfc.sqrtV_G
+            V0, sqrtV0 = self.get_V0sqrtV0(chi0)
+
         for iw, chi0_GG in enumerate(chi0_wGG):
             # Note, at q=0 get_epsinv_GG modifies chi0_GG
             einv_GG = dfc.get_epsinv_GG(chi0_GG, iw)
@@ -190,17 +202,18 @@ class WCalculator(WBaseCalculator):
             # W^c = sqrt(V)(epsinv - delta_GG')sqrt(V). However, full epsinv
             # is still needed for q0_corrector.
             einvt_GG = (einv_GG - dfc.I_GG) if only_correlation else einv_GG
-            W_GG[:] = einvt_GG * (dfc.sqrtV_G *
-                                  dfc.sqrtV_G[:, np.newaxis])
+            W_GG[:] = einvt_GG * (sqrtV_G *
+                                  sqrtV_G[:, np.newaxis])
             if self.q0_corrector is not None and chi0.optical_limit:
                 W = dfc.wblocks1d.a + iw
                 self.q0_corrector.add_q0_correction(chi0.qpd, W_GG,
                                                     einv_GG,
                                                     chi0.chi0_WxvG[W],
                                                     chi0.chi0_Wvv[W],
-                                                    dfc.sqrtV_G)
+                                                    sqrtV_G)
                 # XXX Is it to correct to have "or" here?
-            elif chi0.optical_limit or self.integrate_gamma != 0:
+            elif (self.integrate_gamma == 0 and chi0.optical_limit) or\
+                    self.integrate_gamma in {1, 2}:
                 self.apply_gamma_correction(W_GG, einvt_GG,
                                             V0, sqrtV0, dfc.sqrtV_G)
 

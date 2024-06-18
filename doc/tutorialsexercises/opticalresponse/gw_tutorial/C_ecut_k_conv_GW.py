@@ -27,6 +27,7 @@ for k in [6, 8, 10, 12]:
                   bands=(3, 5),
                   ecut=ecut,
                   kpts=[0],
+                  integrate_gamma='WS',
                   filename=f'C-g0w0_k{k}_ecut{ecut}')
 
         result = gw.calculate()

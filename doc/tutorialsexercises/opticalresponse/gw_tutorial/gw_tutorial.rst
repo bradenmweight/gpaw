@@ -26,6 +26,10 @@ Quasi-particle spectrum of bulk diamond
 In the first part of the tutorial, the G0W0 calculator is introduced and the
 quasi-particle spectrum of bulk diamond is calculated.
 
+.. note::
+
+    This tutorial has been updated Jun 17th 2024 to include Wigner-Seitz
+    truncation method for the Coulomb kernel, which greatly improves convergence.
 
 Groundstate calculation
 -----------------------
@@ -70,7 +74,7 @@ for example possible to extract the direct bandgap at the Gamma point:
 
 .. literalinclude:: get_gw_bandgap.py
 
-with the result: 6.96 eV.
+with the result: 7.11 eV.
 
 The possible input parameters of the G0W0 calculator are listed here:
 
@@ -92,10 +96,10 @@ shown below.
 .. image:: C_GW.png
     :height: 400 px
 
-A k-point sampling of (8x8x8) seems to give results converged to within 0.05 eV.
+A k-point sampling of (8x8x8) seems to give results converged to within 0.005 eV.
 The plane wave cutoff is usually converged by employing a `1/E^{3/2}_{\text{cut}}` extrapolation.
 This can be done with the following script: :download:`C_ecut_extrap.py` resulting
-in a direct band gap of 7.57 eV. The extrapolation is shown in the figure below
+in a direct band gap of 7.42 eV. The extrapolation is shown in the figure below
 
 .. image:: C_GW_k8_extrap.png
     :height: 400 px
@@ -124,7 +128,7 @@ is close to the default values.
 Final results
 -------------
 
-A full G0W0 calculation with (8x8x8) k-points and extrapolated to infinite cutoff results in a direct band gap of 7.57 eV. Hence the value of 6.96 eV calculated at first was not converged!
+A full G0W0 calculation with (8x8x8) k-points and extrapolated to infinite cutoff results in a direct band gap of 7.42 eV. Hence the value of 7.11 eV calculated at first was not converged!
 
 Another method for carrying out the frequency integration is the Plasmon Pole
 approximation (PPA). Read more about it here :ref:`gw_theory_ppa`. This is
@@ -134,6 +138,11 @@ using (8x8x8) k-points and extrapolating from calculations at a cutoff of 300
 and 400 eV gives a direct band gap of 7.52 eV, which is in very good agreement
 with the result for the full frequency integration but the calculation took
 only minutes.
+
+.. note::
+
+   Currently PPA does not support Wigner-Seitz supercell truncation and thus
+   the k-point convergence will be lower.
 
 .. note::
 

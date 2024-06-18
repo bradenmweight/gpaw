@@ -30,6 +30,7 @@ for i, domega0 in enumerate([0.01, 0.02, 0.03, 0.04, 0.05]):
                   bands=(3, 5),
                   kpts=[0],
                   ecut=20,
+                  integrate_gamma='WS',
                   frequencies=frequencies,
                   filename=f'C_g0w0_domega0_{domega0}_omega2_{omega2}')
 
