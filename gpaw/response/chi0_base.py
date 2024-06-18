@@ -173,6 +173,10 @@ class Chi0ComponentCalculator:
         ----------
         nblocks : int
             Divide response function memory allocation in nblocks.
+        qsymmetry: bool, dict, or QSymmetryAnalyzer
+            QSymmetryAnalyzer, or bool to enable all/no symmetries,
+            or dict with which to create QSymmetryAnalyzer.
+            Disabling symmetries may be useful for debugging.
         integrationmode : str or None
             Integrator for the k-point integration.
             If == 'tetrahedron integration' then the kpoint integral is
