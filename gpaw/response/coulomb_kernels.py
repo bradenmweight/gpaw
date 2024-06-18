@@ -5,6 +5,7 @@ import numpy as np
 from ase.dft import monkhorst_pack
 from gpaw.response.pair_functions import SingleQPWDescriptor
 from gpaw.response.dyson import PWKernel
+from gpaw.kpt_descriptor import to1bz
 
 
 class NewCoulombKernel(PWKernel):
@@ -151,8 +152,13 @@ def get_integrated_kernel(qpd, N_c, truncation=None,
     if reduced:
         # Only integrate periodic directions if truncation is used
         Nf_c[np.where(~pbc_c)[0]] = 1
-    q_qc = monkhorst_pack(Nf_c) / N_c
+
+    q_qc = monkhorst_pack(Nf_c)
+    q_qc = to1bz(q_qc, qpd.gd.cell_cv)
+    q_qc /= N_c
     q_qc += qpd.q_c
+    q_qc = to1bz(q_qc, qpd.gd.cell_cv)
+
     q_qv = np.dot(q_qc, B_cv)
 
     Nn_c = np.where(~pbc_c)[0]
