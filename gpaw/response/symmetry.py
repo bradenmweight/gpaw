@@ -95,7 +95,7 @@ class QSymmetryAnalyzer:
         where :math:`\Delta` is a reciprocal lattice vector.
         """
         # Map q-point for each unitary symmetry
-        U_ucc = kd.symmetry.op_scc
+        U_ucc = kd.symmetry.op_scc  # here s is the unitary symmetry index
         newq_uc = np.dot(U_ucc, q_c)
 
         # Direct and indirect -> global symmetries
@@ -210,7 +210,7 @@ class PWSymmetryAnalyzer:
 
         self.kptfinder = kpoints.kptfinder
 
-        self.G_sG = self.initialize_G_maps()
+        self.G_SG = self.initialize_G_maps()
 
         self.context.print(self.get_infostring())
         self.context.print(self.symmetry_description())
@@ -276,10 +276,9 @@ class PWSymmetryAnalyzer:
         """Group kpoints according to the reduced symmetries"""
         if K_k is None:
             K_k = np.arange(self.kd.nbzkpts)
-        S_s = self.symmetries.S_s
-        bz2bz_ks = self.kd.bz2bz_ks
-        nk = len(bz2bz_ks)
-        sbz2sbz_ks = bz2bz_ks[K_k][:, S_s]  # Reduced number of symmetries
+        bz2bz_kS = self.kd.bz2bz_ks  # on kd, s is the global symmetry index
+        nk = len(bz2bz_kS)
+        sbz2sbz_ks = bz2bz_kS[K_k][:, self.symmetries.S_s]  # s: q-symmetries
         # Avoid -1 (see documentation in gpaw.symmetry)
         sbz2sbz_ks[sbz2sbz_ks == -1] = nk
 
@@ -300,8 +299,8 @@ class PWSymmetryAnalyzer:
         """Find irreducible k-points for tetrahedron integration."""
         # Get the little group of q
         U_scc = []
-        for s in self.symmetries.S_s:
-            U_cc, sign = self.symmetries.get_symmetry_operator(s)
+        for S in self.symmetries.S_s:
+            U_cc, sign = self.symmetries.get_symmetry_operator(S)
             U_scc.append(sign * U_cc)
         U_scc = np.array(U_scc)
 
@@ -355,9 +354,9 @@ class PWSymmetryAnalyzer:
             tmp_GG = np.zeros_like(A_GG, order='C')
             # tmp2_GG = np.zeros_like(A_GG)
 
-            for s in self.symmetries.S_s:
-                G_G = self.G_sG[s]
-                _, sign = self.symmetries.get_symmetry_operator(s)
+            for S in self.symmetries.S_s:
+                G_G = self.G_SG[S]
+                sign = self.symmetries.sign(S)
                 GG_shuffle(G_G, sign, A_GG, tmp_GG)
 
                 # This is the exact operation that GG_shuffle does.
@@ -386,9 +385,9 @@ class PWSymmetryAnalyzer:
             AT_wxvG = A_wxvG[:, ::-1]
 
         tmp_wxvG = np.zeros_like(A_wxvG)
-        for s in self.symmetries.S_s:
-            G_G = self.G_sG[s]
-            U_cc, sign = self.symmetries.get_symmetry_operator(s)
+        for S in self.symmetries.S_s:
+            G_G = self.G_SG[S]
+            U_cc, sign = self.symmetries.get_symmetry_operator(S)
             M_vv = np.dot(np.dot(A_cv.T, U_cc.T), iA_cv)
             if sign == 1:
                 tmp = sign * np.dot(M_vv.T, A_wxvG[..., G_G])
@@ -408,8 +407,8 @@ class PWSymmetryAnalyzer:
         if self.use_time_reversal:
             AT_wvv = np.transpose(A_wvv, (0, 2, 1))
 
-        for s in self.symmetries.S_s:
-            U_cc, sign = self.symmetries.get_symmetry_operator(s)
+        for S in self.symmetries.S_s:
+            U_cc, sign = self.symmetries.get_symmetry_operator(S)
             M_vv = np.dot(np.dot(A_cv.T, U_cc.T), iA_cv)
             if sign == 1:
                 tmp = np.dot(np.dot(M_vv.T, A_wvv), M_vv)
