@@ -251,16 +251,6 @@ class RPACalculator:
                 energy_i.append(energy)
                 m1 = m2
 
-                a = 1 / chi0calc.chi0_body_calc.integrator.kncomm.size
-                if ecut < ecutmax and a != 1.0:
-                    # Chi0 will be summed again over chicomm, so we divide
-                    # by its size:
-                    for chi0 in chi0_s:
-                        chi0.chi0_WgG[:] *= a
-                    # if chi0_swxvG is not None:
-                    #     chi0_swxvG *= a
-                    #     chi0_swvv *= a
-
             energy_qi.append(energy_i)
             self.write(energy_qi, ecut_i)
             p()
