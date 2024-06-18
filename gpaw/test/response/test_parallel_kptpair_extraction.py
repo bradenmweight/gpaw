@@ -11,7 +11,7 @@ from gpaw.response.kspair import KohnShamKPointPairExtractor
 from gpaw.response.pair_functions import SingleQPWDescriptor
 from gpaw.response.pair_transitions import PairTransitions
 from gpaw.response.pair_integrator import KPointPairPointIntegral
-from gpaw.response.symmetry import QSymmetryAnalyzer, PWSymmetryAnalyzer
+from gpaw.response.symmetry import QSymmetryAnalyzer
 
 from gpaw.test.response.test_chiks import (generate_system_s, generate_qrel_q,
                                            get_q_c, generate_nblocks_n)
