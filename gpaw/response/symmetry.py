@@ -96,7 +96,7 @@ class QSymmetryAnalyzer:
         """
         # Map q-point for each unitary symmetry
         U_ucc = kd.symmetry.op_scc  # here s is the unitary symmetry index
-        newq_uc = np.dot(U_ucc, q_c)
+        Uq_uc = np.dot(U_ucc, q_c)
 
         # Direct and indirect -> global symmetries
         nU = len(U_ucc)
@@ -106,14 +106,14 @@ class QSymmetryAnalyzer:
 
         # Identify direct symmetries
         # Check whether U q - q is integer (reciprocal lattice vector)
-        dshift_uc = newq_uc - q_c[np.newaxis]
+        dshift_uc = Uq_uc - q_c[np.newaxis]
         is_direct_symm_u = (dshift_uc == dshift_uc.round()).all(axis=1)
         is_qsymmetry_S[:nU][is_direct_symm_u] = True
         shift_Sc[:nU] = dshift_uc
 
         # Identify indirect symmetries
         # Check whether -U q - q is integer (reciprocal lattice vector)
-        idshift_uc = -newq_uc - q_c
+        idshift_uc = -Uq_uc - q_c
         is_indirect_symm_u = (idshift_uc == idshift_uc.round()).all(axis=1)
         is_qsymmetry_S[nU:][is_indirect_symm_u] = True
         shift_Sc[nU:] = idshift_uc
