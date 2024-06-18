@@ -5,9 +5,8 @@ def workflow():
             # Something wrong with this one (#1186):
             run(script='atom/test_pbe_isolated_output.py')
         with run(script='atom/si.atom.rpa_init_pbe.py', cores=24, tmax='15m'):
-            if 0:  # See issue #1188
-                run(script='atom/si.atom.rpa.py',
-                    cores=2 * 96, nodename='epyc96', tmax='15h')
+            run(script='atom/si.atom.rpa.py',
+                cores=24, processes=16, tmax='3h')
     with run(script='si.pbe.py'):
         exx = run(script='si_pbe_exx.py', cores=4, tmax='15m')
         run(script='test_pbe_output.py', deps=[exx])

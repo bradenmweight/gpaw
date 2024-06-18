@@ -5,7 +5,7 @@ from gpaw import PW
 # This calculation is too heavy to run as an exercise!!
 
 # Plane wave cutoff
-pwcutoff = 400.0
+pwcutoff = 450.0
 
 
 # box length for isolated atom
