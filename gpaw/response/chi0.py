@@ -222,7 +222,12 @@ class Chi0BodyCalculator(Chi0ComponentPWCalculator):
                                   optical=False, m1=m1, m2=m2)
 
         chi0_body.data_WgG[:] /= prefactor
-        out_WgG = chi0_body.zeros()
+        if self.hilbert:
+            # Allocate a temporary array for the spectral function
+            out_WgG = chi0_body.zeros()
+        else:
+            # Use the preallocated array for direct updates
+            out_WgG = chi0_body.data_WgG
         self.integrator.integrate(domain=domain,  # Integration domain
                                   integrand=integrand,
                                   task=self.task,
@@ -238,8 +243,8 @@ class Chi0BodyCalculator(Chi0ComponentPWCalculator):
                 ht = HilbertTransform(np.array(self.wd.omega_w), self.eta,
                                       timeordered=self.timeordered)
                 ht(out_WgG)
-        # Update the actual chi0 array
-        chi0_body.data_WgG[:] += out_WgG
+            # Update the actual chi0 array
+            chi0_body.data_WgG[:] += out_WgG
         chi0_body.data_WgG[:] *= prefactor
 
         tmp_chi0_wGG = chi0_body.copy_array_with_distribution('wGG')
