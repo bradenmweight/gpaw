@@ -44,9 +44,9 @@ class QSymmetries(Sequence):
            vector). May be reduced further, if some of the symmetries have been
            disabled. Length is q-dependent and depends on user input.
     """
-    U_ucc: np.ndarray
-    S_s: np.ndarray
-    shift_Sc: np.ndarray
+    U_ucc: np.ndarray  # unitary symmetry transformations
+    S_s: np.ndarray  # extended symmetry index for each q-symmetry
+    shift_Sc: np.ndarray  # reciprocal lattice shift, G = (T)Uq - q
 
     def __post_init__(self):
         self.nU = len(self.U_ucc)
@@ -56,8 +56,7 @@ class QSymmetries(Sequence):
 
     def __getitem__(self, s):
         S = self.S_s[s]
-        return QSymmetryOperator(
-            self.unioperator(S), self.sign(S), self.shift_Sc[S])
+        return self.unioperator(S), self.sign(S), self.shift_Sc[S]
 
     def unioperator(self, S):
         return self.U_ucc[S % self.nU]
@@ -71,17 +70,6 @@ class QSymmetries(Sequence):
         if self.timereversal(S):
             return -1
         return 1
-
-    def get_symmetry_operator(self, S):
-        """Return symmetry operator s."""
-        return self.unioperator(S), self.sign(S)
-
-
-@dataclass
-class QSymmetryOperator:
-    U_cc: np.ndarray
-    sign: int
-    shift_c: np.ndarray
 
 
 @dataclass
@@ -290,10 +278,8 @@ class PWSymmetryAnalyzer:
                     s = x + y * nx
                     if s == ns:
                         break
-                    op_cc, sign = self.symmetries.get_symmetry_operator(
-                        # little ugly this, symmetries can do the indexing XXX
-                        self.symmetries.S_s[s])
-                    op_c = sign * op_cc[c]
+                    U_cc, sign, _ = self.symmetries[s]
+                    op_c = sign * U_cc[c]
                     tisl.append(f'  ({op_c[0]:2d} {op_c[1]:2d} {op_c[2]:2d})')
                 tisl.append('\n')
                 isl.append(''.join(tisl))
@@ -326,12 +312,8 @@ class PWSymmetryAnalyzer:
 
     def get_tetrahedron_ikpts(self, *, pbc_c):
         """Find irreducible k-points for tetrahedron integration."""
-        # Get the little group of q
-        U_scc = []
-        for S in self.symmetries.S_s:
-            U_cc, sign = self.symmetries.get_symmetry_operator(S)
-            U_scc.append(sign * U_cc)
-        U_scc = np.array(U_scc)
+        U_scc = np.array([  # little group of q
+            sign * U_cc for U_cc, sign, _ in self.symmetries])
 
         # Determine the irreducible BZ
         bzk_kc, ibzk_kc, _ = get_reduced_bz(self.qpd.gd.cell_cv,
@@ -383,9 +365,7 @@ class PWSymmetryAnalyzer:
             tmp_GG = np.zeros_like(A_GG, order='C')
             # tmp2_GG = np.zeros_like(A_GG)
 
-            for s, S in enumerate(self.symmetries.S_s):
-                G_G = self.G_sG[s]
-                sign = self.symmetries.sign(S)
+            for (_, sign, _), G_G in zip(self.symmetries, self.G_sG):
                 GG_shuffle(G_G, sign, A_GG, tmp_GG)
 
                 # This is the exact operation that GG_shuffle does.
@@ -414,9 +394,7 @@ class PWSymmetryAnalyzer:
             AT_wxvG = A_wxvG[:, ::-1]
 
         tmp_wxvG = np.zeros_like(A_wxvG)
-        for s, S in enumerate(self.symmetries.S_s):
-            G_G = self.G_sG[s]
-            U_cc, sign = self.symmetries.get_symmetry_operator(S)
+        for (U_cc, sign, _), G_G in zip(self.symmetries, self.G_sG):
             M_vv = np.dot(np.dot(A_cv.T, U_cc.T), iA_cv)
             if sign == 1:
                 tmp = sign * np.dot(M_vv.T, A_wxvG[..., G_G])
@@ -436,8 +414,7 @@ class PWSymmetryAnalyzer:
         if self.use_time_reversal:
             AT_wvv = np.transpose(A_wvv, (0, 2, 1))
 
-        for S in self.symmetries.S_s:
-            U_cc, sign = self.symmetries.get_symmetry_operator(S)
+        for U_cc, sign, _ in self.symmetries:
             M_vv = np.dot(np.dot(A_cv.T, U_cc.T), iA_cv)
             if sign == 1:
                 tmp = np.dot(np.dot(M_vv.T, A_wvv), M_vv)
@@ -457,10 +434,9 @@ class PWSymmetryAnalyzer:
         Q_G = qpd.Q_qG[0]
 
         G_sG = []
-        for S in self.symmetries.S_s:
-            U_cc, sign = self.symmetries.get_symmetry_operator(S)
+        for U_cc, sign, shift_c in self.symmetries:
             iU_cc = np.linalg.inv(U_cc).T
-            UG_Gc = np.dot(G_Gc - self.symmetries.shift_Sc[S], sign * iU_cc)
+            UG_Gc = np.dot(G_Gc - shift_c, sign * iU_cc)
 
             assert np.allclose(UG_Gc.round(), UG_Gc)
             UQ_G = np.ravel_multi_index(UG_Gc.round().astype(int).T,
