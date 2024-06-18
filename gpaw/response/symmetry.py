@@ -1,5 +1,6 @@
 from typing import Union
 from dataclasses import dataclass
+from collections.abc import Sequence
 
 import numpy as np
 from scipy.spatial import Delaunay, cKDTree
@@ -29,7 +30,7 @@ class KPointFinder:
 
 
 @dataclass
-class QSymmetries:
+class QSymmetries(Sequence):
     """Symmetry operations for a given q-point.
 
     We operate with several different symmetry indices:
@@ -53,6 +54,14 @@ class QSymmetries:
     def __len__(self):
         return len(self.S_s)
 
+    def __getitem__(self, s):
+        S = self.S_s[s]
+        return QSymmetryOperator(
+            self.unioperator(S), self.sign(S), self.shift_Sc[S])
+
+    def unioperator(self, S):
+        return self.U_ucc[S % self.nU]
+
     def timereversal(self, S):
         """Is the global index S a time-reversal symmetry?"""
         return bool(S // self.nU)
@@ -65,7 +74,14 @@ class QSymmetries:
 
     def get_symmetry_operator(self, S):
         """Return symmetry operator s."""
-        return self.U_ucc[S % self.nU], self.sign(S)
+        return self.unioperator(S), self.sign(S)
+
+
+@dataclass
+class QSymmetryOperator:
+    U_cc: np.ndarray
+    sign: int
+    shift_c: np.ndarray
 
 
 @dataclass
