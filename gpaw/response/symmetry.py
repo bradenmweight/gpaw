@@ -235,7 +235,7 @@ class PWSymmetryAnalyzer:
         if self.disable_symmetries:
             txt += 'All symmetries have been disabled. '
 
-        txt += f'Found {len(self.symmetries.s_s)} allowed symmetries. '
+        txt += f'Found {len(self.symmetries)} allowed symmetries. '
 
         # Maybe we can avoid calling this somehow, we're only using
         # it to print:
