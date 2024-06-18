@@ -23,6 +23,7 @@ from gpaw.response.pair_functions import SingleQPWDescriptor
 from gpaw.response.screened_interaction import initialize_w_calculator
 from gpaw.response.g0w0 import validate_integrate_gamma
 
+
 def decide_whether_tammdancoff(val_sn, con_sn):
     for n in val_sn[0]:
         if n in con_sn[0]:
@@ -169,7 +170,8 @@ class BSEBackend:
         if integrate_gamma['type'] == 'sphere' and truncation is not None:
             self.context.print('***WARNING*** Analytical Coulomb integration' +
                                ' is not expected to work with Coulomb ' +
-                               'truncation. Use integrate_gamma=\'reciprocal\'')
+                               'truncation. ' +
+                               'Use integrate_gamma=\'reciprocal\'')
         self.integrate_gamma = integrate_gamma
 
         # Find q-vectors and weights in the IBZ:

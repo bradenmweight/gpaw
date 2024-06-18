@@ -30,13 +30,28 @@ from ase.utils.filecache import MultiFileJSONCache as FileCache
 from contextlib import ExitStack
 from ase.parallel import broadcast
 
+
 def validate_integrate_gamma(gamma_integration):
+    defaults = {'sphere': {'type': 'sphere'},
+                'reciprocal': {'type': 'reciprocal'},
+                'reciprocal2D': {'type': 'reciprocal', 'reduced': True},
+                '1BZ': {'type': '1BZ'},
+                '1BZ2D': {'type': '1BZ', 'reduced': True},
+                'WS': {'type': 'WS'}}
+
+    if isinstance(gamma_integration, int):
+        raise ValueError("gamma_integration=INT is deprecated. Please start"
+                         "using the new notations, as is given in the"
+                         "documentation of gpaw/response/g0w0.py class "
+                         "G0W0.__init__.")
+
     if isinstance(gamma_integration, str):
-        gamma_integration = {'type': gamma_integration}
+        gamma_integration = defaults[gamma_integration]
     assert gamma_integration['type'] in {'sphere', 'reciprocal', '1BZ', 'WS'}
-    if gamma_integration['type'] != 'reciprocal':
+    if gamma_integration['type'] not in {'reciprocal', '1BZ'}:
         assert not gamma_integration.get('reduced', False)
     return gamma_integration
+
 
 def compare_inputs(inp1, inp2, rel_tol=1e-14, abs_tol=1e-14):
     """
@@ -1111,7 +1126,10 @@ class G0W0(G0W0Calculator):
         truncation: str
             Coulomb truncation scheme. Can be either 2D, 1D, or 0D.
         integrate_gamma: string or dict
-            Method to integrate the Coulomb interaction. 
+            Method to integrate the Coulomb interaction.
+
+            The default is 'sphere'. If 'reduced' key is not given,
+            it defaults to False.
 
             {'type': 'sphere'} or 'sphere':
                 Analytical integration of q=0, G=0 1/q^2 integrand in a sphere
@@ -1137,14 +1155,14 @@ class G0W0(G0W0Calculator):
             {'type': 'WS'} or 'WS':
                 The most accurate method to use for bulk systems.
                 Instead of numerically integrating only q=0, G=0, all (q,G)-
-                pairs participate to the truncation, which is done in real space
-                utilizing the Wigner-Seitz truncation in the Born-von-Karmann
-                supercell of the system.
+                pairs participate to the truncation, which is done in real
+                space utilizing the Wigner-Seitz truncation in the
+                Born-von-Karmann supercell of the system.
 
                 Numerical integration of q=0, G=0 1/q^2 integral in a volume
                 resembling the Wigner-Seitz cell of the reciprocal lattice
-                (voronoi). More accurate than 'reciprocal'.
-                
+                (Voronoi). More accurate than 'reciprocal'.
+
                 R. Sundararaman and T. A. Arias: Phys. Rev. B 87, 165122 (2013)
 
         E0: float
@@ -1162,7 +1180,7 @@ class G0W0(G0W0Calculator):
             requirements as much as possible.
         """
 
-        gamma_integration = validate_integrate_gamma(gamma_integration)
+        integrate_gamma = validate_integrate_gamma(integrate_gamma)
 
         # We pass a serial communicator because the parallel handling
         # is somewhat wonky, we'd rather do that ourselves:
