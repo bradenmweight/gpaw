@@ -563,8 +563,8 @@ def soc_eigenstates(calc: ASECalculator | GPAW | str | Path,
 
 
 def soc(a: Setup, xc, D_sp: Array2D) -> Array3D:
-    """<phi_i|dV_adr / r * L_v|phi_j>"""
-    v_g = get_radial_potential(a, xc, D_sp)
+    """<phi_i|dU^a/dr / r * L_v|phi_j>"""
+    v_g = get_radial_potential_derivative(a, xc, D_sp)
     Ng = len(v_g)
     phi_jg = a.data.phi_jg
 
@@ -578,7 +578,7 @@ def soc(a: Setup, xc, D_sp: Array2D) -> Array3D:
         for j2, l2 in enumerate(a.l_j):
             if l1 == l2:
                 f_g = phi_jg[j1][:Ng] * v_g * phi_jg[j2][:Ng]
-                c = a.xc_correction.rgd.integrate(f_g) / (4 * np.pi)
+                c = a.xc_correction.rgd.integrate(f_g, n=-1) / (4 * np.pi)
                 dVL_vii[0, N1:N1 + Nm, N2:N2 + Nm] = c * Lx_lmm[l1]
                 dVL_vii[1, N1:N1 + Nm, N2:N2 + Nm] = c * Ly_lmm[l1]
                 dVL_vii[2, N1:N1 + Nm, N2:N2 + Nm] = c * Lz_lmm[l1]
@@ -606,9 +606,9 @@ def projected_soc(dVL_vii: Array3D,
     return dVL_vii
 
 
-def get_radial_potential(a: Setup, xc, D_sp: Array2D) -> Array1D:
-    """Calculates (dV/dr)/r for the effective potential.
-    Below, f_g denotes dV/dr = minus the radial force"""
+def get_radial_potential_derivative(a: Setup, xc, D_sp: Array2D) -> Array1D:
+    """Calculates (dU/dr) for the effective potential.
+    Below, f_g denotes dU/dr which is also the negative of the radial force"""
 
     rgd = a.xc_correction.rgd
     r_g = rgd.r_g.copy()
@@ -641,7 +641,7 @@ def get_radial_potential(a: Setup, xc, D_sp: Array2D) -> Array1D:
                         axis=0)
         f_g += fxc_g
 
-    return f_g / r_g
+    return f_g
 
 
 def get_anisotropy(calc, theta=0.0, phi=0.0, nbands=0, width=None):
