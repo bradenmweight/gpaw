@@ -55,7 +55,7 @@ def test_Wsymm(in_tmp_dir, scalapack):
         wcalc = initialize_w_calculator(chi0calc,
                                         wcontext,
                                         coulomb=coulomb,
-                                        integrate_gamma=0)
+                                        integrate_gamma={'type': 'sphere'})
         Wlist = []
         qlist = []
         for iq, q_c in enumerate(q_c_list):

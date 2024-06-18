@@ -26,7 +26,7 @@ def initialize_w_calculator(chi0calc, context, *,
                             coulomb,
                             xc='RPA',  # G0W0Kernel arguments
                             ppa=False, E0=Ha, eta=None,
-                            integrate_gamma=0, q0_correction=False):
+                            integrate_gamma='sphere', q0_correction=False):
     """Initialize a WCalculator from a Chi0Calculator.
 
     Parameters
@@ -61,7 +61,7 @@ class WBaseCalculator():
 
     def __init__(self, gs, context, *, qd,
                  coulomb, xckernel,
-                 integrate_gamma=0, eta=None,
+                 integrate_gamma={'type': 'sphere'}, eta=None,
                  q0_correction=False):
         """
         Base class for W Calculator including basic initializations and Gamma
@@ -74,12 +74,7 @@ class WBaseCalculator():
         qd : QPointDescriptor
         coulomb : CoulombKernel
         xckernel : G0W0Kernel
-        integrate_gamma: int
-             Method to integrate the Coulomb interaction. 1 is a numerical
-             integration at all q-points with G=[0,0,0] - this breaks the
-             symmetry slightly. 0 is analytical integration at q=[0,0,0] only
-             this conserves the symmetry. integrate_gamma=2 is the same as 1,
-             but the average is only carried out in the non-periodic directions
+        integrate_gamma: dict
         q0_correction : bool
             Analytic correction to the q=0 contribution applicable to 2D
             systems.
@@ -110,26 +105,31 @@ class WBaseCalculator():
     def get_V0sqrtV0(self, chi0):
         """
         Integrated Coulomb kernels.
-        integrate_gamma = 0: Analytically integrated kernel
-        in sphere around Gamma
-        integrate_gamma > 0: Numerically  integrated kernel
         XXX: Understand and document Rq0, V0, sqrtV0
         """
         V0 = None
         sqrtV0 = None
-        if self.integrate_gamma in {1, 2}:
-            reduced = (self.integrate_gamma == 2)
+        if self.integrate_gamma['type'] in {'reciprocal', '1BZ'}:
             V0, sqrtV0 = self.coulomb.integrated_kernel(qpd=chi0.qpd,
-                                                        reduced=reduced)
-        elif self.integrate_gamma == 0:
+                                                        reduced=self.integrate_gamma.get('reduced', False),
+                                                        tofirstbz=self.integrate_gamma['type'] == '1BZ')
+        elif self.integrate_gamma['type'] == 'sphere':
             if chi0.optical_limit:
+                # The volume of reciprocal cell occupied by a single q-point
                 bzvol = (2 * np.pi)**3 / self.gs.volume / self.qd.nbzkpts
+                # Radius of a sphere with a volume of the bzvol above
                 Rq0 = (3 * bzvol / (4 * np.pi))**(1. / 3.)
+                # Analytical integral of Coulomb interaction over the sphere
+                # defined above centered at q=0.
+                # V0 = 1/|bzvol| int_bzvol dq 4 pi / |q^2|
                 V0 = 16 * np.pi**2 * Rq0 / bzvol
+                # Analytical integral of square root of Coulomb interaction
+                # over the same sphere
+                # sqrtV0 = 1/|bzvol| int_bzvol dq sqrt(4 pi / |q^2|)
                 sqrtV0 = (4 * np.pi)**(1.5) * Rq0**2 / bzvol / 2
         else:
             raise KeyError('Unknown integrate_gamma option:'
-                           f'{self.integrate_gamma}. Expected 0, 1, 2 or WS.')
+                           f'{self.integrate_gamma}.')
         return V0, sqrtV0
 
     def apply_gamma_correction(self, W_GG, einv_GG, V0, sqrtV0, sqrtV_G):
@@ -184,7 +184,7 @@ class WCalculator(WBaseCalculator):
                                            self.xckernel, fxc_mode)
         self.context.timer.start('Dyson eq.')
 
-        if self.integrate_gamma == 'WS':
+        if self.integrate_gamma['type'] == 'WS':
             from gpaw.hybrids.wstc import WignerSeitzTruncatedCoulomb
             wstc = WignerSeitzTruncatedCoulomb(chi0.qpd.gd.cell_cv,
                                                dfc.coulomb.N_c)
@@ -212,8 +212,8 @@ class WCalculator(WBaseCalculator):
                                                     chi0.chi0_Wvv[W],
                                                     sqrtV_G)
                 # XXX Is it to correct to have "or" here?
-            elif (self.integrate_gamma == 0 and chi0.optical_limit) or\
-                    self.integrate_gamma in {1, 2}:
+            elif (self.integrate_gamma['type'] == 'sphere' and chi0.optical_limit) or\
+                    self.integrate_gamma['type'] in {'reciprocal', '1BZ'}:
                 self.apply_gamma_correction(W_GG, einvt_GG,
                                             V0, sqrtV0, dfc.sqrtV_G)
 
@@ -372,7 +372,7 @@ class PPACalculator(WBaseCalculator):
                                  (einv_wGG[0] - einv_wGG[1]))
         R_GG = -0.5 * omegat_GG * einv_wGG[0]
         W_GG = pi * R_GG * dfc.sqrtV_G * dfc.sqrtV_G[:, np.newaxis]
-        if chi0.optical_limit or self.integrate_gamma != 0:
+        if chi0.optical_limit or self.integrate_gamma['type'] != 'sphere':
             self.apply_gamma_correction(W_GG, pi * R_GG,
                                         V0, sqrtV0,
                                         dfc.sqrtV_G)

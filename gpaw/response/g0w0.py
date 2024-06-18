@@ -30,6 +30,13 @@ from ase.utils.filecache import MultiFileJSONCache as FileCache
 from contextlib import ExitStack
 from ase.parallel import broadcast
 
+def validate_integrate_gamma(gamma_integration):
+    if isinstance(gamma_integration, str):
+        gamma_integration = {'type': gamma_integration}
+    assert gamma_integration['type'] in {'sphere', 'reciprocal', '1BZ', 'WS'}
+    if gamma_integration['type'] != 'reciprocal':
+        assert not gamma_integration.get('reduced', False)
+    return gamma_integration
 
 def compare_inputs(inp1, inp2, rel_tol=1e-14, abs_tol=1e-14):
     """
@@ -1047,7 +1054,7 @@ class G0W0(G0W0Calculator):
                  timer=None,
                  fxc_mode='GW',
                  truncation=None,
-                 integrate_gamma=0,
+                 integrate_gamma='sphere',
                  q0_correction=False,
                  do_GW_too=False,
                  **kwargs):
@@ -1103,14 +1110,43 @@ class G0W0(G0W0Calculator):
             (almost for free).
         truncation: str
             Coulomb truncation scheme. Can be either 2D, 1D, or 0D.
-        integrate_gamma: int or string
-            Method to integrate the Coulomb interaction. 1 is a numerical
-            integration at all q-points with G=[0,0,0] - this breaks the
-            symmetry slightly. 0 is analytical integration at q=[0,0,0] only -
-            this conserves the symmetry. integrate_gamma=2 is the same as 1,
-            but the average is only carried out in the non-periodic directions.
-            'WS' is Wigner-Seitz truncated Coulomb interaction from
-            R. Sundararaman and T. A. Arias: Phys. Rev. B 87, 165122 (2013)
+        integrate_gamma: string or dict
+            Method to integrate the Coulomb interaction. 
+
+            {'type': 'sphere'} or 'sphere':
+                Analytical integration of q=0, G=0 1/q^2 integrand in a sphere
+                matching the volume of a single q-point.
+                Used to be integrate_gamma=0.
+
+            {'type': 'reciprocal'} or 'reciprocal':
+                Numerical integration of q=0, G=0 1/q^2 integral in a volume
+                resembling the reciprocal cell (parallelpiped).
+                Used to be integrate_gamma=1.
+
+            {'type': 'reciprocal', 'reduced':True}:
+                Numerical integration of q=0, G=0 1/q^2 integral in a area
+                resembling the reciprocal 2D cell (parallelogram) to be used
+                to be usedwith 2D systems.
+                Used to be integrate_gamma=2.
+
+            {'type': '1BZ'} or '1BZ':
+                Numerical integration of q=0, G=0 1/q^2 integral in a volume
+                resembling the Wigner-Seitz cell of the reciprocal lattice
+                (voronoi). More accurate than 'reciprocal'.
+
+            {'type': 'WS'} or 'WS':
+                The most accurate method to use for bulk systems.
+                Instead of numerically integrating only q=0, G=0, all (q,G)-
+                pairs participate to the truncation, which is done in real space
+                utilizing the Wigner-Seitz truncation in the Born-von-Karmann
+                supercell of the system.
+
+                Numerical integration of q=0, G=0 1/q^2 integral in a volume
+                resembling the Wigner-Seitz cell of the reciprocal lattice
+                (voronoi). More accurate than 'reciprocal'.
+                
+                R. Sundararaman and T. A. Arias: Phys. Rev. B 87, 165122 (2013)
+
         E0: float
             Energy (in eV) used for fitting in the plasmon-pole approximation.
         q0_correction: bool
@@ -1125,6 +1161,9 @@ class G0W0(G0W0Calculator):
             Cuts chi0 into as many blocks as possible to reduce memory
             requirements as much as possible.
         """
+
+        gamma_integration = validate_integrate_gamma(gamma_integration)
+
         # We pass a serial communicator because the parallel handling
         # is somewhat wonky, we'd rather do that ourselves:
         try:
@@ -1162,7 +1201,7 @@ class G0W0(G0W0Calculator):
                     'nbands cannot be supplied with ecut-extrapolation.')
 
         if ppa:
-            assert integrate_gamma != 'WS', "TODO"
+            assert integrate_gamma['type'] != 'WS', "TODO"
             # use small imaginary frequency to avoid dividing by zero:
             frequencies = [1e-10j, 1j * E0]
 

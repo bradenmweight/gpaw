@@ -19,7 +19,7 @@ def ibz2bz_map(qd):
     return out_map
 
 
-def initialize_w_model(chi0calc, truncation=None, integrate_gamma=0,
+def initialize_w_model(chi0calc, truncation=None, integrate_gamma='sphere',
                        q0_correction=False, txt='w_model.out',
                        eta=None, world=world, timer=None):
     """ Helper function to initialize ModelInteraction
@@ -30,11 +30,7 @@ def initialize_w_model(chi0calc, truncation=None, integrate_gamma=0,
     truncation: str
         Coulomb truncation scheme. Can be either 2D, 1D, 0D or None.
     integrate_gamma: int
-        Method to integrate the Coulomb interaction. 1 is a numerical
-        integration at all q-points with G=[0,0,0] - this breaks the
-        symmetry slightly. 0 is analytical integration at q=[0,0,0] only -
-        this conserves the symmetry. integrate_gamma=2 is the same as 1,
-        but the average is only carried out in the non-periodic directions.
+        COPY FROM G0W0
     q0_correction: bool
         Analytic correction to the q=0 contribution applicable to 2D
         systems.

@@ -39,8 +39,8 @@ def run(gpw_filename, nblocks, integrate_gamma):
     return output
 
 
-reference = {0: pytest.approx([-9.253, 5.442, 2.389, 0.403, 0.000,
-                               6.261, 3.570, 1.323, 0.001], abs=0.0035),
+reference = {'sphere': pytest.approx([-9.253, 5.442, 2.389, 0.403, 0.000,
+                                      6.261, 3.570, 1.323, 0.001], abs=0.0035),
              'WS': pytest.approx([-9.253, 5.442, 2.389, 0.403, 0.000,
                                   6.284, 3.551, 1.285, 0.001], abs=0.0035)}
 
@@ -48,7 +48,7 @@ reference = {0: pytest.approx([-9.253, 5.442, 2.389, 0.403, 0.000,
 @pytest.mark.response
 @pytest.mark.slow
 @pytest.mark.parametrize('si', [0, 1])
-@pytest.mark.parametrize('integrate_gamma', [0, 'WS'])
+@pytest.mark.parametrize('integrate_gamma', ['sphere', 'WS'])
 @pytest.mark.parametrize('symm', ['all', 'no', 'tr', 'pg'])
 @pytest.mark.parametrize('nblocks',
                          [x for x in [1, 2, 4, 8] if x <= world.size])
@@ -88,7 +88,7 @@ def test_few_freq_response_gwsi(in_tmp_dir, scalapack,
     # This test has very few frequencies and tests that the code doesn't crash.
     filename = gpw_files['si_gw_a0_all']
     gw = G0W0(filename, 'gw_0.2',
-              nbands=8, integrate_gamma=0,
+              nbands=8, integrate_gamma='sphere',
               kpts=[(0, 0, 0), (0.5, 0.5, 0)],  # Gamma, X
               ecut=40, nblocks=nblocks,
               frequencies={'type': 'nonlinear',

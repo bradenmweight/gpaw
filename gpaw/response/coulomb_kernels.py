@@ -130,7 +130,7 @@ def calculate_2D_truncated_coulomb(qpd, q_v=None, *, pbc_c):
 
     qGp_G = ((qG_Gv[:, Np_c[0]])**2 + (qG_Gv[:, Np_c[1]]**2))**0.5
     qGn_G = qG_Gv[:, Nn_c[0]]
-
+#
     v_G = 4 * np.pi / (qG_Gv**2).sum(axis=1)
     if np.allclose(qGn_G[0], 0) or qpd.optical_limit:
         """sin(qGn_G * R) = 0 when R = L/2 and q_n = 0.0"""
@@ -144,7 +144,7 @@ def calculate_2D_truncated_coulomb(qpd, q_v=None, *, pbc_c):
 
 
 def get_integrated_kernel(qpd, N_c, truncation=None,
-                          N=100, reduced=False, *, pbc_c):
+                          N=100, reduced=False, tofirstbz=False, *, pbc_c):
     from scipy.special import j1, k0, j0, k1  # type: ignore
     # ignore type hints for the above import
     B_cv = 2 * np.pi * qpd.gd.icell_cv
@@ -154,10 +154,20 @@ def get_integrated_kernel(qpd, N_c, truncation=None,
         Nf_c[np.where(~pbc_c)[0]] = 1
 
     q_qc = monkhorst_pack(Nf_c)
-    q_qc = to1bz(q_qc, qpd.gd.cell_cv)
+
+    if tofirstbz:
+        # We make a 1st BZ shaped integration volume, by reducing the full
+        # Monkhorts-Pack grid to the 1st BZ.
+        q_qc = to1bz(q_qc, qpd.gd.cell_cv)
+
     q_qc /= N_c
     q_qc += qpd.q_c
-    q_qc = to1bz(q_qc, qpd.gd.cell_cv)
+
+    if tofirstbz:
+        # Because we added the q_c q-point vector, the integration volume is
+        # no longer strictly inside the 1st BZ of the full cell. Thus, we
+        # reduce it again.
+        q_qc = to1bz(q_qc, qpd.gd.cell_cv)
 
     q_qv = np.dot(q_qc, B_cv)
 
