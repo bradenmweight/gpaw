@@ -46,7 +46,7 @@ class QSymmetries(Sequence):
     """
     U_ucc: np.ndarray  # unitary symmetry transformations
     S_s: np.ndarray  # extended symmetry index for each q-symmetry
-    shift_Sc: np.ndarray  # reciprocal lattice shift, G = (T)Uq - q
+    shift_sc: np.ndarray  # reciprocal lattice shifts, G = (T)Uq - q
 
     def __post_init__(self):
         self.nU = len(self.U_ucc)
@@ -56,13 +56,13 @@ class QSymmetries(Sequence):
 
     def __getitem__(self, s):
         S = self.S_s[s]
-        return self.unioperator(S), self.sign(S), self.shift_Sc[S]
+        return self.unioperator(S), self.sign(S), self.shift_sc[s]
 
     def unioperator(self, S):
         return self.U_ucc[S % self.nU]
 
     def timereversal(self, S):
-        """Is the global index S a time-reversal symmetry?"""
+        """Does the extended index S involve a time-reversal symmetry?"""
         return bool(S // self.nU)
 
     def sign(self, S):
@@ -161,7 +161,7 @@ class QSymmetryAnalyzer:
         # We always filter out non-symmorphic symmetries
         S_s = list(filter(is_not_non_symmorphic, S_s))
 
-        return QSymmetries(U_ucc, S_s, shift_Sc)
+        return QSymmetries(U_ucc, S_s, shift_Sc[S_s])
 
 
 QSymmetryInput = Union[QSymmetryAnalyzer, dict, bool]
