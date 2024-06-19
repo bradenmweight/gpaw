@@ -102,6 +102,7 @@ class QSymmetries(Sequence):
             isl.append('\n')
         return ''.join(isl[:-1])
 
+
 @dataclass
 class QSymmetryAnalyzer:
     """Identifies symmetries of the k-grid, under which q is invariant.
