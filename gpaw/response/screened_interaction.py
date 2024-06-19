@@ -6,7 +6,61 @@ from ase.dft.kpoints import monkhorst_pack
 from gpaw.kpt_descriptor import KPointDescriptor
 from gpaw.response.temp import DielectricFunctionCalculator
 from gpaw.response.hilbert import GWHilbertTransforms
-from gpaw.response.g0w0 import GammaIntegrationMode
+
+
+class GammaIntegrationMode:
+    def __init__(self, gamma_integration):
+        if isinstance(gamma_integration, GammaIntegrationMode):
+            self.type = gamma_integration.type
+            self.reduced = gamma_integration.reduced
+            return
+
+        defaults = {'sphere': {'type': 'sphere'},
+                    'reciprocal': {'type': 'reciprocal'},
+                    'reciprocal2D': {'type': 'reciprocal', 'reduced': True},
+                    '1BZ': {'type': '1BZ'},
+                    '1BZ2D': {'type': '1BZ', 'reduced': True},
+                    'WS': {'type': 'WS'}}
+
+        if isinstance(gamma_integration, int):
+            raise TypeError("gamma_integration=INT is no longer supported. "
+                            "Please start using the new notations, as is given"
+                            " in the documentation in gpaw/response/g0w0.py"
+                            " of __init__ of class G0W0.")
+
+        if isinstance(gamma_integration, str):
+            gamma_integration = defaults[gamma_integration]
+
+        self.type = gamma_integration['type']
+        self.reduced = gamma_integration.get('reduced', False)
+
+        if self.type not in {'sphere', 'reciprocal', '1BZ', 'WS'}:
+            raise TypeError('type in gamma_integration should be one of sphere'
+                            ', reciprocal, 1BZ, or WS.')
+
+        if not self.is_numerical:
+            if gamma_integration.get('reduced', False):
+                raise TypeError('reduced key being True is only supported for '
+                                'type reciprocal or 1BZ.')
+
+    def __repr__(self):
+        return f'type: {self.type} reduced: {self.reduced}'
+
+    @property
+    def is_analytical(self):
+        return self.type == 'spherical'
+
+    @property
+    def is_numerical(self):
+        return self.type in {'reciprocal', '1BZ'}
+
+    @property
+    def is_Wigner_Seitz(self):
+        return self.type == 'WS'
+
+    @property
+    def to_1bz(self):
+        return self.type == '1BZ'
 
 
 class QPointDescriptor(KPointDescriptor):

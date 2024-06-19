@@ -8,7 +8,7 @@ from gpaw.response import timer
 from gpaw.response.pw_parallelization import Blocks1D
 from gpaw.response.pair import KPointPairFactory
 from gpaw.wannier90 import read_uwan
-from gpaw.response.g0w0 import GammaIntegrationMode
+from gpaw.response.screened_interaction import GammaIntegrationMode
 
 
 def ibz2bz_map(qd):

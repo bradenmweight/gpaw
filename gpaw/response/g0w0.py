@@ -21,7 +21,8 @@ from gpaw.response.chi0 import Chi0Calculator, get_frequency_descriptor
 from gpaw.response.pair import phase_shifted_fft_indices
 from gpaw.response.pair_functions import SingleQPWDescriptor
 from gpaw.response.pw_parallelization import Blocks1D
-from gpaw.response.screened_interaction import initialize_w_calculator
+from gpaw.response.screened_interaction import (initialize_w_calculator,
+                                                GammaIntegrationMode)
 from gpaw.response.coulomb_kernels import CoulombKernel
 from gpaw.response import timer
 from gpaw.mpi import broadcast_exception
@@ -29,61 +30,6 @@ from gpaw.mpi import broadcast_exception
 from ase.utils.filecache import MultiFileJSONCache as FileCache
 from contextlib import ExitStack
 from ase.parallel import broadcast
-
-
-class GammaIntegrationMode:
-    def __init__(self, gamma_integration):
-        if isinstance(gamma_integration, GammaIntegrationMode):
-            self.type = gamma_integration.type
-            self.reduced = gamma_integration.reduced
-            return
-
-        defaults = {'sphere': {'type': 'sphere'},
-                    'reciprocal': {'type': 'reciprocal'},
-                    'reciprocal2D': {'type': 'reciprocal', 'reduced': True},
-                    '1BZ': {'type': '1BZ'},
-                    '1BZ2D': {'type': '1BZ', 'reduced': True},
-                    'WS': {'type': 'WS'}}
-
-        if isinstance(gamma_integration, int):
-            raise TypeError("gamma_integration=INT is no longer supported. "
-                            "Please start using the new notations, as is given"
-                            " in the documentation in gpaw/response/g0w0.py"
-                            " of __init__ of class G0W0.")
-
-        if isinstance(gamma_integration, str):
-            gamma_integration = defaults[gamma_integration]
-
-        self.type = gamma_integration['type']
-        self.reduced = gamma_integration.get('reduced', False)
-
-        if self.type not in {'sphere', 'reciprocal', '1BZ', 'WS'}:
-            raise TypeError('type in gamma_integration should be one of sphere'
-                            ', reciprocal, 1BZ, or WS.')
-
-        if not self.is_numerical:
-            if gamma_integration.get('reduced', False):
-                raise TypeError('reduced key being True is only supported for '
-                                'type reciprocal or 1BZ.')
-
-    def __repr__(self):
-        return f'type: {self.type} reduced: {self.reduced}'
-
-    @property
-    def is_analytical(self):
-        return self.type == 'spherical'
-
-    @property
-    def is_numerical(self):
-        return self.type in {'reciprocal', '1BZ'}
-
-    @property
-    def is_Wigner_Seitz(self):
-        return self.type == 'WS'
-
-    @property
-    def to_1bz(self):
-        return self.type == '1BZ'
 
 
 def compare_inputs(inp1, inp2, rel_tol=1e-14, abs_tol=1e-14):

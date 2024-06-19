@@ -20,8 +20,8 @@ from gpaw.response.df import write_response_function
 from gpaw.response.frequencies import FrequencyDescriptor
 from gpaw.response.pair import KPointPairFactory, get_gs_and_context
 from gpaw.response.pair_functions import SingleQPWDescriptor
-from gpaw.response.screened_interaction import initialize_w_calculator
-from gpaw.response.g0w0 import GammaIntegrationMode
+from gpaw.response.screened_interaction import (initialize_w_calculator,
+                                                GammaIntegrationMode)
 
 
 def decide_whether_tammdancoff(val_sn, con_sn):
