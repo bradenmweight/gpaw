@@ -71,10 +71,19 @@ class QSymmetries(Sequence):
             return -1
         return 1
 
+    @property
+    def ndirect(self):
+        """Number of direct symmetries."""
+        return sum(np.array(self.S_s) < self.nU)
+
+    @property
+    def nindirect(self):
+        """Number of indirect symmetries."""
+        return len(self) - self.ndirect
 
 @dataclass
 class QSymmetryAnalyzer:
-    """K-point symmetry analyzer for transitions k -> k + q.
+    """Identifies symmetries of the k-grid, under which q is invariant.
 
     Parameters
     ----------
@@ -91,8 +100,30 @@ class QSymmetryAnalyzer:
     def disabled(self):
         return not (self.point_group or self.time_reversal)
 
+    @property
+    def disabled_symmetry_info(self):
+        if self.disabled:
+            txt = ''
+        elif not self.point_group:
+            txt = 'point-group '
+        elif not self.time_reversal:
+            txt = 'time-reversal '
+        else:
+            return ''
+        txt += 'symmetry has been manually disabled'
+        return txt
+
+    def analysis_info(self, symmetries):
+        dsinfo = self.disabled_symmetry_info
+        txt = f'\nAllowed symmetries{f" ({dsinfo})" if len(dsinfo) else ""}:'
+        txt += f'\n    Direct symmetries (Uq -> q): {symmetries.ndirect}'
+        txt += f'\n    Indirect symmetries (TUq -> q): {symmetries.nindirect}'
+        txt += f'\nIn total {len(symmetries)} allowed symmetries.'
+        return txt
+
     def analyze(self, kpoints, qpd, context):
         symmetries = self.analyze_symmetries(qpd.q_c, kpoints.kd)
+        context.print(self.analysis_info(symmetries))
         return PWSymmetryAnalyzer(
             symmetries,
             kpoints, qpd, context, not self.point_group,
@@ -212,10 +243,6 @@ class PWSymmetryAnalyzer:
         self.disable_time_reversal = disable_time_reversal
         if (kd.symmetry.has_inversion or not kd.symmetry.time_reversal) and \
            not self.disable_time_reversal:
-            self.context.print('\nThe ground calculation does not support time'
-                               '-reversal symmetry possibly because it has an '
-                               'inversion center or that it has been manually '
-                               'deactivated.\n')
             self.disable_time_reversal = True
 
         self.disable_symmetries = (self.disable_point_group and
@@ -237,30 +264,11 @@ class PWSymmetryAnalyzer:
         return len(self.symmetries)
 
     def get_infostring(self):
-        txt = ''
-
-        if self.disable_point_group:
-            txt += 'Point group not included. '
-        else:
-            txt += 'Point group included. '
-
-        if self.disable_time_reversal:
-            txt += 'Time reversal not included. '
-        else:
-            txt += 'Time reversal included. '
-
-        txt += 'Disabled non-symmorphic symmetries. '
-
-        if self.disable_symmetries:
-            txt += 'All symmetries have been disabled. '
-
-        txt += f'Found {len(self.symmetries)} allowed symmetries. '
-
         # Maybe we can avoid calling this somehow, we're only using
         # it to print:
         K_gK = self.group_kpoints()
         ng = len(K_gK)
-        txt += f'{ng} groups of equivalent kpoints. '
+        txt = f'{ng} groups of equivalent kpoints. '
         percent = (1. - (ng + 0.) / self.kd.nbzkpts) * 100
         txt += f'{percent}% reduction. '
         return txt
