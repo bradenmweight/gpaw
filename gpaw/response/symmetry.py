@@ -1,6 +1,7 @@
 from typing import Union
 from dataclasses import dataclass
 from collections.abc import Sequence
+from functools import cached_property
 
 import numpy as np
 from scipy.spatial import Delaunay, cKDTree
@@ -71,7 +72,7 @@ class QSymmetries(Sequence):
             return -1
         return 1
 
-    @property
+    @cached_property
     def ndirect(self):
         """Number of direct symmetries."""
         return sum(np.array(self.S_s) < self.nU)
