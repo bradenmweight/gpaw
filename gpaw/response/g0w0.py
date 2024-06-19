@@ -40,16 +40,20 @@ def validate_integrate_gamma(gamma_integration):
                 'WS': {'type': 'WS'}}
 
     if isinstance(gamma_integration, int):
-        raise ValueError("gamma_integration=INT is deprecated. Please start"
-                         "using the new notations, as is given in the"
-                         "documentation of gpaw/response/g0w0.py class "
-                         "G0W0.__init__.")
+        raise TypeError("gamma_integration=INT is no longer supported. "
+                        "Please start using the new notations, as is given in"
+                        " the documentation of gpaw/response/g0w0.py class "
+                        "G0W0.__init__.")
 
     if isinstance(gamma_integration, str):
         gamma_integration = defaults[gamma_integration]
-    assert gamma_integration['type'] in {'sphere', 'reciprocal', '1BZ', 'WS'}
+    if gamma_integration['type'] not in {'sphere', 'reciprocal', '1BZ', 'WS'}:
+        raise TypeError('type in gamma_integration should be one of sphere, '
+                        'reciprocal, 1BZ, or WS.')
     if gamma_integration['type'] not in {'reciprocal', '1BZ'}:
-        assert not gamma_integration.get('reduced', False)
+        if gamma_integration.get('reduced', False):
+            raise TypeError('reduced key being True is only supported for '
+                            'type reciprocal or 1BZ.')
     return gamma_integration
 
 
