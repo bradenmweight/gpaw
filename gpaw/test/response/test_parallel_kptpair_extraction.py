@@ -8,7 +8,6 @@ from gpaw.mpi import world
 from gpaw.response import ResponseContext, ResponseGroundStateAdapter
 from gpaw.response.pw_parallelization import block_partition
 from gpaw.response.kspair import KohnShamKPointPairExtractor
-from gpaw.response.pair_functions import SingleQPWDescriptor
 from gpaw.response.pair_transitions import PairTransitions
 from gpaw.response.pair_integrator import KPointPairPointIntegral
 from gpaw.response.symmetry import QSymmetryAnalyzer
