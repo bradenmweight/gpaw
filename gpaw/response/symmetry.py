@@ -1,6 +1,7 @@
 from typing import Union
 from dataclasses import dataclass
 from collections.abc import Sequence
+from functools import cached_property
 
 import numpy as np
 from scipy.spatial import Delaunay, cKDTree
@@ -72,7 +73,7 @@ class QSymmetries(Sequence):
             return -1
         return 1
 
-    @property
+    @cached_property
     def ndirect(self):
         """Number of direct symmetries."""
         return sum(np.array(self.S_s) < self.nU)
@@ -82,7 +83,6 @@ class QSymmetries(Sequence):
         """Number of indirect symmetries."""
         return len(self) - self.ndirect
 
-    @property
     def description(self) -> str:
         """Return string description of symmetry operations."""
         isl = ['\n']
@@ -137,12 +137,13 @@ class QSymmetryAnalyzer:
 
     def analysis_info(self, symmetries):
         dsinfo = self.disabled_symmetry_info
-        txt = f'\nSymmetries of q_c{f" ({dsinfo})" if len(dsinfo) else ""}:'
-        txt += f'\n    Direct symmetries (Uq -> q): {symmetries.ndirect}'
-        txt += f'\n    Indirect symmetries (TUq -> q): {symmetries.nindirect}'
-        txt += f'\nIn total {len(symmetries)} allowed symmetries.\n'
-        txt += symmetries.description
-        return txt
+        return '\n'.join([
+            '',
+            f'Symmetries of q_c{f" ({dsinfo})" if len(dsinfo) else ""}:',
+            f'    Direct symmetries (Uq -> q): {symmetries.ndirect}',
+            f'    Indirect symmetries (TUq -> q): {symmetries.nindirect}',
+            f'In total {len(symmetries)} allowed symmetries.',
+            symmetries.description()])
 
     def analyze(self, q_c, kpoints, context):
         """Analyze symmetries and set up KPointDomainGenerator."""
