@@ -294,7 +294,7 @@ class KPointPairIntegral(ABC):
         """
         self.gs = kptpair_extractor.gs
         self.kptpair_extractor = kptpair_extractor
-        self.q_c = generator.qpd.q_c
+        self.q_c = generator.symmetries.q_c
 
         # Prepare the k-point pair integral
         bzk_kc, weight_k = self.get_kpoint_domain(generator)

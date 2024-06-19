@@ -291,7 +291,8 @@ class Chi0ComponentCalculator:
         if integrationmode is None:
             k_kc = generator.get_kpt_domain()
         elif integrationmode == 'tetrahedron integration':
-            k_kc = generator.get_tetrahedron_kpt_domain(pbc_c=self.pbc)
+            k_kc = generator.get_tetrahedron_kpt_domain(
+                pbc_c=self.pbc, cell_cv=self.gs.gd.cell_cv)
         kpoints = KPointDomain(k_kc, self.gs.gd.icell_cv)
 
         return kpoints, generator, symmetrizer

@@ -45,6 +45,7 @@ class QSymmetries(Sequence):
            vector). May be reduced further, if some of the symmetries have been
            disabled. Length is q-dependent and depends on user input.
     """
+    q_c: np.ndarray
     U_ucc: np.ndarray  # unitary symmetry transformations
     S_s: np.ndarray  # extended symmetry index for each q-symmetry
     shift_sc: np.ndarray  # reciprocal lattice shifts, G = (T)Uq - q
@@ -146,7 +147,7 @@ class QSymmetryAnalyzer:
 
     def analyze(self, kpoints, qpd, context):
         symmetries = self.analyze_symmetries(qpd.q_c, kpoints.kd)
-        generator = KPointDomainGenerator(symmetries, kpoints, qpd)
+        generator = KPointDomainGenerator(symmetries, kpoints)
         symmetrizer = PWSymmetrizer(symmetries, qpd, context)
         context.print(self.analysis_info(symmetries))
         context.print(generator.get_infostring())
@@ -215,7 +216,7 @@ class QSymmetryAnalyzer:
         # We always filter out non-symmorphic symmetries
         S_s = list(filter(is_not_non_symmorphic, S_s))
 
-        return QSymmetries(U_ucc, S_s, shift_Sc[S_s])
+        return QSymmetries(q_c, U_ucc, S_s, shift_Sc[S_s])
 
 
 QSymmetryInput = Union[QSymmetryAnalyzer, dict, bool]
@@ -232,9 +233,8 @@ def ensure_qsymmetry(qsymmetry: QSymmetryInput) -> QSymmetryAnalyzer:
 
 
 class KPointDomainGenerator:
-    def __init__(self, symmetries, kpoints, qpd):
+    def __init__(self, symmetries, kpoints):
         self.symmetries = symmetries
-        self.qpd = qpd
 
         self.kd = kpoints.kd
         self.kptfinder = kpoints.kptfinder
@@ -276,13 +276,13 @@ class KPointDomainGenerator:
                          K_K in self.group_kpoints()])
         return k_kc
 
-    def get_tetrahedron_ikpts(self, *, pbc_c):
+    def get_tetrahedron_ikpts(self, *, pbc_c, cell_cv):
         """Find irreducible k-points for tetrahedron integration."""
         U_scc = np.array([  # little group of q
             sign * U_cc for U_cc, sign, _ in self.symmetries])
 
         # Determine the irreducible BZ
-        bzk_kc, ibzk_kc, _ = get_reduced_bz(self.qpd.gd.cell_cv,
+        bzk_kc, ibzk_kc, _ = get_reduced_bz(cell_cv,
                                             U_scc,
                                             False,
                                             pbc_c=pbc_c)
@@ -303,8 +303,8 @@ class KPointDomainGenerator:
 
         return ik_kc
 
-    def get_tetrahedron_kpt_domain(self, *, pbc_c):
-        ik_kc = self.get_tetrahedron_ikpts(pbc_c=pbc_c)
+    def get_tetrahedron_kpt_domain(self, *, pbc_c, cell_cv):
+        ik_kc = self.get_tetrahedron_ikpts(pbc_c=pbc_c, cell_cv=cell_cv)
         if pbc_c.all():
             k_kc = ik_kc
         else:
@@ -336,8 +336,9 @@ class PWSymmetrizer:
                  symmetries: QSymmetries,
                  qpd: SingleQPWDescriptor,
                  context):
-        self.qpd = qpd  # check me XXX
+        assert np.allclose(symmetries.q_c, qpd.q_c)
         self.symmetries = symmetries
+        self.qpd = qpd
         self.G_sG = self.initialize_G_maps()
         self.context = context  # temporary, do timing elsewhere XXX
 
