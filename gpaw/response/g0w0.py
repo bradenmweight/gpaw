@@ -1151,7 +1151,7 @@ class G0W0(G0W0Calculator):
                 Numerical integration of q=0, G=0 1/q^2 integral in a volume
                 resembling the Wigner-Seitz cell of the reciprocal lattice
                 (voronoi). More accurate than 'reciprocal'.
-            
+
             {'type': '1BZ', 'reduced': True} or '1BZ2D':
                 Same as above, but everything is done in 2D (for 2D systems).
 
