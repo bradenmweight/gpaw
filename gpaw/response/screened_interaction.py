@@ -105,7 +105,6 @@ class WBaseCalculator():
     def get_V0sqrtV0(self, chi0):
         """
         Integrated Coulomb kernels.
-        XXX: Understand and document Rq0, V0, sqrtV0
         """
         V0 = None
         sqrtV0 = None

@@ -1141,7 +1141,7 @@ class G0W0(G0W0Calculator):
                 resembling the reciprocal cell (parallelpiped).
                 Used to be integrate_gamma=1.
 
-            {'type': 'reciprocal', 'reduced':True}:
+            {'type': 'reciprocal', 'reduced':True} or 'reciprocal2D':
                 Numerical integration of q=0, G=0 1/q^2 integral in a area
                 resembling the reciprocal 2D cell (parallelogram) to be used
                 to be usedwith 2D systems.
@@ -1151,6 +1151,9 @@ class G0W0(G0W0Calculator):
                 Numerical integration of q=0, G=0 1/q^2 integral in a volume
                 resembling the Wigner-Seitz cell of the reciprocal lattice
                 (voronoi). More accurate than 'reciprocal'.
+            
+            {'type': '1BZ', 'reduced': True} or '1BZ2D':
+                Same as above, but everything is done in 2D (for 2D systems).
 
             {'type': 'WS'} or 'WS':
                 The most accurate method to use for bulk systems.

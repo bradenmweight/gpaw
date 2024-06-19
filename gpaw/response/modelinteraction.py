@@ -29,8 +29,7 @@ def initialize_w_model(chi0calc, truncation=None, integrate_gamma='sphere',
     chi0calc: Chi0Calculator
     truncation: str
         Coulomb truncation scheme. Can be either 2D, 1D, 0D or None.
-    integrate_gamma: int
-        COPY FROM G0W0
+    integrate_gamma: dict
     q0_correction: bool
         Analytic correction to the q=0 contribution applicable to 2D
         systems.
