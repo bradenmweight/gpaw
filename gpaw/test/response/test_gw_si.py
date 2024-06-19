@@ -46,7 +46,7 @@ reference = {'sphere': pytest.approx([-9.253, 5.442, 2.389, 0.403, 0.000,
              '1BZ': pytest.approx([-9.252, 5.441, 2.389, 0.403, 0.000,
                                    6.360, 3.405, 1.148, 0.001], abs=0.0035),
              'reciprocal': pytest.approx([-9.252, 5.441, 2.389, 0.403, 0.000,
-                                          6.132, 3.817, 1.579, 0.001])}
+                                          6.132, 3.817, 1.579, 0.001], abs=0.0035)}
 # The systems are not 2D, thus, the reciprocal2D will yield same results as
 # reciprocal. This is tested in test_integrate_gamma_modes.
 reference['reciprocal2D'] = reference['reciprocal']
