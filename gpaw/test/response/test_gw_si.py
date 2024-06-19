@@ -75,7 +75,10 @@ def test_response_gwsi(in_tmp_dir, si, symm, nblocks, integrate_gamma,
                                              'reciprocal2D',
                                              '1BZ2D'])
 @pytest.mark.response
-def test_integrate_gamma_modes(in_tmp_dir, integrate_gamma, gpw_files):
+def test_integrate_gamma_modes(in_tmp_dir, integrate_gamma, gpw_files,
+                               gpaw_new):
+    if gpaw_new and world.size > 1:
+        pytest.skip('Hybrids not working in parallel with GPAW_NEW=1')
     assert run(gpw_files['si_gw_a0_all'], 1, integrate_gamma) == \
            reference[integrate_gamma]
 
