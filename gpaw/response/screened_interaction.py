@@ -110,9 +110,11 @@ class WBaseCalculator():
         V0 = None
         sqrtV0 = None
         if self.integrate_gamma['type'] in {'reciprocal', '1BZ'}:
+            reduced = self.integrate_gamma.get('reduced', False)
+            tofirstbz = self.integrate_gamma['type'] == '1BZ'
             V0, sqrtV0 = self.coulomb.integrated_kernel(qpd=chi0.qpd,
-                                                        reduced=self.integrate_gamma.get('reduced', False),
-                                                        tofirstbz=self.integrate_gamma['type'] == '1BZ')
+                                                        reduced=reduced,
+                                                        tofirstbz=tofirstbz)
         elif self.integrate_gamma['type'] == 'sphere':
             if chi0.optical_limit:
                 # The volume of reciprocal cell occupied by a single q-point
@@ -211,8 +213,8 @@ class WCalculator(WBaseCalculator):
                                                     chi0.chi0_WxvG[W],
                                                     chi0.chi0_Wvv[W],
                                                     sqrtV_G)
-                # XXX Is it to correct to have "or" here?
-            elif (self.integrate_gamma['type'] == 'sphere' and chi0.optical_limit) or\
+            elif (self.integrate_gamma['type'] == 'sphere' and
+                    chi0.optical_limit) or\
                     self.integrate_gamma['type'] in {'reciprocal', '1BZ'}:
                 self.apply_gamma_correction(W_GG, einvt_GG,
                                             V0, sqrtV0, dfc.sqrtV_G)
