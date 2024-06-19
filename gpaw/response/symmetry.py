@@ -1,5 +1,6 @@
 from typing import Union
 from dataclasses import dataclass
+from collections.abc import Sequence
 
 import numpy as np
 from scipy.spatial import Delaunay, cKDTree
@@ -29,7 +30,7 @@ class KPointFinder:
 
 
 @dataclass
-class QSymmetries:
+class QSymmetries(Sequence):
     """Symmetry operations for a given q-point.
 
     We operate with several different symmetry indices:
@@ -43,9 +44,9 @@ class QSymmetries:
            vector). May be reduced further, if some of the symmetries have been
            disabled. Length is q-dependent and depends on user input.
     """
-    U_ucc: np.ndarray
-    S_s: np.ndarray
-    shift_Sc: np.ndarray
+    U_ucc: np.ndarray  # unitary symmetry transformations
+    S_s: np.ndarray  # extended symmetry index for each q-symmetry
+    shift_sc: np.ndarray  # reciprocal lattice shifts, G = (T)Uq - q
 
     def __post_init__(self):
         self.nU = len(self.U_ucc)
@@ -53,8 +54,15 @@ class QSymmetries:
     def __len__(self):
         return len(self.S_s)
 
+    def __getitem__(self, s):
+        S = self.S_s[s]
+        return self.unioperator(S), self.sign(S), self.shift_sc[s]
+
+    def unioperator(self, S):
+        return self.U_ucc[S % self.nU]
+
     def timereversal(self, S):
-        """Is the global index S a time-reversal symmetry?"""
+        """Does the extended index S involve a time-reversal symmetry?"""
         return bool(S // self.nU)
 
     def sign(self, S):
@@ -62,10 +70,6 @@ class QSymmetries:
         if self.timereversal(S):
             return -1
         return 1
-
-    def get_symmetry_operator(self, S):
-        """Return symmetry operator s."""
-        return self.U_ucc[S % self.nU], self.sign(S)
 
 
 @dataclass
@@ -157,7 +161,7 @@ class QSymmetryAnalyzer:
         # We always filter out non-symmorphic symmetries
         S_s = list(filter(is_not_non_symmorphic, S_s))
 
-        return QSymmetries(U_ucc, S_s, shift_Sc)
+        return QSymmetries(U_ucc, S_s, shift_Sc[S_s])
 
 
 QSymmetryInput = Union[QSymmetryAnalyzer, dict, bool]
@@ -223,7 +227,7 @@ class PWSymmetryAnalyzer:
 
         self.kptfinder = kpoints.kptfinder
 
-        self.G_SG = self.initialize_G_maps()
+        self.G_sG = self.initialize_G_maps()
 
         self.context.print(self.get_infostring())
         self.context.print(self.symmetry_description())
@@ -274,10 +278,8 @@ class PWSymmetryAnalyzer:
                     s = x + y * nx
                     if s == ns:
                         break
-                    op_cc, sign = self.symmetries.get_symmetry_operator(
-                        # little ugly this, symmetries can do the indexing XXX
-                        self.symmetries.S_s[s])
-                    op_c = sign * op_cc[c]
+                    U_cc, sign, _ = self.symmetries[s]
+                    op_c = sign * U_cc[c]
                     tisl.append(f'  ({op_c[0]:2d} {op_c[1]:2d} {op_c[2]:2d})')
                 tisl.append('\n')
                 isl.append(''.join(tisl))
@@ -310,12 +312,8 @@ class PWSymmetryAnalyzer:
 
     def get_tetrahedron_ikpts(self, *, pbc_c):
         """Find irreducible k-points for tetrahedron integration."""
-        # Get the little group of q
-        U_scc = []
-        for S in self.symmetries.S_s:
-            U_cc, sign = self.symmetries.get_symmetry_operator(S)
-            U_scc.append(sign * U_cc)
-        U_scc = np.array(U_scc)
+        U_scc = np.array([  # little group of q
+            sign * U_cc for U_cc, sign, _ in self.symmetries])
 
         # Determine the irreducible BZ
         bzk_kc, ibzk_kc, _ = get_reduced_bz(self.qpd.gd.cell_cv,
@@ -367,9 +365,7 @@ class PWSymmetryAnalyzer:
             tmp_GG = np.zeros_like(A_GG, order='C')
             # tmp2_GG = np.zeros_like(A_GG)
 
-            for S in self.symmetries.S_s:
-                G_G = self.G_SG[S]
-                sign = self.symmetries.sign(S)
+            for (_, sign, _), G_G in zip(self.symmetries, self.G_sG):
                 GG_shuffle(G_G, sign, A_GG, tmp_GG)
 
                 # This is the exact operation that GG_shuffle does.
@@ -398,9 +394,7 @@ class PWSymmetryAnalyzer:
             AT_wxvG = A_wxvG[:, ::-1]
 
         tmp_wxvG = np.zeros_like(A_wxvG)
-        for S in self.symmetries.S_s:
-            G_G = self.G_SG[S]
-            U_cc, sign = self.symmetries.get_symmetry_operator(S)
+        for (U_cc, sign, _), G_G in zip(self.symmetries, self.G_sG):
             M_vv = np.dot(np.dot(A_cv.T, U_cc.T), iA_cv)
             if sign == 1:
                 tmp = sign * np.dot(M_vv.T, A_wxvG[..., G_G])
@@ -420,8 +414,7 @@ class PWSymmetryAnalyzer:
         if self.use_time_reversal:
             AT_wvv = np.transpose(A_wvv, (0, 2, 1))
 
-        for S in self.symmetries.S_s:
-            U_cc, sign = self.symmetries.get_symmetry_operator(S)
+        for U_cc, sign, _ in self.symmetries:
             M_vv = np.dot(np.dot(A_cv.T, U_cc.T), iA_cv)
             if sign == 1:
                 tmp = np.dot(np.dot(M_vv.T, A_wvv), M_vv)
@@ -440,11 +433,10 @@ class PWSymmetryAnalyzer:
         G_Gc = np.dot(G_Gv, np.linalg.inv(B_cv))
         Q_G = qpd.Q_qG[0]
 
-        G_SG = [None] * self.nsym
-        for S in self.symmetries.S_s:
-            U_cc, sign = self.symmetries.get_symmetry_operator(S)
+        G_sG = []
+        for U_cc, sign, shift_c in self.symmetries:
             iU_cc = np.linalg.inv(U_cc).T
-            UG_Gc = np.dot(G_Gc - self.symmetries.shift_Sc[S], sign * iU_cc)
+            UG_Gc = np.dot(G_Gc - shift_c, sign * iU_cc)
 
             assert np.allclose(UG_Gc.round(), UG_Gc)
             UQ_G = np.ravel_multi_index(UG_Gc.round().astype(int).T,
@@ -458,8 +450,8 @@ class PWSymmetryAnalyzer:
                     print('This should not be possible but' +
                           'a G-vector was mapped outside the sphere')
                     raise IndexError
-            G_SG[S] = np.array(G_G, dtype=np.int32)
-        return G_SG
+            G_sG.append(np.array(G_G, dtype=np.int32))
+        return np.array(G_sG)
 
     def unfold_ibz_kpoint(self, ik):
         """Return kpoints related to irreducible kpoint."""
