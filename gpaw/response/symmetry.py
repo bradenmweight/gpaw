@@ -81,6 +81,27 @@ class QSymmetries(Sequence):
         """Number of indirect symmetries."""
         return len(self) - self.ndirect
 
+    @property
+    def description(self) -> str:
+        """Return string description of symmetry operations."""
+        isl = ['\n']
+        nx = 6  # You are not allowed to use non-symmorphic syms (value 3)
+        y = 0
+        for y in range((len(self) + nx - 1) // nx):
+            for c in range(3):
+                tisl = []
+                for x in range(nx):
+                    s = x + y * nx
+                    if s == len(self):
+                        break
+                    U_cc, sign, _ = self[s]
+                    op_c = sign * U_cc[c]
+                    tisl.append(f'  ({op_c[0]:2d} {op_c[1]:2d} {op_c[2]:2d})')
+                tisl.append('\n')
+                isl.append(''.join(tisl))
+            isl.append('\n')
+        return ''.join(isl[:-1])
+
 @dataclass
 class QSymmetryAnalyzer:
     """Identifies symmetries of the k-grid, under which q is invariant.
@@ -115,10 +136,11 @@ class QSymmetryAnalyzer:
 
     def analysis_info(self, symmetries):
         dsinfo = self.disabled_symmetry_info
-        txt = f'\nAllowed symmetries{f" ({dsinfo})" if len(dsinfo) else ""}:'
+        txt = f'\nSymmetries of q_c{f" ({dsinfo})" if len(dsinfo) else ""}:'
         txt += f'\n    Direct symmetries (Uq -> q): {symmetries.ndirect}'
         txt += f'\n    Indirect symmetries (TUq -> q): {symmetries.nindirect}'
-        txt += f'\nIn total {len(symmetries)} allowed symmetries.'
+        txt += f'\nIn total {len(symmetries)} allowed symmetries.\n'
+        txt += symmetries.description
         return txt
 
     def analyze(self, kpoints, qpd, context):
@@ -257,7 +279,6 @@ class PWSymmetryAnalyzer:
         self.G_sG = self.initialize_G_maps()
 
         self.context.print(self.get_infostring())
-        self.context.print(self.symmetry_description())
 
     def how_many_symmetries(self):
         # temporary backwards compatibility for external calls
@@ -270,29 +291,8 @@ class PWSymmetryAnalyzer:
         ng = len(K_gK)
         txt = f'{ng} groups of equivalent kpoints. '
         percent = (1. - (ng + 0.) / self.kd.nbzkpts) * 100
-        txt += f'{percent}% reduction. '
+        txt += f'{percent}% reduction.\n'
         return txt
-
-    def symmetry_description(self) -> str:
-        """Return string description of symmetry operations."""
-        isl = ['\n']
-        nx = 6  # You are not allowed to use non-symmorphic syms (value 3)
-        ns = len(self.symmetries)
-        y = 0
-        for y in range((ns + nx - 1) // nx):
-            for c in range(3):
-                tisl = []
-                for x in range(nx):
-                    s = x + y * nx
-                    if s == ns:
-                        break
-                    U_cc, sign, _ = self.symmetries[s]
-                    op_c = sign * U_cc[c]
-                    tisl.append(f'  ({op_c[0]:2d} {op_c[1]:2d} {op_c[2]:2d})')
-                tisl.append('\n')
-                isl.append(''.join(tisl))
-            isl.append('\n')
-        return ''.join(isl)
 
     @timer('Group kpoints')
     def group_kpoints(self, K_k=None):
