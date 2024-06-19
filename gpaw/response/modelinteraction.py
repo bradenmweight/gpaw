@@ -19,7 +19,8 @@ def ibz2bz_map(qd):
     return out_map
 
 
-def initialize_w_model(chi0calc, truncation=None, integrate_gamma='sphere',
+def initialize_w_model(chi0calc, truncation=None,
+                       integrate_gamma={'type': 'sphere'},
                        q0_correction=False, txt='w_model.out',
                        eta=None, world=world, timer=None):
     """ Helper function to initialize ModelInteraction
