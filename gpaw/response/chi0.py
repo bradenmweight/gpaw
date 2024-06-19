@@ -216,9 +216,10 @@ class Chi0BodyCalculator(Chi0ComponentPWCalculator):
         self.context.print('Integrating chi0 body.')
 
         # domain: Domain from from gpaw.response.integrators
-        # analyzer: PWSymmetryAnalyzer from gpaw.response.symmetry
-        domain, analyzer, prefactor = self.get_integration_domain(qpd, spins)
-        integrand = Chi0Integrand(self, qpd=qpd, analyzer=analyzer,
+        # generator: KPointDomainGenerator from gpaw.response.symmetry
+        # symmetrizer: PWSymmetrizer from gpaw.response.symmetry
+        domain, generator, symmetrizer, prefactor = self.get_integration_domain(qpd, spins)
+        integrand = Chi0Integrand(self, qpd=qpd, generator=generator,
                                   optical=False, m1=m1, m2=m2)
 
         chi0_body.data_WgG[:] /= prefactor
@@ -248,7 +249,7 @@ class Chi0BodyCalculator(Chi0ComponentPWCalculator):
         chi0_body.data_WgG[:] *= prefactor
 
         tmp_chi0_wGG = chi0_body.copy_array_with_distribution('wGG')
-        analyzer.symmetrize_wGG(tmp_chi0_wGG)
+        symmetrizer.symmetrize_wGG(tmp_chi0_wGG)
         chi0_body.data_WgG[:] = chi0_body.blockdist.distribute_as(
             tmp_chi0_wGG, chi0_body.nw, 'WgG')
 
@@ -392,8 +393,8 @@ class Chi0OpticalExtensionCalculator(Chi0ComponentPWCalculator):
         chi0_opt_ext = chi0_optical_extension
         qpd = chi0_opt_ext.qpd
 
-        domain, analyzer, prefactor = self.get_integration_domain(qpd, spins)
-        integrand = Chi0Integrand(self, qpd=qpd, analyzer=analyzer,
+        domain, generator, symmetrizer, prefactor = self.get_integration_domain(qpd, spins)
+        integrand = Chi0Integrand(self, qpd=qpd, generator=generator,
                                   optical=True, m1=m1, m2=m2)
 
         # We integrate the head and wings together, using the combined index P
@@ -417,10 +418,10 @@ class Chi0OpticalExtensionCalculator(Chi0ComponentPWCalculator):
 
         # Fill in wings part of the data, but leave out the head part (G0)
         chi0_opt_ext.wings_WxvG[..., 1:] += tmp_chi0_WxvP[..., 3:]
-        analyzer.symmetrize_wxvG(chi0_opt_ext.wings_WxvG)
+        symmetrizer.symmetrize_wxvG(chi0_opt_ext.wings_WxvG)
         # Fill in the head
         chi0_opt_ext.head_Wvv[:] += tmp_chi0_WxvP[:, 0, :3, :3]
-        analyzer.symmetrize_wvv(chi0_opt_ext.head_Wvv)
+        symmetrizer.symmetrize_wvv(chi0_opt_ext.head_Wvv)
 
     def construct_hermitian_task(self):
         return HermitianOpticalLimit()

@@ -12,7 +12,7 @@ from gpaw.response.chi0_data import Chi0DrudeData
 from gpaw.response.frequencies import FrequencyGridDescriptor
 
 if TYPE_CHECKING:
-    from gpaw.response.symmetry import PWSymmetryAnalyzer
+    from gpaw.response.symmetry import KPointDomainGenerator
 
 
 class Chi0DrudeCalculator(Chi0ComponentCalculator):
@@ -60,13 +60,14 @@ class Chi0DrudeCalculator(Chi0ComponentCalculator):
                                          ecut=1e-3, gd=self.gs.gd)
 
         # domain: Domain from from gpaw.response.integrators
-        # analyzer: PWSymmetryAnalyzer from gpaw.response.symmetry
-        domain, analyzer, prefactor = self.get_integration_domain(
+        # generator: KPointDomainGenerator from gpaw.response.symmetry
+        # symmetrizer: PWSymmetrizer from gpaw.response.symmetry
+        domain, generator, symmetrizer, prefactor = self.get_integration_domain(
             qpd, spins=range(self.gs.nspins))
 
         # The plasma frequency integral is special in the way that only
         # the spectral part is needed
-        integrand = PlasmaFrequencyIntegrand(self, qpd, analyzer)
+        integrand = PlasmaFrequencyIntegrand(self, qpd, generator)
 
         # Integrate using temporary array
         tmp_plasmafreq_wvv = np.zeros((1,) + chi0_drude.vv_shape, complex)
@@ -81,7 +82,7 @@ class Chi0DrudeCalculator(Chi0ComponentCalculator):
 
         # Store the plasma frequency itself and print it for anyone to use
         plasmafreq_vv = tmp_plasmafreq_wvv[0].copy()
-        analyzer.symmetrize_wvv(plasmafreq_vv[np.newaxis])
+        symmetrizer.symmetrize_wvv(plasmafreq_vv[np.newaxis])
         chi0_drude.plasmafreq_vv += 4 * np.pi * plasmafreq_vv
         self.context.print('Plasma frequency:', flush=False)
         self.context.print((chi0_drude.plasmafreq_vv**0.5 * Ha).round(2))
@@ -130,10 +131,10 @@ class Chi0DrudeCalculator(Chi0ComponentCalculator):
 class PlasmaFrequencyIntegrand(Integrand):
     def __init__(self, chi0drudecalc: Chi0DrudeCalculator,
                  qpd: SingleQPWDescriptor,
-                 analyzer: PWSymmetryAnalyzer):
+                 generator: KPointDomainGenerator):
         self._drude = chi0drudecalc
         self.qpd = qpd
-        self.analyzer = analyzer
+        self.generator = generator
 
     def _band_summation(self):
         # Intraband response needs only integrate partially unoccupied bands.
@@ -166,8 +167,8 @@ class PlasmaFrequencyIntegrand(Integrand):
             else:
                 dfde_n = np.zeros_like(f_n)
             vel_nv *= np.sqrt(-dfde_n[:, np.newaxis])
-            weight = np.sqrt(self.analyzer.get_kpoint_weight(k_c) /
-                             self.analyzer.how_many_symmetries())
+            weight = np.sqrt(self.generator.get_kpoint_weight(k_c) /
+                             self.generator.how_many_symmetries())
             vel_nv *= weight
 
         return vel_nv

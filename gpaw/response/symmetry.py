@@ -9,6 +9,7 @@ from gpaw.bztools import get_reduced_bz, unique_rows
 from gpaw.cgpaw import GG_shuffle
 
 from gpaw.response import timer
+from gpaw.response.pair_functions import SingleQPWDescriptor
 
 
 class KPointFinder:
@@ -145,8 +146,11 @@ class QSymmetryAnalyzer:
 
     def analyze(self, kpoints, qpd, context):
         symmetries = self.analyze_symmetries(qpd.q_c, kpoints.kd)
+        generator = KPointDomainGenerator(symmetries, kpoints, qpd)
+        symmetrizer = PWSymmetrizer(symmetries, qpd, context)
         context.print(self.analysis_info(symmetries))
-        return PWSymmetryAnalyzer(symmetries, kpoints, qpd, context)
+        context.print(generator.get_infostring())
+        return generator, symmetrizer
 
     def analyze_symmetries(self, q_c, kd):
         r"""Determine allowed symmetries.
@@ -227,35 +231,13 @@ def ensure_qsymmetry(qsymmetry: QSymmetryInput) -> QSymmetryAnalyzer:
     return qsymmetry
 
 
-class PWSymmetryAnalyzer:
-    """Class for handling planewave symmetries."""
-
-    def __init__(self, symmetries, kpoints, qpd, context):
-        """Creates a PWSymmetryAnalyzer object.
-
-        Determines which of the symmetries of the atomic structure
-        that is compatible with the reciprocal lattice. Contains the
-        necessary functions for mapping quantities between kpoints,
-        and or symmetrizing arrays.
-
-        kd: KPointDescriptor
-            The kpoint descriptor containing the
-            information about symmetries and kpoints.
-        qpd: SingleQPWDescriptor
-            Plane wave descriptor that contains the reciprocal
-            lattice .
-        context: ResponseContext
-        """
+class KPointDomainGenerator:
+    def __init__(self, symmetries, kpoints, qpd):
         self.symmetries = symmetries
         self.qpd = qpd
-        self.context = context
 
         self.kd = kpoints.kd
         self.kptfinder = kpoints.kptfinder
-
-        self.G_sG = self.initialize_G_maps()
-
-        self.context.print(self.get_infostring())
 
     def how_many_symmetries(self):
         # temporary backwards compatibility for external calls
@@ -271,7 +253,6 @@ class PWSymmetryAnalyzer:
         txt += f'{percent}% reduction.\n'
         return txt
 
-    @timer('Group kpoints')
     def group_kpoints(self, K_k=None):
         """Group kpoints according to the reduced symmetries"""
         if K_k is None:
@@ -341,6 +322,24 @@ class PWSymmetryAnalyzer:
         for K_k in K_gK:
             if K in K_k:
                 return len(K_k)
+
+    def unfold_ibz_kpoint(self, ik):
+        """Return kpoints related to irreducible kpoint."""
+        kd = self.kd
+        K_k = np.unique(kd.bz2bz_ks[kd.ibz2bz_k[ik]])
+        K_k = K_k[K_k != -1]
+        return K_k
+
+
+class PWSymmetrizer:
+    def __init__(self,
+                 symmetries: QSymmetries,
+                 qpd: SingleQPWDescriptor,
+                 context):
+        self.qpd = qpd  # check me XXX
+        self.symmetries = symmetries
+        self.G_sG = self.initialize_G_maps()
+        self.context = context  # temporary, do timing elsewhere XXX
 
     @timer('symmetrize_wGG')
     def symmetrize_wGG(self, A_wGG):
@@ -431,10 +430,3 @@ class PWSymmetryAnalyzer:
                     raise IndexError
             G_sG.append(np.array(G_G, dtype=np.int32))
         return np.array(G_sG)
-
-    def unfold_ibz_kpoint(self, ik):
-        """Return kpoints related to irreducible kpoint."""
-        kd = self.kd
-        K_k = np.unique(kd.bz2bz_ks[kd.ibz2bz_k[ik]])
-        K_k = K_k[K_k != -1]
-        return K_k

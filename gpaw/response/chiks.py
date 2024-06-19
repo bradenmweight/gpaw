@@ -141,10 +141,10 @@ class GeneralizedSuscetibilityCalculator(PairFunctionIntegrator):
             self.matrix_element_calc2.initialize_paw_corrections(chiks.qpd)
 
         # Perform the actual integration
-        analyzer = self._integrate(chiks, transitions)
+        symmetrizer = self._integrate(chiks, transitions)
 
         # Symmetrize chiks according to the symmetries of the ground state
-        self.symmetrize(chiks, analyzer)
+        self.symmetrize(chiks, symmetrizer)
 
         # Map to standard output format
         chiks = self.post_process(chiks)
@@ -354,14 +354,14 @@ class GeneralizedSuscetibilityCalculator(PairFunctionIntegrator):
             mmmx(1.0, gcc_Gt, 'N', xf_tZg, 'N', 1.0, chiks_GZg)  # slow step
 
     @timer('Symmetrizing chiks')
-    def symmetrize(self, chiks, analyzer):
+    def symmetrize(self, chiks, symmetrizer):
         """Symmetrize chiks_zGG."""
         chiks_ZgG = chiks.array_with_view('ZgG')
 
         # Distribute over frequencies
         nz = len(chiks.zd)
         tmp_zGG = chiks.blockdist.distribute_as(chiks_ZgG, nz, 'zGG')
-        analyzer.symmetrize_zGG(tmp_zGG)
+        symmetrizer.symmetrize_zGG(tmp_zGG)
         # Distribute over plane waves
         chiks_ZgG[:] = chiks.blockdist.distribute_as(tmp_zGG, nz, 'ZgG')
 
