@@ -136,12 +136,13 @@ class QSymmetryAnalyzer:
 
     def analysis_info(self, symmetries):
         dsinfo = self.disabled_symmetry_info
-        txt = f'\nSymmetries of q_c{f" ({dsinfo})" if len(dsinfo) else ""}:'
-        txt += f'\n    Direct symmetries (Uq -> q): {symmetries.ndirect}'
-        txt += f'\n    Indirect symmetries (TUq -> q): {symmetries.nindirect}'
-        txt += f'\nIn total {len(symmetries)} allowed symmetries.\n'
-        txt += symmetries.description()
-        return txt
+        return '\n'.join([
+            '',
+            f'Symmetries of q_c{f" ({dsinfo})" if len(dsinfo) else ""}:',
+            f'    Direct symmetries (Uq -> q): {symmetries.ndirect}',
+            f'    Indirect symmetries (TUq -> q): {symmetries.nindirect}',
+            f'In total {len(symmetries)} allowed symmetries.',
+            symmetries.description()])
 
     def analyze(self, kpoints, qpd, context):
         symmetries = self.analyze_symmetries(qpd.q_c, kpoints.kd)
