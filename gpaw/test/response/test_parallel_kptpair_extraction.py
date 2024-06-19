@@ -108,10 +108,8 @@ def initialize_extractor(gs, context, tcomm, kcomm):
 
 
 def initialize_integral(extractor, context, q_c):
-    gs = extractor.gs
-    qpd = SingleQPWDescriptor.from_q(q_c, 1e-3, gs.gd)
-    qsymmetry = QSymmetryAnalyzer()
-    generator, _ = qsymmetry.analyze(gs.kpoints, qpd, context)
+    _, generator = QSymmetryAnalyzer().analyze(
+        np.asarray(q_c), extractor.gs.kpoints, context)
     return KPointPairPointIntegral(extractor, generator)
 
 

@@ -248,15 +248,15 @@ class Chi0ComponentCalculator:
                     'Please use find_high_symmetry_monkhorst_pack() from '
                     'gpaw.bztools to generate your k-point grid.')
 
-    def get_integration_domain(self, qpd, spins):
+    def get_integration_domain(self, q_c, spins):
         """Get integrator domain and prefactor for the integral."""
         for spin in spins:
             assert spin in range(self.gs.nspins)
         # The integration domain is determined by the following function
         # that reduces the integration domain to the irreducible zone
         # of the little group of q.
-        kpoints, generator, symmetrizer = self.get_kpoints(
-            qpd, integrationmode=self.integrationmode)
+        symmetries, generator, kpoints = self.get_kpoints(
+            q_c, integrationmode=self.integrationmode)
 
         domain = Domain(kpoints.k_kv, spins)
 
@@ -280,13 +280,13 @@ class Chi0ComponentCalculator:
             nbzkpts = self.gs.kd.nbzkpts
             prefactor *= len(kpoints) / nbzkpts
 
-        return domain, generator, symmetrizer, prefactor
+        return symmetries, generator, domain, prefactor
 
     @timer('Get kpoints')
-    def get_kpoints(self, qpd, integrationmode):
+    def get_kpoints(self, q_c, integrationmode):
         """Get the integration domain."""
-        generator, symmetrizer = self.qsymmetry.analyze(
-            self.gs.kpoints, qpd, self.context)
+        symmetries, generator = self.qsymmetry.analyze(
+            np.asarray(q_c), self.gs.kpoints, self.context)
 
         if integrationmode is None:
             k_kc = generator.get_kpt_domain()
@@ -295,7 +295,10 @@ class Chi0ComponentCalculator:
                 pbc_c=self.pbc, cell_cv=self.gs.gd.cell_cv)
         kpoints = KPointDomain(k_kc, self.gs.gd.icell_cv)
 
-        return kpoints, generator, symmetrizer
+        # In the future, we probably want to put enough functionality on the
+        # KPointDomain such that we don't need to also return the
+        # KPointDomainGenerator XXX
+        return symmetries, generator, kpoints
 
     def get_gs_info_string(self, tab=''):
         gs = self.gs

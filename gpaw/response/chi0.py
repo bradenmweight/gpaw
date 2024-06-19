@@ -8,6 +8,7 @@ from ase.units import Ha
 
 import gpaw
 from gpaw.response import ResponseContext
+from gpaw.response.symmetry import PWSymmetrizer
 from gpaw.response.chi0_data import (Chi0Data, Chi0BodyData,
                                      Chi0OpticalExtensionData)
 from gpaw.response.frequencies import FrequencyDescriptor
@@ -215,10 +216,12 @@ class Chi0BodyCalculator(Chi0ComponentPWCalculator):
 
         self.context.print('Integrating chi0 body.')
 
-        # domain: Domain from from gpaw.response.integrators
+        # symmetries: QSymmetries from gpaw.response.symmetry
         # generator: KPointDomainGenerator from gpaw.response.symmetry
-        # symmetrizer: PWSymmetrizer from gpaw.response.symmetry
-        domain, generator, symmetrizer, prefactor = self.get_integration_domain(qpd, spins)
+        # domain: Domain from from gpaw.response.integrators
+        symmetries, generator, domain, prefactor = self.get_integration_domain(
+            qpd.q_c, spins)
+        symmetrizer = PWSymmetrizer(symmetries, qpd)
         integrand = Chi0Integrand(self, qpd=qpd, generator=generator,
                                   optical=False, m1=m1, m2=m2)
 
@@ -249,7 +252,9 @@ class Chi0BodyCalculator(Chi0ComponentPWCalculator):
         chi0_body.data_WgG[:] *= prefactor
 
         tmp_chi0_wGG = chi0_body.copy_array_with_distribution('wGG')
+        self.context.timer.start('symmetrize_wGG')
         symmetrizer.symmetrize_wGG(tmp_chi0_wGG)
+        self.context.timer.stop('symmetrize_wGG')
         chi0_body.data_WgG[:] = chi0_body.blockdist.distribute_as(
             tmp_chi0_wGG, chi0_body.nw, 'WgG')
 
@@ -393,7 +398,10 @@ class Chi0OpticalExtensionCalculator(Chi0ComponentPWCalculator):
         chi0_opt_ext = chi0_optical_extension
         qpd = chi0_opt_ext.qpd
 
-        domain, generator, symmetrizer, prefactor = self.get_integration_domain(qpd, spins)
+        symmetries, generator, domain, prefactor = self.get_integration_domain(
+            qpd.q_c, spins)
+        symmetrizer = PWSymmetrizer(symmetries, qpd)
+
         integrand = Chi0Integrand(self, qpd=qpd, generator=generator,
                                   optical=True, m1=m1, m2=m2)
 

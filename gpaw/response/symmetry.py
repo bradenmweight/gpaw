@@ -8,7 +8,6 @@ from scipy.spatial import Delaunay, cKDTree
 from gpaw.bztools import get_reduced_bz, unique_rows
 from gpaw.cgpaw import GG_shuffle
 
-from gpaw.response import timer
 from gpaw.response.pair_functions import SingleQPWDescriptor
 
 
@@ -145,13 +144,13 @@ class QSymmetryAnalyzer:
         txt += symmetries.description
         return txt
 
-    def analyze(self, kpoints, qpd, context):
-        symmetries = self.analyze_symmetries(qpd.q_c, kpoints.kd)
+    def analyze(self, q_c, kpoints, context):
+        """Analyze symmetries and set up KPointDomainGenerator."""
+        symmetries = self.analyze_symmetries(q_c, kpoints.kd)
         generator = KPointDomainGenerator(symmetries, kpoints)
-        symmetrizer = PWSymmetrizer(symmetries, qpd, context)
         context.print(self.analysis_info(symmetries))
         context.print(generator.get_infostring())
-        return generator, symmetrizer
+        return symmetries, generator
 
     def analyze_symmetries(self, q_c, kd):
         r"""Determine allowed symmetries.
@@ -332,17 +331,12 @@ class KPointDomainGenerator:
 
 
 class PWSymmetrizer:
-    def __init__(self,
-                 symmetries: QSymmetries,
-                 qpd: SingleQPWDescriptor,
-                 context):
+    def __init__(self, symmetries: QSymmetries, qpd: SingleQPWDescriptor):
         assert np.allclose(symmetries.q_c, qpd.q_c)
         self.symmetries = symmetries
         self.qpd = qpd
         self.G_sG = self.initialize_G_maps()
-        self.context = context  # temporary, do timing elsewhere XXX
 
-    @timer('symmetrize_wGG')
     def symmetrize_wGG(self, A_wGG):
         """Symmetrize an array in GG'."""
 
@@ -368,7 +362,6 @@ class PWSymmetrizer:
     # Set up complex frequency alias
     symmetrize_zGG = symmetrize_wGG
 
-    @timer('symmetrize_wxvG')
     def symmetrize_wxvG(self, A_wxvG):
         """Symmetrize chi0_wxvG"""
         A_cv = self.qpd.gd.cell_cv
@@ -386,7 +379,6 @@ class PWSymmetrizer:
         # Overwrite the input
         A_wxvG[:] = tmp_wxvG / len(self.symmetries)
 
-    @timer('symmetrize_wvv')
     def symmetrize_wvv(self, A_wvv):
         """Symmetrize chi_wvv."""
         A_cv = self.qpd.gd.cell_cv

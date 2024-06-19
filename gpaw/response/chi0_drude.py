@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 from ase.units import Ha
 
+from gpaw.response.symmetry import PWSymmetrizer
 from gpaw.response.integrators import Integrand, HilbertTetrahedron, Intraband
 from gpaw.response.chi0_base import Chi0ComponentCalculator
 from gpaw.response.pair_functions import SingleQPWDescriptor
@@ -51,19 +52,17 @@ class Chi0DrudeCalculator(Chi0ComponentCalculator):
         """In-place calculation of the Drude dielectric response function,
         based on the free-space plasma frequency of the intraband transitions.
         """
-        # Create a dummy plane-wave descriptor. We need this for the symmetry
-        # analysis -> see discussion in gpaw.response.jdos
-
-        # gs: ResponseGroundStateAdapter from gpaw.response.groundstate
-        # gd: GridDescriptor from gpaw.grid_descriptor
-        qpd = SingleQPWDescriptor.from_q([0., 0., 0.],
-                                         ecut=1e-3, gd=self.gs.gd)
-
-        # domain: Domain from from gpaw.response.integrators
+        q_c = [0., 0., 0.]
+        # symmetries: QSymmetries from gpaw.response.symmetry
         # generator: KPointDomainGenerator from gpaw.response.symmetry
-        # symmetrizer: PWSymmetrizer from gpaw.response.symmetry
-        domain, generator, symmetrizer, prefactor = self.get_integration_domain(
-            qpd, spins=range(self.gs.nspins))
+        # domain: Domain from from gpaw.response.integrators
+        symmetries, generator, domain, prefactor = self.get_integration_domain(
+            q_c=q_c, spins=range(self.gs.nspins))
+
+        # For now, we still need to create a dummy plane-wave descriptor, since
+        # we only include a single symmetrizer -> #XXX
+        qpd = SingleQPWDescriptor.from_q(q_c, ecut=1e-3, gd=self.gs.gd)
+        symmetrizer = PWSymmetrizer(symmetries, qpd)
 
         # The plasma frequency integral is special in the way that only
         # the spectral part is needed

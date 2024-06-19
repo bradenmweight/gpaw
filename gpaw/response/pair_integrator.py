@@ -6,7 +6,7 @@ from ase.units import Hartree
 from gpaw.utilities.progressbar import ProgressBar
 
 from gpaw.response import timer
-from gpaw.response.symmetry import ensure_qsymmetry
+from gpaw.response.symmetry import ensure_qsymmetry, PWSymmetrizer
 from gpaw.response.kspair import (KohnShamKPointPair,
                                   KohnShamKPointPairExtractor)
 from gpaw.response.pw_parallelization import block_partition
@@ -125,8 +125,8 @@ class PairFunctionIntegrator(ABC):
         -------
         symmetrizer : PWSymmetrizer
         """
-        generator, symmetrizer = self.qsymmetry.analyze(
-            self.gs.kpoints, out.qpd, self.context)
+        symmetries, generator = self.qsymmetry.analyze(
+            out.qpd.q_c, self.gs.kpoints, self.context)
 
         # Perform the actual integral as a point integral over k-point pairs
         integral = KPointPairPointIntegral(self.kptpair_extractor, generator)
@@ -142,7 +142,11 @@ class PairFunctionIntegrator(ABC):
         with self.context.timer('Sum over distributed k-points'):
             self.intrablockcomm.sum(out.array)
 
-        return symmetrizer
+        # In the future, we don't want to return the pw-symmetrizer, but rather
+        # the symmetries themselves, such that the caller can construct its own
+        # symmetrizer. This would allow us to free the PairFunction object of
+        # qpd, allowing us to avoid dummy plane-wave descriptors in JDOS etc.
+        return PWSymmetrizer(symmetries, out.qpd)
 
     @abstractmethod
     def add_integrand(self, kptpair: KohnShamKPointPair, weight,
