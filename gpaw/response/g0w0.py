@@ -30,6 +30,7 @@ from ase.utils.filecache import MultiFileJSONCache as FileCache
 from contextlib import ExitStack
 from ase.parallel import broadcast
 
+
 class GammaIntegrationMode:
     def __init__(self, gamma_integration):
         if isinstance(gamma_integration, GammaIntegrationMode):
@@ -46,17 +47,19 @@ class GammaIntegrationMode:
 
         if isinstance(gamma_integration, int):
             raise TypeError("gamma_integration=INT is no longer supported. "
-                            "Please start using the new notations, as is given in"
-                            " the documentation of gpaw/response/g0w0.py class "
-                            "G0W0.__init__.")
+                            "Please start using the new notations, as is given"
+                            " in the documentation in gpaw/response/g0w0.py"
+                            " of __init__ of class G0W0.")
 
         if isinstance(gamma_integration, str):
             gamma_integration = defaults[gamma_integration]
 
-        self.type, self.reduced = gamma_integration['type'], gamma_integration.get('reduced', False)
+        self.type = gamma_integration['type']
+        self.reduced = gamma_integration.get('reduced', False)
+
         if self.type not in {'sphere', 'reciprocal', '1BZ', 'WS'}:
-            raise TypeError('type in gamma_integration should be one of sphere, '
-                            'reciprocal, 1BZ, or WS.')
+            raise TypeError('type in gamma_integration should be one of sphere'
+                            ', reciprocal, 1BZ, or WS.')
 
         if not self.is_numerical:
             if gamma_integration.get('reduced', False):
@@ -73,7 +76,7 @@ class GammaIntegrationMode:
     @property
     def is_numerical(self):
         return self.type in {'reciprocal', '1BZ'}
-    
+
     @property
     def is_Wigner_Seitz(self):
         return self.type == 'WS'
@@ -1183,7 +1186,7 @@ class G0W0(G0W0Calculator):
                 (voronoi). More accurate than 'reciprocal'.
 
                 A. Guandalini, P. D’Amico, A. Ferretti and D. Varsano:
-                npj Computational Materials volume 9, Article number: 44 (2023) 
+                npj Computational Materials volume 9, Article number: 44 (2023)
 
             {'type': '1BZ', 'reduced': True} or '1BZ2D':
                 Same as above, but everything is done in 2D (for 2D systems).
