@@ -82,7 +82,6 @@ class QSymmetries(Sequence):
         """Number of indirect symmetries."""
         return len(self) - self.ndirect
 
-    @property
     def description(self) -> str:
         """Return string description of symmetry operations."""
         isl = ['\n']
@@ -141,7 +140,7 @@ class QSymmetryAnalyzer:
         txt += f'\n    Direct symmetries (Uq -> q): {symmetries.ndirect}'
         txt += f'\n    Indirect symmetries (TUq -> q): {symmetries.nindirect}'
         txt += f'\nIn total {len(symmetries)} allowed symmetries.\n'
-        txt += symmetries.description
+        txt += symmetries.description()
         return txt
 
     def analyze(self, kpoints, qpd, context):
