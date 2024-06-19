@@ -916,7 +916,7 @@ class G0W0Calculator:
                 'ecut_e': list(self.ecut_e),
                 'frequencies': self.frequencies,
                 'fxc_modes': self.fxc_modes,
-                'integrate_gamma': self.wcalc.integrate_gamma}
+                'integrate_gamma': repr(self.wcalc.integrate_gamma)}
 
     @timer('calculate_w')
     def calculate_w(self, chi0calc, q_c, chi0,

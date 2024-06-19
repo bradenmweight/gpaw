@@ -48,7 +48,7 @@ class GammaIntegrationMode:
 
     @property
     def is_analytical(self):
-        return self.type == 'spherical'
+        return self.type == 'sphere'
 
     @property
     def is_numerical(self):
@@ -242,7 +242,7 @@ class WCalculator(WBaseCalculator):
                                            self.xckernel, fxc_mode)
         self.context.timer.start('Dyson eq.')
 
-        if self.is_Wigner_Seitz:
+        if self.integrate_gamma.is_Wigner_Seitz:
             from gpaw.hybrids.wstc import WignerSeitzTruncatedCoulomb
             wstc = WignerSeitzTruncatedCoulomb(chi0.qpd.gd.cell_cv,
                                                dfc.coulomb.N_c)
@@ -269,8 +269,8 @@ class WCalculator(WBaseCalculator):
                                                     chi0.chi0_WxvG[W],
                                                     chi0.chi0_Wvv[W],
                                                     sqrtV_G)
-            elif (self.is_analytical and chi0.optical_limit) or\
-                    self.integrate_gamma.is_numerical:
+            elif (self.integrate_gamma.is_analytical and chi0.optical_limit) \
+                    or self.integrate_gamma.is_numerical:
                 self.apply_gamma_correction(W_GG, einvt_GG,
                                             V0, sqrtV0, dfc.sqrtV_G)
 
