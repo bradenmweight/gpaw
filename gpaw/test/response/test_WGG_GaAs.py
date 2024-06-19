@@ -5,7 +5,8 @@ from gpaw.response.coulomb_kernels import CoulombKernel
 from gpaw import GPAW, PW, FermiDirac
 from gpaw.response.chi0 import Chi0Calculator
 from gpaw.response.frequencies import FrequencyDescriptor
-from gpaw.response.screened_interaction import initialize_w_calculator
+from gpaw.response.screened_interaction import (initialize_w_calculator,
+                                                GammaIntegrationMode)
 from ase.build import bulk
 from ase import Atoms
 
@@ -52,10 +53,11 @@ def test_Wsymm(in_tmp_dir, scalapack):
         wcontext = ResponseContext('out.txt')
         truncation = None
         coulomb = CoulombKernel.from_gs(gs, truncation=truncation)
+        gimode = GammaIntegrationMode('sphere')
         wcalc = initialize_w_calculator(chi0calc,
                                         wcontext,
                                         coulomb=coulomb,
-                                        integrate_gamma={'type': 'sphere'})
+                                        integrate_gamma=gimode)
         Wlist = []
         qlist = []
         for iq, q_c in enumerate(q_c_list):
