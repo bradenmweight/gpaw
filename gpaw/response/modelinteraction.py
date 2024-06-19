@@ -8,6 +8,7 @@ from gpaw.response import timer
 from gpaw.response.pw_parallelization import Blocks1D
 from gpaw.response.pair import KPointPairFactory
 from gpaw.wannier90 import read_uwan
+from gpaw.response.g0w0 import GammaIntegrationMode
 
 
 def ibz2bz_map(qd):
@@ -20,7 +21,7 @@ def ibz2bz_map(qd):
 
 
 def initialize_w_model(chi0calc, truncation=None,
-                       integrate_gamma={'type': 'sphere'},
+                       integrate_gamma=GammaIntegrationMode('sphere'),
                        q0_correction=False, txt='w_model.out',
                        eta=None, world=world, timer=None):
     """ Helper function to initialize ModelInteraction
@@ -30,7 +31,7 @@ def initialize_w_model(chi0calc, truncation=None,
     chi0calc: Chi0Calculator
     truncation: str
         Coulomb truncation scheme. Can be either 2D, 1D, 0D or None.
-    integrate_gamma: dict
+    integrate_gamma: GammaIntegrationMode
     q0_correction: bool
         Analytic correction to the q=0 contribution applicable to 2D
         systems.

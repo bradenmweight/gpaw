@@ -131,7 +131,7 @@ def calculate_2D_truncated_coulomb(qpd, q_v=None, *, pbc_c):
 
     qGp_G = ((qG_Gv[:, Np_c[0]])**2 + (qG_Gv[:, Np_c[1]]**2))**0.5
     qGn_G = qG_Gv[:, Nn_c[0]]
-#
+
     v_G = 4 * np.pi / (qG_Gv**2).sum(axis=1)
     if np.allclose(qGn_G[0], 0) or qpd.optical_limit:
         """sin(qGn_G * R) = 0 when R = L/2 and q_n = 0.0"""

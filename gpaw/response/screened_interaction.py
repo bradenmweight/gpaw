@@ -6,6 +6,7 @@ from ase.dft.kpoints import monkhorst_pack
 from gpaw.kpt_descriptor import KPointDescriptor
 from gpaw.response.temp import DielectricFunctionCalculator
 from gpaw.response.hilbert import GWHilbertTransforms
+from gpaw.response.g0w0 import GammaIntegrationMode
 
 
 class QPointDescriptor(KPointDescriptor):
@@ -26,7 +27,8 @@ def initialize_w_calculator(chi0calc, context, *,
                             coulomb,
                             xc='RPA',  # G0W0Kernel arguments
                             ppa=False, E0=Ha, eta=None,
-                            integrate_gamma='sphere', q0_correction=False):
+                            integrate_gamma=GammaIntegrationMode('sphere'),
+                            q0_correction=False):
     """Initialize a WCalculator from a Chi0Calculator.
 
     Parameters
@@ -61,7 +63,8 @@ class WBaseCalculator():
 
     def __init__(self, gs, context, *, qd,
                  coulomb, xckernel,
-                 integrate_gamma={'type': 'sphere'}, eta=None,
+                 integrate_gamma=GammaIntegrationMode('sphere'),
+                 eta=None,
                  q0_correction=False):
         """
         Base class for W Calculator including basic initializations and Gamma
@@ -74,7 +77,7 @@ class WBaseCalculator():
         qd : QPointDescriptor
         coulomb : CoulombKernel
         xckernel : G0W0Kernel
-        integrate_gamma: dict
+        integrate_gamma: GammaIntegrationMode
         q0_correction : bool
             Analytic correction to the q=0 contribution applicable to 2D
             systems.
@@ -108,13 +111,13 @@ class WBaseCalculator():
         """
         V0 = None
         sqrtV0 = None
-        if self.integrate_gamma['type'] in {'reciprocal', '1BZ'}:
-            reduced = self.integrate_gamma.get('reduced', False)
-            tofirstbz = self.integrate_gamma['type'] == '1BZ'
+        if self.integrate_gamma.is_numerical:
+            reduced = self.integrate_gamma.reduced
+            tofirstbz = self.integrate_gamma.to_1bz
             V0, sqrtV0 = self.coulomb.integrated_kernel(qpd=chi0.qpd,
                                                         reduced=reduced,
                                                         tofirstbz=tofirstbz)
-        elif self.integrate_gamma['type'] == 'sphere':
+        elif self.integrate_gamma.is_analytical:
             if chi0.optical_limit:
                 # The volume of reciprocal cell occupied by a single q-point
                 bzvol = (2 * np.pi)**3 / self.gs.volume / self.qd.nbzkpts
@@ -185,7 +188,7 @@ class WCalculator(WBaseCalculator):
                                            self.xckernel, fxc_mode)
         self.context.timer.start('Dyson eq.')
 
-        if self.integrate_gamma['type'] == 'WS':
+        if self.is_Wigner_Seitz:
             from gpaw.hybrids.wstc import WignerSeitzTruncatedCoulomb
             wstc = WignerSeitzTruncatedCoulomb(chi0.qpd.gd.cell_cv,
                                                dfc.coulomb.N_c)
@@ -212,9 +215,8 @@ class WCalculator(WBaseCalculator):
                                                     chi0.chi0_WxvG[W],
                                                     chi0.chi0_Wvv[W],
                                                     sqrtV_G)
-            elif (self.integrate_gamma['type'] == 'sphere' and
-                    chi0.optical_limit) or\
-                    self.integrate_gamma['type'] in {'reciprocal', '1BZ'}:
+            elif (self.is_analytical and chi0.optical_limit) or\
+                    self.integrate_gamma.is_numerical:
                 self.apply_gamma_correction(W_GG, einvt_GG,
                                             V0, sqrtV0, dfc.sqrtV_G)
 
@@ -373,7 +375,7 @@ class PPACalculator(WBaseCalculator):
                                  (einv_wGG[0] - einv_wGG[1]))
         R_GG = -0.5 * omegat_GG * einv_wGG[0]
         W_GG = pi * R_GG * dfc.sqrtV_G * dfc.sqrtV_G[:, np.newaxis]
-        if chi0.optical_limit or self.integrate_gamma['type'] != 'sphere':
+        if chi0.optical_limit or not self.integrate_gamma.is_analytical:
             self.apply_gamma_correction(W_GG, pi * R_GG,
                                         V0, sqrtV0,
                                         dfc.sqrtV_G)

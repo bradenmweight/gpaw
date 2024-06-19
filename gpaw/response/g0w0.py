@@ -30,31 +30,57 @@ from ase.utils.filecache import MultiFileJSONCache as FileCache
 from contextlib import ExitStack
 from ase.parallel import broadcast
 
+class GammaIntegrationMode:
+    def __init__(self, gamma_integration):
+        if isinstance(gamma_integration, GammaIntegrationMode):
+            self.type = gamma_integration.type
+            self.reduced = gamma_integration.reduced
+            return
 
-def validate_integrate_gamma(gamma_integration):
-    defaults = {'sphere': {'type': 'sphere'},
-                'reciprocal': {'type': 'reciprocal'},
-                'reciprocal2D': {'type': 'reciprocal', 'reduced': True},
-                '1BZ': {'type': '1BZ'},
-                '1BZ2D': {'type': '1BZ', 'reduced': True},
-                'WS': {'type': 'WS'}}
+        defaults = {'sphere': {'type': 'sphere'},
+                    'reciprocal': {'type': 'reciprocal'},
+                    'reciprocal2D': {'type': 'reciprocal', 'reduced': True},
+                    '1BZ': {'type': '1BZ'},
+                    '1BZ2D': {'type': '1BZ', 'reduced': True},
+                    'WS': {'type': 'WS'}}
 
-    if isinstance(gamma_integration, int):
-        raise TypeError("gamma_integration=INT is no longer supported. "
-                        "Please start using the new notations, as is given in"
-                        " the documentation of gpaw/response/g0w0.py class "
-                        "G0W0.__init__.")
+        if isinstance(gamma_integration, int):
+            raise TypeError("gamma_integration=INT is no longer supported. "
+                            "Please start using the new notations, as is given in"
+                            " the documentation of gpaw/response/g0w0.py class "
+                            "G0W0.__init__.")
 
-    if isinstance(gamma_integration, str):
-        gamma_integration = defaults[gamma_integration]
-    if gamma_integration['type'] not in {'sphere', 'reciprocal', '1BZ', 'WS'}:
-        raise TypeError('type in gamma_integration should be one of sphere, '
-                        'reciprocal, 1BZ, or WS.')
-    if gamma_integration['type'] not in {'reciprocal', '1BZ'}:
-        if gamma_integration.get('reduced', False):
-            raise TypeError('reduced key being True is only supported for '
-                            'type reciprocal or 1BZ.')
-    return gamma_integration
+        if isinstance(gamma_integration, str):
+            gamma_integration = defaults[gamma_integration]
+
+        self.type, self.reduced = gamma_integration['type'], gamma_integration.get('reduced', False)
+        if self.type not in {'sphere', 'reciprocal', '1BZ', 'WS'}:
+            raise TypeError('type in gamma_integration should be one of sphere, '
+                            'reciprocal, 1BZ, or WS.')
+
+        if not self.is_numerical:
+            if gamma_integration.get('reduced', False):
+                raise TypeError('reduced key being True is only supported for '
+                                'type reciprocal or 1BZ.')
+
+    def __repr__(self):
+        return f'type: {self.type} reduced: {self.reduced}'
+
+    @property
+    def is_analytical(self):
+        return self.type == 'spherical'
+
+    @property
+    def is_numerical(self):
+        return self.type in {'reciprocal', '1BZ'}
+    
+    @property
+    def is_Wigner_Seitz(self):
+        return self.type == 'WS'
+
+    @property
+    def to_1bz(self):
+        return self.type == '1BZ'
 
 
 def compare_inputs(inp1, inp2, rel_tol=1e-14, abs_tol=1e-14):
@@ -1156,6 +1182,9 @@ class G0W0(G0W0Calculator):
                 resembling the Wigner-Seitz cell of the reciprocal lattice
                 (voronoi). More accurate than 'reciprocal'.
 
+                A. Guandalini, P. D’Amico, A. Ferretti and D. Varsano:
+                npj Computational Materials volume 9, Article number: 44 (2023) 
+
             {'type': '1BZ', 'reduced': True} or '1BZ2D':
                 Same as above, but everything is done in 2D (for 2D systems).
 
@@ -1187,7 +1216,7 @@ class G0W0(G0W0Calculator):
             requirements as much as possible.
         """
 
-        integrate_gamma = validate_integrate_gamma(integrate_gamma)
+        integrate_gamma = GammaIntegrationMode(integrate_gamma)
 
         # We pass a serial communicator because the parallel handling
         # is somewhat wonky, we'd rather do that ourselves:
@@ -1226,7 +1255,7 @@ class G0W0(G0W0Calculator):
                     'nbands cannot be supplied with ecut-extrapolation.')
 
         if ppa:
-            assert integrate_gamma['type'] != 'WS', "TODO"
+            assert integrate_gamma.is_Wigner_Seitz, "TODO"
             # use small imaginary frequency to avoid dividing by zero:
             frequencies = [1e-10j, 1j * E0]
 
