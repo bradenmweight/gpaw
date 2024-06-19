@@ -90,7 +90,7 @@ class BSEMatrix:
             assert ns == (
                 -(-bse.kd.nbzkpts // world.size) * (
                     bse.nv * bse.nc *
-                    bse.spins *
+                    bse.nspins *
                     (bse.spinors + 1)**2))
 
             # XXX We don't need to create new BLACS grids all the time
