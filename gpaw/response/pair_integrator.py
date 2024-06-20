@@ -1,6 +1,7 @@
 import numpy as np
 from abc import ABC, abstractmethod
 
+from gpaw.typing import Vector
 from gpaw.utilities.progressbar import ProgressBar
 
 from gpaw.response import timer
@@ -8,8 +9,31 @@ from gpaw.response.symmetry import ensure_qsymmetry
 from gpaw.response.kspair import (KohnShamKPointPair,
                                   KohnShamKPointPairExtractor)
 from gpaw.response.pw_parallelization import block_partition
-from gpaw.response.pair_functions import PairFunction
 from gpaw.response.pair_transitions import PairTransitions
+
+
+class PairFunction(ABC):
+    r"""Pair function data object.
+
+    In the GPAW response module, a pair function is understood as any function
+    which can be written as a sum over the eigenstate transitions with a given
+    crystal momentum difference q,
+             __
+             \
+    pf(q) =  /  pf_αα' δ_{q,q_{α',α}}
+             ‾‾
+             α,α'
+
+    where pf_αα' is an arbitrary matrix element.
+    """
+
+    def __init__(self, q_c: Vector):
+        self.q_c = np.asarray(q_c)
+        self.array = self.zeros()
+
+    @abstractmethod
+    def zeros(self):
+        """Generate an array of zeros, representing the pair function."""
 
 
 class PairFunctionIntegrator(ABC):
@@ -18,14 +42,14 @@ class PairFunctionIntegrator(ABC):
     The implementation is currently restricted collinear periodic crystals in
     absence of spin-orbit coupling.
 
-    In the Kohn-Sham system, pair functions (see the PairFunciton class for
-    further descriptions) can be constructed straight-forwardly as a sum over
-    transitions between Kohn-Sham eigenstates at k and k + q,
-                  __  __  __                            __
-               1  \   \   \                          1  \
-    pf(q,z) =  ‾  /   /   /   pf_nks,n'k+qs'(q,z) =  ‾  /  pf_T(q,z)
-               V  ‾‾  ‾‾  ‾‾                         V  ‾‾
-                  k  n,n' s,s'                          T
+    In the Kohn-Sham system, pair functions can be constructed
+    straight-forwardly as a sum over transitions between Kohn-Sham eigenstates
+    at k and k + q,
+                __  __  __                          __
+             1  \   \   \                        1  \
+    pf(q) =  ‾  /   /   /   pf_nks,n'k+qs'(q) =  ‾  /  pf_T(q)
+             V  ‾‾  ‾‾  ‾‾                       V  ‾‾
+                k  n,n' s,s'                        T
 
     where V is the crystal volume and T is a composite index encoding all
     relevant transitions:
@@ -37,11 +61,11 @@ class PairFunctionIntegrator(ABC):
     transitions t:
 
     t (composite transition index): (n, s) -> (n', s')
-                  __                 __  __                  __
-               1  \               1  \   \                1  \
-    pf(q,z) =  ‾  /  pf_T(q,z) =  ‾  /   /  pf_kt(q,z) =  ‾  /  (...)_k
-               V  ‾‾              V  ‾‾  ‾‾               V  ‾‾
-                  T                  k   t                   k
+                __               __  __                __
+             1  \             1  \   \              1  \
+    pf(q) =  ‾  /  pf_T(q) =  ‾  /   /  pf_kt(q) =  ‾  /  (...)_k
+             V  ‾‾            V  ‾‾  ‾‾             V  ‾‾
+                T                k   t                 k
 
     In the code, the k-point integral is handled by a KPointPairIntegral
     object, while the sum over band and spin transitions t is carried out in
@@ -56,11 +80,11 @@ class PairFunctionIntegrator(ABC):
        k
 
     self.add_integrand():
-                __                __   __
-                \                 \    \
-    (...)_k  =  /  pf_kt(q,z)  =  /    /   pf_nks,n'k+qs'(q,z)
-                ‾‾                ‾‾   ‾‾
-                t                 n,n' s,s'
+                __              __   __
+                \               \    \
+    (...)_k  =  /  pf_kt(q)  =  /    /   pf_nks,n'k+qs'(q)
+                ‾‾              ‾‾   ‾‾
+                t               n,n' s,s'
 
     In practise, the integration is carried out by letting the
     KPointPairIntegral extract individual KohnShamKPointPair objects, which
@@ -69,12 +93,6 @@ class PairFunctionIntegrator(ABC):
     KPointPairIntegral.weighted_kpoint_pairs() generates these kptpairs along
     with their integral weights such that self._integrate() can construct the
     pair functions in a flexible, yet general manner.
-
-    NB: Although it is not a fundamental limitation to pair functions as
-    described above, the current implementation is based on a plane-wave
-    represenation of spatial coordinates. This means that symmetries are
-    analyzed with a plane-wave basis in mind, leaving room for further
-    generalization in the future.
     """
 
     def __init__(self, gs, context, qsymmetry=True, nblocks=1):
@@ -121,7 +139,7 @@ class PairFunctionIntegrator(ABC):
 
         Returns
         -------
-        symmetrizer : PWSymmetrizer
+        symmetries : QSymmetries
         """
         symmetries, generator = self.qsymmetry.analyze(
             out.q_c, self.gs.kpoints, self.context)

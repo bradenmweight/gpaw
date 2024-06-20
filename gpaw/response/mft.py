@@ -13,7 +13,7 @@ from gpaw.response.chiks import ChiKSCalculator, smat
 from gpaw.response.localft import LocalFTCalculator, add_LSDA_Wxc
 from gpaw.response.site_kernels import SiteKernels
 from gpaw.response.site_data import AtomicSites, AtomicSiteData
-from gpaw.response.pair_integrator import PairFunctionIntegrator
+from gpaw.response.pair_integrator import PairFunction, PairFunctionIntegrator
 from gpaw.response.pair_transitions import PairTransitions
 from gpaw.response.matrix_elements import (SitePairDensityCalculator,
                                            SiteZeemanPairEnergyCalculator)
@@ -317,14 +317,11 @@ def calculate_pair_site_zeeman_energy(
     return pair_site_zeeman_energy.array * Hartree  # Ha -> eV
 
 
-class StaticSiteFunction:  # promote common denominator to ABC XXX
+class StaticSiteFunction(PairFunction):
     """Data object for static single-particle site functions."""
-    def __init__(self,
-                 q_c: Vector,
-                 sites: AtomicSites):
-        self.q_c = np.asarray(q_c)
+    def __init__(self, q_c: Vector, sites: AtomicSites):
         self.sites = sites
-        self.array = self.zeros()
+        super().__init__(q_c)
 
     @property
     def shape(self):

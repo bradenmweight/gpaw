@@ -9,6 +9,7 @@ from gpaw.typing import Vector
 from gpaw.kpt_descriptor import KPointDescriptor
 from gpaw.pw.descriptor import PWDescriptor
 
+from gpaw.response.pair_integrator import PairFunction
 from gpaw.response.frequencies import ComplexFrequencyDescriptor
 from gpaw.response.pw_parallelization import (Blocks1D,
                                               PlaneWaveBlockDistributor)
@@ -46,19 +47,16 @@ class SingleQPWDescriptor(PWDescriptor):
             self.q_c, ecut, gd, gammacentered=gammacentered)
 
 
-class PairFunction(ABC):
-    r"""Pair function data object.
+class DynamicPairFunction(PairFunction):
+    r"""Dynamic pair function data object.
 
-    In the GPAW response module, a pair function is understood as any function
-    which can be written as a sum over the eigenstate transitions with a given
-    crystal momentum difference q
+    A dynamic pair function is not only a function of the crystal momentum q,
+    but also of the complex frequency z = ω + iη:
                __
                \
     pf(q,z) =  /  pf_αα'(z) δ_{q,q_{α',α}}
                ‾‾
                α,α'
-
-    where z = ω + iη is a complex frequency.
 
     Typically, this will be some generalized (linear) susceptibility, which is
     defined by the Kubo formula,
@@ -80,20 +78,12 @@ class PairFunction(ABC):
 
     For more information, please refer to [Skovhus T., PhD. Thesis, 2021]."""
 
-    def __init__(self,
-                 q_c: Vector,
-                 zd: ComplexFrequencyDescriptor):
-        """Construct a pair function."""
-        self.q_c = np.asarray(q_c)
+    def __init__(self, q_c: Vector, zd: ComplexFrequencyDescriptor):
         self.zd = zd
-        self.array = self.zeros()
-
-    @abstractmethod
-    def zeros(self):
-        """Generate an array of zeros, representing the pair function."""
+        super().__init__(q_c)
 
 
-class LatticePeriodicPairFunction(PairFunction):
+class LatticePeriodicPairFunction(DynamicPairFunction):
     r"""Data object for lattice periodic pair functions.
 
     Any spatial dependent pair function is considered to be lattice periodic,

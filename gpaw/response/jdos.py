@@ -2,12 +2,12 @@ import numpy as np
 
 from gpaw.response import ResponseContext
 from gpaw.response.pair_integrator import PairFunctionIntegrator
-from gpaw.response.pair_functions import PairFunction
+from gpaw.response.pair_functions import DynamicPairFunction
 from gpaw.response.chiks import get_temporal_part
 from gpaw.response.frequencies import ComplexFrequencyDescriptor
 
 
-class JDOS(PairFunction):
+class JDOS(DynamicPairFunction):
 
     def __init__(self, spincomponent, q_c, zd):
         self.spincomponent = spincomponent
