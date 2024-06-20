@@ -1,3 +1,4 @@
+import pytest
 import numpy as np
 from ase.units import Hartree as Ha
 from gpaw.cgpaw import evaluate_mpa_poly as mpa_C
@@ -20,8 +21,8 @@ def mpa_py(omega, f, omegat_nGG, W_nGG, eta, factor):
     return x_GG, dx_GG
 
 
-def test_residues(in_tmp_dir):
-    f = 0.5
+@pytest.mark.parametrize('f', [0, 0.4, 1.0])
+def test_residues(in_tmp_dir, f):
     factor = 2.0
     eta = 0.1 * Ha
     nG = 5
@@ -40,9 +41,5 @@ def test_residues(in_tmp_dir):
     x_GG_C = np.empty(omegat_nGG.shape[1:], dtype=complex)
     dx_GG_C = np.empty(omegat_nGG.shape[1:], dtype=complex)
     mpa_C(x_GG_C, dx_GG_C, omega, f, omegat_nGG, W_nGG, eta, factor)
-
-    print(x_GG_py)
-    print(x_GG_C)
-    print(x_GG_py / x_GG_C)
 
     assert np.allclose(x_GG_py, x_GG_C, atol=1e-6)
