@@ -9,7 +9,7 @@ from scipy.spatial import Delaunay, cKDTree
 from gpaw.bztools import get_reduced_bz, unique_rows
 from gpaw.cgpaw import GG_shuffle
 
-from gpaw.response import timer
+from gpaw.response.pair_functions import SingleQPWDescriptor
 
 
 class KPointFinder:
@@ -45,6 +45,7 @@ class QSymmetries(Sequence):
            vector). May be reduced further, if some of the symmetries have been
            disabled. Length is q-dependent and depends on user input.
     """
+    q_c: np.ndarray
     U_ucc: np.ndarray  # unitary symmetry transformations
     S_s: np.ndarray  # extended symmetry index for each q-symmetry
     shift_sc: np.ndarray  # reciprocal lattice shifts, G = (T)Uq - q
@@ -144,10 +145,13 @@ class QSymmetryAnalyzer:
             f'In total {len(symmetries)} allowed symmetries.',
             symmetries.description()])
 
-    def analyze(self, kpoints, qpd, context):
-        symmetries = self.analyze_symmetries(qpd.q_c, kpoints.kd)
+    def analyze(self, q_c, kpoints, context):
+        """Analyze symmetries and set up KPointDomainGenerator."""
+        symmetries = self.analyze_symmetries(q_c, kpoints.kd)
+        generator = KPointDomainGenerator(symmetries, kpoints)
         context.print(self.analysis_info(symmetries))
-        return PWSymmetryAnalyzer(symmetries, kpoints, qpd, context)
+        context.print(generator.get_infostring())
+        return symmetries, generator
 
     def analyze_symmetries(self, q_c, kd):
         r"""Determine allowed symmetries.
@@ -212,7 +216,7 @@ class QSymmetryAnalyzer:
         # We always filter out non-symmorphic symmetries
         S_s = list(filter(is_not_non_symmorphic, S_s))
 
-        return QSymmetries(U_ucc, S_s, shift_Sc[S_s])
+        return QSymmetries(q_c, U_ucc, S_s, shift_Sc[S_s])
 
 
 QSymmetryInput = Union[QSymmetryAnalyzer, dict, bool]
@@ -228,35 +232,12 @@ def ensure_qsymmetry(qsymmetry: QSymmetryInput) -> QSymmetryAnalyzer:
     return qsymmetry
 
 
-class PWSymmetryAnalyzer:
-    """Class for handling planewave symmetries."""
-
-    def __init__(self, symmetries, kpoints, qpd, context):
-        """Creates a PWSymmetryAnalyzer object.
-
-        Determines which of the symmetries of the atomic structure
-        that is compatible with the reciprocal lattice. Contains the
-        necessary functions for mapping quantities between kpoints,
-        and or symmetrizing arrays.
-
-        kd: KPointDescriptor
-            The kpoint descriptor containing the
-            information about symmetries and kpoints.
-        qpd: SingleQPWDescriptor
-            Plane wave descriptor that contains the reciprocal
-            lattice .
-        context: ResponseContext
-        """
+class KPointDomainGenerator:
+    def __init__(self, symmetries, kpoints):
         self.symmetries = symmetries
-        self.qpd = qpd
-        self.context = context
 
         self.kd = kpoints.kd
         self.kptfinder = kpoints.kptfinder
-
-        self.G_sG = self.initialize_G_maps()
-
-        self.context.print(self.get_infostring())
 
     def how_many_symmetries(self):
         # temporary backwards compatibility for external calls
@@ -272,7 +253,6 @@ class PWSymmetryAnalyzer:
         txt += f'{percent}% reduction.\n'
         return txt
 
-    @timer('Group kpoints')
     def group_kpoints(self, K_k=None):
         """Group kpoints according to the reduced symmetries"""
         if K_k is None:
@@ -296,13 +276,13 @@ class PWSymmetryAnalyzer:
                          K_K in self.group_kpoints()])
         return k_kc
 
-    def get_tetrahedron_ikpts(self, *, pbc_c):
+    def get_tetrahedron_ikpts(self, *, pbc_c, cell_cv):
         """Find irreducible k-points for tetrahedron integration."""
         U_scc = np.array([  # little group of q
             sign * U_cc for U_cc, sign, _ in self.symmetries])
 
         # Determine the irreducible BZ
-        bzk_kc, ibzk_kc, _ = get_reduced_bz(self.qpd.gd.cell_cv,
+        bzk_kc, ibzk_kc, _ = get_reduced_bz(cell_cv,
                                             U_scc,
                                             False,
                                             pbc_c=pbc_c)
@@ -323,8 +303,8 @@ class PWSymmetryAnalyzer:
 
         return ik_kc
 
-    def get_tetrahedron_kpt_domain(self, *, pbc_c):
-        ik_kc = self.get_tetrahedron_ikpts(pbc_c=pbc_c)
+    def get_tetrahedron_kpt_domain(self, *, pbc_c, cell_cv):
+        ik_kc = self.get_tetrahedron_ikpts(pbc_c=pbc_c, cell_cv=cell_cv)
         if pbc_c.all():
             k_kc = ik_kc
         else:
@@ -343,7 +323,21 @@ class PWSymmetryAnalyzer:
             if K in K_k:
                 return len(K_k)
 
-    @timer('symmetrize_wGG')
+    def unfold_ibz_kpoint(self, ik):
+        """Return kpoints related to irreducible kpoint."""
+        kd = self.kd
+        K_k = np.unique(kd.bz2bz_ks[kd.ibz2bz_k[ik]])
+        K_k = K_k[K_k != -1]
+        return K_k
+
+
+class PWSymmetrizer:
+    def __init__(self, symmetries: QSymmetries, qpd: SingleQPWDescriptor):
+        assert np.allclose(symmetries.q_c, qpd.q_c)
+        self.symmetries = symmetries
+        self.qpd = qpd
+        self.G_sG = self.initialize_G_maps()
+
     def symmetrize_wGG(self, A_wGG):
         """Symmetrize an array in GG'."""
 
@@ -369,7 +363,6 @@ class PWSymmetryAnalyzer:
     # Set up complex frequency alias
     symmetrize_zGG = symmetrize_wGG
 
-    @timer('symmetrize_wxvG')
     def symmetrize_wxvG(self, A_wxvG):
         """Symmetrize chi0_wxvG"""
         A_cv = self.qpd.gd.cell_cv
@@ -387,7 +380,6 @@ class PWSymmetryAnalyzer:
         # Overwrite the input
         A_wxvG[:] = tmp_wxvG / len(self.symmetries)
 
-    @timer('symmetrize_wvv')
     def symmetrize_wvv(self, A_wvv):
         """Symmetrize chi_wvv."""
         A_cv = self.qpd.gd.cell_cv
@@ -432,10 +424,3 @@ class PWSymmetryAnalyzer:
                     raise IndexError
             G_sG.append(np.array(G_G, dtype=np.int32))
         return np.array(G_sG)
-
-    def unfold_ibz_kpoint(self, ik):
-        """Return kpoints related to irreducible kpoint."""
-        kd = self.kd
-        K_k = np.unique(kd.bz2bz_ks[kd.ibz2bz_k[ik]])
-        K_k = K_k[K_k != -1]
-        return K_k

@@ -14,7 +14,8 @@ from gpaw.response.pair_functions import SingleQPWDescriptor
 from gpaw.response.pw_parallelization import block_partition
 from gpaw.response.integrators import (
     Integrand, PointIntegrator, TetrahedronIntegrator, Domain)
-from gpaw.response.symmetry import (PWSymmetryAnalyzer, QSymmetryInput,
+from gpaw.response.symmetry import (KPointDomainGenerator,
+                                    QSymmetryInput,
                                     ensure_qsymmetry)
 from gpaw.response.kpoints import KPointDomain
 
@@ -28,7 +29,7 @@ class Chi0Integrand(Integrand):
     def __init__(self, chi0calc: Chi0ComponentPWCalculator,
                  optical: bool,
                  qpd: SingleQPWDescriptor,
-                 analyzer: PWSymmetryAnalyzer,
+                 generator: KPointDomainGenerator,
                  m1: int,
                  m2: int):
 
@@ -48,7 +49,7 @@ class Chi0Integrand(Integrand):
         self.kptpair_factory: KPointPairFactory = chi0calc.kptpair_factory
 
         self.qpd = qpd
-        self.analyzer = analyzer
+        self.generator = generator
         self.integrationmode = chi0calc.integrationmode
         self.optical = optical
         self.blockcomm = chi0calc.blockcomm
@@ -104,8 +105,8 @@ class Chi0Integrand(Integrand):
         K = self.gs.kpoints.kptfinder.find(k_c)
         # assert point.K == K, (point.K, K)
 
-        weight = np.sqrt(self.analyzer.get_kpoint_weight(k_c) /
-                         self.analyzer.how_many_symmetries())
+        weight = np.sqrt(self.generator.get_kpoint_weight(k_c) /
+                         self.generator.how_many_symmetries())
 
         # Here we're again setting pawcorr willy-nilly
         if self._chi0calc.pawcorr is None:
@@ -247,15 +248,15 @@ class Chi0ComponentCalculator:
                     'Please use find_high_symmetry_monkhorst_pack() from '
                     'gpaw.bztools to generate your k-point grid.')
 
-    def get_integration_domain(self, qpd, spins):
+    def get_integration_domain(self, q_c, spins):
         """Get integrator domain and prefactor for the integral."""
         for spin in spins:
             assert spin in range(self.gs.nspins)
         # The integration domain is determined by the following function
         # that reduces the integration domain to the irreducible zone
         # of the little group of q.
-        kpoints, analyzer = self.get_kpoints(
-            qpd, integrationmode=self.integrationmode)
+        symmetries, generator, kpoints = self.get_kpoints(
+            q_c, integrationmode=self.integrationmode)
 
         domain = Domain(kpoints.k_kv, spins)
 
@@ -266,34 +267,38 @@ class Chi0ComponentCalculator:
             # integrated. We normalize by vol(BZ) / vol(domain) to make
             # sure that to fix this.
             domainvol = convex_hull_volume(
-                kpoints.k_kv) * analyzer.how_many_symmetries()
+                kpoints.k_kv) * generator.how_many_symmetries()
             bzvol = (2 * np.pi)**3 / self.gs.volume
             factor = bzvol / domainvol
         else:
             factor = 1
 
-        prefactor = (2 * factor * analyzer.how_many_symmetries() /
+        prefactor = (2 * factor * generator.how_many_symmetries() /
                      (self.gs.nspins * (2 * np.pi)**3))  # Remember prefactor
 
         if self.integrationmode is None:
             nbzkpts = self.gs.kd.nbzkpts
             prefactor *= len(kpoints) / nbzkpts
 
-        return domain, analyzer, prefactor
+        return symmetries, generator, domain, prefactor
 
     @timer('Get kpoints')
-    def get_kpoints(self, qpd, integrationmode):
+    def get_kpoints(self, q_c, integrationmode):
         """Get the integration domain."""
-        symmetries = self.qsymmetry.analyze(
-            self.gs.kpoints, qpd, self.context)
+        symmetries, generator = self.qsymmetry.analyze(
+            np.asarray(q_c), self.gs.kpoints, self.context)
 
         if integrationmode is None:
-            k_kc = symmetries.get_kpt_domain()
+            k_kc = generator.get_kpt_domain()
         elif integrationmode == 'tetrahedron integration':
-            k_kc = symmetries.get_tetrahedron_kpt_domain(pbc_c=self.pbc)
+            k_kc = generator.get_tetrahedron_kpt_domain(
+                pbc_c=self.pbc, cell_cv=self.gs.gd.cell_cv)
         kpoints = KPointDomain(k_kc, self.gs.gd.icell_cv)
 
-        return kpoints, symmetries
+        # In the future, we probably want to put enough functionality on the
+        # KPointDomain such that we don't need to also return the
+        # KPointDomainGenerator XXX
+        return symmetries, generator, kpoints
 
     def get_gs_info_string(self, tab=''):
         gs = self.gs

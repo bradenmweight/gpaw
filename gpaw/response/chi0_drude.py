@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 from ase.units import Ha
 
+from gpaw.response.symmetry import PWSymmetrizer
 from gpaw.response.integrators import Integrand, HilbertTetrahedron, Intraband
 from gpaw.response.chi0_base import Chi0ComponentCalculator
 from gpaw.response.pair_functions import SingleQPWDescriptor
@@ -12,7 +13,7 @@ from gpaw.response.chi0_data import Chi0DrudeData
 from gpaw.response.frequencies import FrequencyGridDescriptor
 
 if TYPE_CHECKING:
-    from gpaw.response.symmetry import PWSymmetryAnalyzer
+    from gpaw.response.symmetry import KPointDomainGenerator
 
 
 class Chi0DrudeCalculator(Chi0ComponentCalculator):
@@ -51,22 +52,21 @@ class Chi0DrudeCalculator(Chi0ComponentCalculator):
         """In-place calculation of the Drude dielectric response function,
         based on the free-space plasma frequency of the intraband transitions.
         """
-        # Create a dummy plane-wave descriptor. We need this for the symmetry
-        # analysis -> see discussion in gpaw.response.jdos
-
-        # gs: ResponseGroundStateAdapter from gpaw.response.groundstate
-        # gd: GridDescriptor from gpaw.grid_descriptor
-        qpd = SingleQPWDescriptor.from_q([0., 0., 0.],
-                                         ecut=1e-3, gd=self.gs.gd)
-
+        q_c = [0., 0., 0.]
+        # symmetries: QSymmetries from gpaw.response.symmetry
+        # generator: KPointDomainGenerator from gpaw.response.symmetry
         # domain: Domain from from gpaw.response.integrators
-        # analyzer: PWSymmetryAnalyzer from gpaw.response.symmetry
-        domain, analyzer, prefactor = self.get_integration_domain(
-            qpd, spins=range(self.gs.nspins))
+        symmetries, generator, domain, prefactor = self.get_integration_domain(
+            q_c=q_c, spins=range(self.gs.nspins))
+
+        # For now, we still need to create a dummy plane-wave descriptor, since
+        # we only include a single symmetrizer -> #XXX
+        qpd = SingleQPWDescriptor.from_q(q_c, ecut=1e-3, gd=self.gs.gd)
+        symmetrizer = PWSymmetrizer(symmetries, qpd)
 
         # The plasma frequency integral is special in the way that only
         # the spectral part is needed
-        integrand = PlasmaFrequencyIntegrand(self, qpd, analyzer)
+        integrand = PlasmaFrequencyIntegrand(self, qpd, generator)
 
         # Integrate using temporary array
         tmp_plasmafreq_wvv = np.zeros((1,) + chi0_drude.vv_shape, complex)
@@ -81,7 +81,7 @@ class Chi0DrudeCalculator(Chi0ComponentCalculator):
 
         # Store the plasma frequency itself and print it for anyone to use
         plasmafreq_vv = tmp_plasmafreq_wvv[0].copy()
-        analyzer.symmetrize_wvv(plasmafreq_vv[np.newaxis])
+        symmetrizer.symmetrize_wvv(plasmafreq_vv[np.newaxis])
         chi0_drude.plasmafreq_vv += 4 * np.pi * plasmafreq_vv
         self.context.print('Plasma frequency:', flush=False)
         self.context.print((chi0_drude.plasmafreq_vv**0.5 * Ha).round(2))
@@ -130,10 +130,10 @@ class Chi0DrudeCalculator(Chi0ComponentCalculator):
 class PlasmaFrequencyIntegrand(Integrand):
     def __init__(self, chi0drudecalc: Chi0DrudeCalculator,
                  qpd: SingleQPWDescriptor,
-                 analyzer: PWSymmetryAnalyzer):
+                 generator: KPointDomainGenerator):
         self._drude = chi0drudecalc
         self.qpd = qpd
-        self.analyzer = analyzer
+        self.generator = generator
 
     def _band_summation(self):
         # Intraband response needs only integrate partially unoccupied bands.
@@ -166,8 +166,8 @@ class PlasmaFrequencyIntegrand(Integrand):
             else:
                 dfde_n = np.zeros_like(f_n)
             vel_nv *= np.sqrt(-dfde_n[:, np.newaxis])
-            weight = np.sqrt(self.analyzer.get_kpoint_weight(k_c) /
-                             self.analyzer.how_many_symmetries())
+            weight = np.sqrt(self.generator.get_kpoint_weight(k_c) /
+                             self.generator.how_many_symmetries())
             vel_nv *= weight
 
         return vel_nv
