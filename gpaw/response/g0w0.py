@@ -1103,7 +1103,7 @@ class G0W0(G0W0Calculator):
             (almost for free).
         truncation: str
             Coulomb truncation scheme. Can be either 2D, 1D, or 0D.
-        integrate_gamma: int or string
+        integrate_gamma: int or str
             Method to integrate the Coulomb interaction. 1 is a numerical
             integration at all q-points with G=[0,0,0] - this breaks the
             symmetry slightly. 0 is analytical integration at q=[0,0,0] only -
