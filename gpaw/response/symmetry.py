@@ -1,6 +1,7 @@
 from typing import Union
 from dataclasses import dataclass
 from collections.abc import Sequence
+from functools import cached_property
 
 import numpy as np
 from scipy.spatial import Delaunay, cKDTree
@@ -71,10 +72,40 @@ class QSymmetries(Sequence):
             return -1
         return 1
 
+    @cached_property
+    def ndirect(self):
+        """Number of direct symmetries."""
+        return sum(np.array(self.S_s) < self.nU)
+
+    @property
+    def nindirect(self):
+        """Number of indirect symmetries."""
+        return len(self) - self.ndirect
+
+    def description(self) -> str:
+        """Return string description of symmetry operations."""
+        isl = ['\n']
+        nx = 6  # You are not allowed to use non-symmorphic syms (value 3)
+        y = 0
+        for y in range((len(self) + nx - 1) // nx):
+            for c in range(3):
+                tisl = []
+                for x in range(nx):
+                    s = x + y * nx
+                    if s == len(self):
+                        break
+                    U_cc, sign, _ = self[s]
+                    op_c = sign * U_cc[c]
+                    tisl.append(f'  ({op_c[0]:2d} {op_c[1]:2d} {op_c[2]:2d})')
+                tisl.append('\n')
+                isl.append(''.join(tisl))
+            isl.append('\n')
+        return ''.join(isl[:-1])
+
 
 @dataclass
 class QSymmetryAnalyzer:
-    """K-point symmetry analyzer for transitions k -> k + q.
+    """Identifies symmetries of the k-grid, under which q is invariant.
 
     Parameters
     ----------
@@ -83,7 +114,6 @@ class QSymmetryAnalyzer:
     time_reversal : bool
         Use time-reversal symmetry (if applicable).
     """
-
     point_group: bool = True
     time_reversal: bool = True
 
@@ -91,12 +121,33 @@ class QSymmetryAnalyzer:
     def disabled(self):
         return not (self.point_group or self.time_reversal)
 
+    @property
+    def disabled_symmetry_info(self):
+        if self.disabled:
+            txt = ''
+        elif not self.point_group:
+            txt = 'point-group '
+        elif not self.time_reversal:
+            txt = 'time-reversal '
+        else:
+            return ''
+        txt += 'symmetry has been manually disabled'
+        return txt
+
+    def analysis_info(self, symmetries):
+        dsinfo = self.disabled_symmetry_info
+        return '\n'.join([
+            '',
+            f'Symmetries of q_c{f" ({dsinfo})" if len(dsinfo) else ""}:',
+            f'    Direct symmetries (Uq -> q): {symmetries.ndirect}',
+            f'    Indirect symmetries (TUq -> q): {symmetries.nindirect}',
+            f'In total {len(symmetries)} allowed symmetries.',
+            symmetries.description()])
+
     def analyze(self, kpoints, qpd, context):
         symmetries = self.analyze_symmetries(qpd.q_c, kpoints.kd)
-        return PWSymmetryAnalyzer(
-            symmetries,
-            kpoints, qpd, context, not self.point_group,
-            not self.time_reversal)
+        context.print(self.analysis_info(symmetries))
+        return PWSymmetryAnalyzer(symmetries, kpoints, qpd, context)
 
     def analyze_symmetries(self, q_c, kd):
         r"""Determine allowed symmetries.
@@ -180,9 +231,7 @@ def ensure_qsymmetry(qsymmetry: QSymmetryInput) -> QSymmetryAnalyzer:
 class PWSymmetryAnalyzer:
     """Class for handling planewave symmetries."""
 
-    def __init__(self, symmetries, kpoints, qpd, context,
-                 disable_point_group=False,
-                 disable_time_reversal=False):
+    def __init__(self, symmetries, kpoints, qpd, context):
         """Creates a PWSymmetryAnalyzer object.
 
         Determines which of the symmetries of the atomic structure
@@ -197,94 +246,31 @@ class PWSymmetryAnalyzer:
             Plane wave descriptor that contains the reciprocal
             lattice .
         context: ResponseContext
-        disable_point_group: bool
-            Switch for disabling point group symmetries.
-        disable_time_reversal:
-            Switch for disabling time reversal.
         """
         self.symmetries = symmetries
         self.qpd = qpd
-        self.kd = kd = kpoints.kd
         self.context = context
 
-        # Settings
-        self.disable_point_group = disable_point_group
-        self.disable_time_reversal = disable_time_reversal
-        if (kd.symmetry.has_inversion or not kd.symmetry.time_reversal) and \
-           not self.disable_time_reversal:
-            self.context.print('\nThe ground calculation does not support time'
-                               '-reversal symmetry possibly because it has an '
-                               'inversion center or that it has been manually '
-                               'deactivated.\n')
-            self.disable_time_reversal = True
-
-        self.disable_symmetries = (self.disable_point_group and
-                                   self.disable_time_reversal)
-
-        # Number of symmetries
-        self.nsym = 2 * self.symmetries.nU
-        self.use_time_reversal = not self.disable_time_reversal
-
+        self.kd = kpoints.kd
         self.kptfinder = kpoints.kptfinder
 
         self.G_sG = self.initialize_G_maps()
 
         self.context.print(self.get_infostring())
-        self.context.print(self.symmetry_description())
 
     def how_many_symmetries(self):
         # temporary backwards compatibility for external calls
         return len(self.symmetries)
 
     def get_infostring(self):
-        txt = ''
-
-        if self.disable_point_group:
-            txt += 'Point group not included. '
-        else:
-            txt += 'Point group included. '
-
-        if self.disable_time_reversal:
-            txt += 'Time reversal not included. '
-        else:
-            txt += 'Time reversal included. '
-
-        txt += 'Disabled non-symmorphic symmetries. '
-
-        if self.disable_symmetries:
-            txt += 'All symmetries have been disabled. '
-
-        txt += f'Found {len(self.symmetries)} allowed symmetries. '
-
         # Maybe we can avoid calling this somehow, we're only using
         # it to print:
         K_gK = self.group_kpoints()
         ng = len(K_gK)
-        txt += f'{ng} groups of equivalent kpoints. '
+        txt = f'{ng} groups of equivalent kpoints. '
         percent = (1. - (ng + 0.) / self.kd.nbzkpts) * 100
-        txt += f'{percent}% reduction. '
+        txt += f'{percent}% reduction.\n'
         return txt
-
-    def symmetry_description(self) -> str:
-        """Return string description of symmetry operations."""
-        isl = ['\n']
-        nx = 6  # You are not allowed to use non-symmorphic syms (value 3)
-        ns = len(self.symmetries)
-        y = 0
-        for y in range((ns + nx - 1) // nx):
-            for c in range(3):
-                tisl = []
-                for x in range(nx):
-                    s = x + y * nx
-                    if s == ns:
-                        break
-                    U_cc, sign, _ = self.symmetries[s]
-                    op_c = sign * U_cc[c]
-                    tisl.append(f'  ({op_c[0]:2d} {op_c[1]:2d} {op_c[2]:2d})')
-                tisl.append('\n')
-                isl.append(''.join(tisl))
-            isl.append('\n')
-        return ''.join(isl)
 
     @timer('Group kpoints')
     def group_kpoints(self, K_k=None):
@@ -389,17 +375,13 @@ class PWSymmetryAnalyzer:
         A_cv = self.qpd.gd.cell_cv
         iA_cv = self.qpd.gd.icell_cv
 
-        if self.use_time_reversal:
-            # ::-1 corresponds to transpose in wing indices
-            AT_wxvG = A_wxvG[:, ::-1]
-
         tmp_wxvG = np.zeros_like(A_wxvG)
         for (U_cc, sign, _), G_G in zip(self.symmetries, self.G_sG):
             M_vv = np.dot(np.dot(A_cv.T, U_cc.T), iA_cv)
             if sign == 1:
                 tmp = sign * np.dot(M_vv.T, A_wxvG[..., G_G])
-            elif sign == -1:
-                tmp = sign * np.dot(M_vv.T, AT_wxvG[..., G_G])
+            elif sign == -1:  # transpose wings
+                tmp = sign * np.dot(M_vv.T, A_wxvG[:, ::-1, :, G_G])
             tmp_wxvG += np.transpose(tmp, (1, 2, 0, 3))
 
         # Overwrite the input
@@ -410,17 +392,15 @@ class PWSymmetryAnalyzer:
         """Symmetrize chi_wvv."""
         A_cv = self.qpd.gd.cell_cv
         iA_cv = self.qpd.gd.icell_cv
-        tmp_wvv = np.zeros_like(A_wvv)
-        if self.use_time_reversal:
-            AT_wvv = np.transpose(A_wvv, (0, 2, 1))
 
+        tmp_wvv = np.zeros_like(A_wvv)
         for U_cc, sign, _ in self.symmetries:
             M_vv = np.dot(np.dot(A_cv.T, U_cc.T), iA_cv)
+            tmp = np.dot(np.dot(M_vv.T, A_wvv), M_vv)
             if sign == 1:
-                tmp = np.dot(np.dot(M_vv.T, A_wvv), M_vv)
-            elif sign == -1:
-                tmp = np.dot(np.dot(M_vv.T, AT_wvv), M_vv)
-            tmp_wvv += np.transpose(tmp, (1, 0, 2))
+                tmp_wvv += np.transpose(tmp, (1, 0, 2))
+            elif sign == -1:  # transpose head
+                tmp_wvv += np.transpose(tmp, (1, 2, 0))
 
         # Overwrite the input
         A_wvv[:] = tmp_wvv / len(self.symmetries)

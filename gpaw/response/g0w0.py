@@ -1149,7 +1149,6 @@ class G0W0(G0W0Calculator):
                 (Voronoi). More accurate than 'reciprocal'.
 
                 R. Sundararaman and T. A. Arias: Phys. Rev. B 87, 165122 (2013)
-
         E0: float
             Energy (in eV) used for fitting in the plasmon-pole approximation.
         q0_correction: bool
