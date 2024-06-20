@@ -26,20 +26,21 @@ PyObject* evaluate_mpa_poly(PyObject *self, PyObject *args)
         return NULL;
 
 
-    int np = PyArray_DIMS(omegat_nGG_obj)[0];
-    int nG1 = PyArray_DIMS(omegat_nGG_obj)[1];
-    int nG2 = PyArray_DIMS(omegat_nGG_obj)[2];
-
     if (PyArray_NDIM(W_nGG_obj) != 3)
     {
          PyErr_SetString(PyExc_TypeError, "W_nGG should be 3 dimensional");
          return NULL;
     }
+
     if (PyArray_NDIM(omegat_nGG_obj) != 3)
     {
          PyErr_SetString(PyExc_TypeError, "omegat_nGG should be 3 dimensional");
          return NULL;
     }
+
+    int np = PyArray_DIMS(omegat_nGG_obj)[0];
+    int nG1 = PyArray_DIMS(omegat_nGG_obj)[1];
+    int nG2 = PyArray_DIMS(omegat_nGG_obj)[2];
 
     // Check dimensions
     if ((np != PyArray_DIMS(W_nGG_obj)[0]) ||
