@@ -4,6 +4,7 @@ from abc import abstractmethod
 
 import numpy as np
 
+from gpaw.typing import Vector
 from gpaw.response import (ResponseGroundStateAdapter, ResponseContext,
                            GPWFilename, TXTFilename,
                            ensure_gs, ensure_gs_and_context)
@@ -12,7 +13,6 @@ from gpaw.response.chiks import ChiKSCalculator, smat
 from gpaw.response.localft import LocalFTCalculator, add_LSDA_Wxc
 from gpaw.response.site_kernels import SiteKernels
 from gpaw.response.site_data import AtomicSites, AtomicSiteData
-from gpaw.response.pair_functions import SingleQPWDescriptor, PairFunction
 from gpaw.response.pair_integrator import PairFunctionIntegrator
 from gpaw.response.pair_transitions import PairTransitions
 from gpaw.response.matrix_elements import (SitePairDensityCalculator,
@@ -317,13 +317,12 @@ def calculate_pair_site_zeeman_energy(
     return pair_site_zeeman_energy.array * Hartree  # Ha -> eV
 
 
-class StaticSiteFunction(PairFunction):
+class StaticSiteFunction:  # promote common denominator to ABC XXX
     """Data object for static single-particle site functions."""
     def __init__(self,
-                 qpd: SingleQPWDescriptor,
+                 q_c: Vector,
                  sites: AtomicSites):
-        self.qpd = qpd
-        self.q_c = qpd.q_c
+        self.q_c = np.asarray(q_c)
         self.sites = sites
         self.array = self.zeros()
 
@@ -371,8 +370,7 @@ class SingleParticleSiteSumRuleCalculator(PairFunctionIntegrator):
         transitions = PairTransitions(n1_t=n_t, n2_t=n_t, s1_t=s_t, s2_t=s_t)
 
         # Set up data object with q=0
-        qpd = self.get_pw_descriptor([0., 0., 0.], ecut=1e-3)
-        site_function = StaticSiteFunction(qpd, self.sites)
+        site_function = StaticSiteFunction(q_c=[0., 0., 0.], sites=self.sites)
 
         # Perform actual calculation
         self._integrate(site_function, transitions)
@@ -511,10 +509,8 @@ class TwoParticleSiteSumRuleCalculator(PairFunctionIntegrator):
         self.context.print(self.get_info_string(
             q_c, self.nbands, len(transitions)))
 
-        # Set up data object (without a plane-wave representation, which is
-        # irrelevant in this case)
-        qpd = self.get_pw_descriptor(q_c, ecut=1e-3)
-        site_pair_function = StaticSitePairFunction(qpd, self.sites)
+        # Set up data object
+        site_pair_function = StaticSitePairFunction(q_c, self.sites)
 
         # Perform actual calculation
         self._integrate(site_pair_function, transitions)

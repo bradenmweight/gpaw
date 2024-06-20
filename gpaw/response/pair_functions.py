@@ -5,6 +5,7 @@ import numpy as np
 
 from ase.units import Hartree
 
+from gpaw.typing import Vector
 from gpaw.kpt_descriptor import KPointDescriptor
 from gpaw.pw.descriptor import PWDescriptor
 
@@ -80,13 +81,11 @@ class PairFunction(ABC):
     For more information, please refer to [Skovhus T., PhD. Thesis, 2021]."""
 
     def __init__(self,
-                 qpd: SingleQPWDescriptor,
+                 q_c: Vector,
                  zd: ComplexFrequencyDescriptor):
         """Construct a pair function."""
-        self.qpd = qpd
-        self.q_c = qpd.q_c
+        self.q_c = np.asarray(q_c)
         self.zd = zd
-
         self.array = self.zeros()
 
     @abstractmethod
@@ -134,12 +133,13 @@ class LatticePeriodicPairFunction(PairFunction):
             Memory distribution of the pair function array.
             Choices: 'ZgG', 'GZg' and 'zGG'.
         """
+        self.qpd = qpd
         self.blockdist = blockdist
         self.distribution = distribution
 
         self.blocks1d = None
         self.shape = None
-        super().__init__(qpd, zd)
+        super().__init__(qpd.q_c, zd)
 
     def zeros(self):
         if self.shape is None:

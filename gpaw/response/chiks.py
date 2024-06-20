@@ -11,7 +11,7 @@ from gpaw.utilities.blas import mmmx
 
 from gpaw.response import ResponseGroundStateAdapter, ResponseContext, timer
 from gpaw.response.symmetry import (
-    QSymmetryAnalyzer, ensure_qsymmetry, QSymmetryInput)
+    QSymmetryAnalyzer, ensure_qsymmetry, QSymmetryInput, PWSymmetrizer)
 from gpaw.response.frequencies import ComplexFrequencyDescriptor
 from gpaw.response.pw_parallelization import PlaneWaveBlockDistributor
 from gpaw.response.matrix_elements import (PlaneWaveMatrixElementCalculator,
@@ -141,10 +141,10 @@ class GeneralizedSuscetibilityCalculator(PairFunctionIntegrator):
             self.matrix_element_calc2.initialize_paw_corrections(chiks.qpd)
 
         # Perform the actual integration
-        symmetrizer = self._integrate(chiks, transitions)
+        symmetries = self._integrate(chiks, transitions)
 
         # Symmetrize chiks according to the symmetries of the ground state
-        self.symmetrize(chiks, symmetrizer)
+        self.symmetrize(chiks, PWSymmetrizer(symmetries, chiks.qpd))
 
         # Map to standard output format
         chiks = self.post_process(chiks)
