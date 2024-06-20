@@ -1,6 +1,6 @@
 import numpy as np
 from ase.units import Hartree as Ha
-from _gpaw import evaluate_mpa_poly as mpa_C
+from gpaw.cgpaw import evaluate_mpa_poly as mpa_C
 
 
 def mpa_py(omega, f, omegat_nGG, W_nGG, eta, factor):
