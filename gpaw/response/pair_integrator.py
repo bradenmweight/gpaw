@@ -1,8 +1,6 @@
 import numpy as np
 from abc import ABC, abstractmethod
 
-from ase.units import Hartree
-
 from gpaw.utilities.progressbar import ProgressBar
 
 from gpaw.response import timer
@@ -10,7 +8,7 @@ from gpaw.response.symmetry import ensure_qsymmetry
 from gpaw.response.kspair import (KohnShamKPointPair,
                                   KohnShamKPointPairExtractor)
 from gpaw.response.pw_parallelization import block_partition
-from gpaw.response.pair_functions import SingleQPWDescriptor, PairFunction
+from gpaw.response.pair_functions import PairFunction
 from gpaw.response.pair_transitions import PairTransitions
 
 
@@ -185,16 +183,6 @@ class PairFunctionIntegrator(ABC):
         blockcomm, intrablockcomm = block_partition(comm, nblocks)
 
         return blockcomm, intrablockcomm
-
-    def get_pw_descriptor(self, q_c, ecut=50, gammacentered=False):
-        q_c = np.asarray(q_c, dtype=float)
-        ecut = None if ecut is None else ecut / Hartree  # eV to Hartree
-        gd = self.gs.gd
-
-        qpd = SingleQPWDescriptor.from_q(q_c, ecut, gd,
-                                         gammacentered=gammacentered)
-
-        return qpd
 
     def get_band_and_spin_transitions(self, spincomponent, nbands=None,
                                       bandsummation='pairwise'):
