@@ -90,60 +90,67 @@ PyObject* evaluate_mpa_poly(PyObject *self, PyObject *args)
     // Optimizations for things being close to one, or close to zero
     // such that only one branch is evaluated
     if (f > 1 - 1e-10)
-    for (int G1=0; G1<nG1; G1++)
     {
-        for (int G2=0; G2<nG2; G2++)
+        for (int G1=0; G1<nG1; G1++)
         {
-            double complex result = 0;
-            double complex dresult = 0;
-            for (int p=0; p<np; p++)
+            for (int G2=0; G2<nG2; G2++)
             {
-                int index = G2 + G1 * nG2 + p * nG1 * nG2;
-                double complex omegat = omegat_nGG[index];
-                double complex x1 = 1.0 / (omega_eta_m + omegat);
-                result += x1 * W_nGG[index];
-                dresult -= x1 * x1 * W_nGG[index];
+                double complex result = 0;
+                double complex dresult = 0;
+                for (int p=0; p<np; p++)
+                {
+                    int index = G2 + G1 * nG2 + p * nG1 * nG2;
+                    double complex omegat = omegat_nGG[index];
+                    double complex x1 = 1.0 / (omega_eta_m + omegat);
+                    result += x1 * W_nGG[index];
+                    dresult -= x1 * x1 * W_nGG[index];
+                }
+                *x_GG++ = result * 2 * factor;
+                *dx_GG++ = dresult * 2 * factor;
             }
-            *x_GG++ = result * 2 * factor;
-            *dx_GG++ = dresult * 2 * factor;
         }
-    } else if (f < 1e-10)
-    for (int G1=0; G1<nG1; G1++)
+    }
+    else if (f < 1e-10)
     {
-        for (int G2=0; G2<nG2; G2++)
+        for (int G1=0; G1<nG1; G1++)
         {
-            double complex result = 0;
-            double complex dresult = 0;
-            for (int p=0; p<np; p++)
+            for (int G2=0; G2<nG2; G2++)
             {
-                int index = G2 + G1 * nG2 + p * nG1 * nG2;
-                double complex omegat = omegat_nGG[index];
-                double complex x2 = 1.0 / (omega_eta_p - omegat);
-                result += x2 * W_nGG[index];
-                dresult -= x2 * x2 * W_nGG[index];
+                double complex result = 0;
+                double complex dresult = 0;
+                for (int p=0; p<np; p++)
+                {
+                    int index = G2 + G1 * nG2 + p * nG1 * nG2;
+                    double complex omegat = omegat_nGG[index];
+                    double complex x2 = 1.0 / (omega_eta_p - omegat);
+                    result += x2 * W_nGG[index];
+                    dresult -= x2 * x2 * W_nGG[index];
+                }
+                *x_GG++ = result * (2 * factor);
+                *dx_GG++ = dresult * 2 * factor;
             }
-            *x_GG++ = result * (2 * factor);
-            *dx_GG++ = dresult * 2 * factor;
         }
     }
     else
-    for (int G1=0; G1<nG1; G1++)
     {
-        for (int G2=0; G2<nG2; G2++)
+        for (int G1=0; G1<nG1; G1++)
         {
-            double complex result = 0;
-            double complex dresult = 0;
-            for (int p=0; p<np; p++)
+            for (int G2=0; G2<nG2; G2++)
             {
-                int index = G2 + G1 * nG2 + p * nG1 * nG2;
-                double complex omegat = omegat_nGG[index];
-                double complex x1 = f / (omega_eta_m + omegat);
-                double complex x2 = (1.0 - f) / (omega_eta_p - omegat);
-                result += (x1 + x2) * W_nGG[index];
-                dresult -= (x1 * x1 + x2 * x2) * W_nGG[index];
+                double complex result = 0;
+                double complex dresult = 0;
+                for (int p=0; p<np; p++)
+                {
+                    int index = G2 + G1 * nG2 + p * nG1 * nG2;
+                    double complex omegat = omegat_nGG[index];
+                    double complex x1 = f / (omega_eta_m + omegat);
+                    double complex x2 = (1.0 - f) / (omega_eta_p - omegat);
+                    result += (x1 + x2) * W_nGG[index];
+                    dresult -= (x1 * x1 + x2 * x2) * W_nGG[index];
+                }
+                *x_GG++ = result * (2 * factor);
+                *dx_GG++ = dresult * (2 * factor);
             }
-            *x_GG++ = result * (2 * factor);
-            *dx_GG++ = dresult * (2 * factor);
         }
     }
     Py_RETURN_NONE;
