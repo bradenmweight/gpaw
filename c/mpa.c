@@ -1,4 +1,4 @@
-#include "mpa.h"
+#include "extensions.h"
 
 PyObject* evaluate_mpa_poly(PyObject *self, PyObject *args)
 {
