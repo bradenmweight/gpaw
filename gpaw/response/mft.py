@@ -396,7 +396,7 @@ class SingleParticleSiteSumRuleCalculator(PairFunctionIntegrator):
         """
         # Calculate matrix elements
         site_matrix_element = self.matrix_element_calc(
-            kptpair, site_function.qpd)
+            kptpair, site_function.q_c)
         assert site_matrix_element.tblocks.blockcomm.size == 1
         f_tap = site_matrix_element.get_global_array()
 
@@ -542,12 +542,12 @@ class TwoParticleSiteSumRuleCalculator(PairFunctionIntegrator):
         where V0 is the cell volume.
         """
         # Calculate site matrix elements
-        qpd = site_pair_function.qpd
-        matrix_element1 = self.matrix_element_calc1(kptpair, qpd)
+        q_c = site_pair_function.q_c
+        matrix_element1 = self.matrix_element_calc1(kptpair, q_c)
         if self.matrix_element_calc2 is self.matrix_element_calc1:
             matrix_element2 = matrix_element1
         else:
-            matrix_element2 = self.matrix_element_calc2(kptpair, qpd)
+            matrix_element2 = self.matrix_element_calc2(kptpair, q_c)
 
         # Calculate the product between the Pauli matrix and the occupational
         # differences

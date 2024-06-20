@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 
 from gpaw.sphere.integrate import spherical_truncation_function_collection
+from gpaw.kpt_descriptor import KPointDescriptor
 
 from gpaw.response import timer
 from gpaw.response.kspair import KohnShamKPointPair
@@ -16,10 +17,8 @@ from gpaw.response.site_data import AtomicSiteData
 class MatrixElement(ABC):
     """Data class for transitions distributed Kohn-Sham matrix elements."""
 
-    def __init__(self, tblocks, qpd):
+    def __init__(self, tblocks):
         self.tblocks = tblocks
-        self.qpd = qpd
-
         self.array = self.zeros()
         assert self.array.shape[0] == tblocks.blocksize
 
@@ -66,7 +65,7 @@ class MatrixElementCalculator(ABC):
         self.context = context
 
     @timer('Calculate matrix element')
-    def __call__(self, kptpair: KohnShamKPointPair, qpd) -> MatrixElement:
+    def __call__(self, kptpair: KohnShamKPointPair, *args) -> MatrixElement:
         r"""Calculate the matrix element for all transitions t.
 
         The calculation is split into a pseudo contribution and a PAW
@@ -76,14 +75,13 @@ class MatrixElementCalculator(ABC):
 
         see [PRB 103, 245110 (2021)] for additional details and references.
         """
-        matrix_element = self.create_matrix_element(kptpair.tblocks, qpd)
+        matrix_element = self.create_matrix_element(kptpair.tblocks, *args)
         self.add_pseudo_contribution(kptpair, matrix_element)
         self.add_paw_correction(kptpair, matrix_element)
-
         return matrix_element
 
     @abstractmethod
-    def create_matrix_element(self, tblocks, qpd):
+    def create_matrix_element(self, tblocks, *args) -> MatrixElement:
         """Return a new MatrixElement instance."""
 
     def add_pseudo_contribution(self, kptpair, matrix_element):
@@ -186,6 +184,10 @@ class MatrixElementCalculator(ABC):
 
 
 class PlaneWaveMatrixElement(MatrixElement):
+    def __init__(self, tblocks, qpd):
+        self.qpd = qpd
+        super().__init__(tblocks)
+
     def zeros(self):
         return self.qpd.zeros(self.tblocks.blocksize)
 
@@ -379,9 +381,10 @@ class TransversePairPotentialCalculator(PlaneWaveMatrixElementCalculator):
 
 
 class SiteMatrixElement(MatrixElement):
-    def __init__(self, tblocks, qpd, sites):
+    def __init__(self, tblocks, q_c, sites):
+        self.q_c = q_c
         self.sites = sites
-        super().__init__(tblocks, qpd)
+        super().__init__(tblocks)
 
     def zeros(self):
         return np.zeros(
@@ -468,8 +471,8 @@ class SiteMatrixElementCalculator(MatrixElementCalculator):
 
         return F_apii
 
-    def create_matrix_element(self, tblocks, qpd):
-        return SiteMatrixElement(tblocks, qpd, self.sites)
+    def create_matrix_element(self, tblocks, q_c):
+        return SiteMatrixElement(tblocks, q_c, self.sites)
 
     @timer('Calculate pseudo site matrix element')
     def _add_pseudo_contribution(self, k1_c, k2_c, ut1_mytR, ut2_mytR,
@@ -500,11 +503,12 @@ class SiteMatrixElementCalculator(MatrixElementCalculator):
         self.add_f(gd, n_sR, f_R)
 
         # Set up spherical truncation function collection on the coarse
-        # real-space grid with the KPointDescriptor of the q-point.
+        # real-space grid with a KPointDescriptor including only the q-point.
+        qd = KPointDescriptor([matrix_element.q_c])
         stfc = spherical_truncation_function_collection(
             self.gs.gd, self.site_data.spos_ac,
             self.sites.rc_ap, self.site_data.drcut, self.site_data.lambd_ap,
-            kd=matrix_element.qpd.kd, dtype=complex)
+            kd=qd, dtype=complex)
 
         # Integrate Θ(r∊Ω_ap) f(r) ñ_kt(r)
         ntlocal = nt_mytR.shape[0]
