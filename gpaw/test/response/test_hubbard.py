@@ -18,7 +18,7 @@ def test_hubbard_GW(in_tmp_dir, gpw_files, gpaw_new):
     if gpaw_new and world.size > 1:
         pytest.skip('Parallelization bug for new-gpaw')
     gw = G0W0(gpw_files['ag_plusU_pw'], 'gw',
-              integrate_gamma=0,
+              integrate_gamma='sphere',
               frequencies={'type': 'nonlinear',
                            'domega0': 0.1, 'omegamax': None},
               nbands=19,  # Carefully selected to avoid slicing degenerate band
