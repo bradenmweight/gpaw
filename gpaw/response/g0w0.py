@@ -1104,7 +1104,7 @@ class G0W0(G0W0Calculator):
             (almost for free).
         truncation: str
             Coulomb truncation scheme. Can be either 2D, 1D, or 0D.
-        integrate_gamma: string or dict
+        integrate_gamma: str or dict
             Method to integrate the Coulomb interaction.
 
             The default is 'sphere'. If 'reduced' key is not given,
