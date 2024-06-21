@@ -537,7 +537,7 @@ typecheck:
   tags:
     - linux
   script:
-    - pip install mypy types-PyYAML
+    - pip install mypy
     - python --version
     - mypy --version
     - mypy --pretty

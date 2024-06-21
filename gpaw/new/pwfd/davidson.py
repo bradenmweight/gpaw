@@ -19,7 +19,7 @@ from gpaw.new.ibzwfs import IBZWaveFunctions
 from gpaw.new.pwfd.wave_functions import PWFDWaveFunctions
 from gpaw.typing import Array1D, Array2D
 from gpaw.utilities.blas import axpy
-from gpaw.yml import obj2yaml as o2y
+from gpaw.new.logger import obj2str
 from gpaw import debug
 
 
@@ -46,9 +46,9 @@ class Davidson(Eigensolver):
         self.blocksize = blocksize
 
     def __str__(self):
-        return o2y(dict(name='Davidson',
-                        niter=self.niter,
-                        converge_bands=self.converge_bands))
+        return obj2str(dict(name='Davidson',
+                            niter=self.niter,
+                            converge_bands=self.converge_bands))
 
     def _initialize(self, ibzwfs):
         # First time: allocate work-arrays

@@ -4,10 +4,37 @@ import contextlib
 import os
 import sys
 from pathlib import Path
-from typing import IO
+from typing import IO, Any
 
 from gpaw.mpi import MPIComm, world
-from gpaw.yml import obj2yaml as o2y
+
+
+def obj2str(obj: Any, indentation: str = '') -> str:
+    """Convert Python object to string.
+
+    >>> print(obj2str({'a': {'b': 42}}))
+    a:
+      b: 42
+    """
+    if isinstance(obj, dict):
+        i = indentation
+        txt = f'\n{i}'.join(f'{k}: {obj2str(v, i + "  ")}'
+                            for k, v in obj.items())
+        if i:
+            return '\n' + i + txt
+        return txt.replace(': \n', ':\n')
+    return repr(obj)
+
+
+def indent(text: Any, indentation='  ') -> str:
+    r"""Indent text blob.
+
+    >>> indent('line 1\nline 2', '..')
+    '..line 1\n..line 2'
+    """
+    if not isinstance(text, str):
+        text = str(text)
+    return indentation + text.replace('\n', '\n' + indentation)
 
 
 class Logger:
@@ -56,7 +83,7 @@ class Logger:
             if kwargs:
                 for kw, arg in kwargs.items():
                     assert kw not in ['end', 'sep', 'flush', 'file'], kw
-                    print(f'{i}{kw}: {o2y(arg, i + "  ")}',
+                    print(f'{i}{kw}: {obj2str(arg, i + "  ")}',
                           file=self.fd)
             else:
                 text = ' '.join(str(arg) for arg in args)
