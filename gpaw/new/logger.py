@@ -12,7 +12,7 @@ from gpaw.mpi import MPIComm, world
 def obj2str(obj: Any, indentation: str = '') -> str:
     """Convert Python object to string.
 
-    >>> print(obj2yaml({'a': {'b': 42}}))
+    >>> print(obj2str({'a': {'b': 42}}))
     a:
       b: 42
     """
