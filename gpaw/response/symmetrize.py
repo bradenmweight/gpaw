@@ -27,6 +27,7 @@ class HeadSymmetryOperators(Sequence):
         return M_vv, sign
 
     def symmetrize_wvv(self, A_wvv):
+        """Symmetrize chi0_wvv"""
         tmp_wvv = np.zeros_like(A_wvv)
         for M_vv, sign in self:
             tmp = np.dot(np.dot(M_vv.T, A_wvv), M_vv)
@@ -99,32 +100,30 @@ class BodySymmetryOperators(Sequence):
         return np.array(G_sG)
 
 
-class PWSymmetrizer:
+class WingSymmetryOperators(Sequence):
     def __init__(self, symmetries: QSymmetries, qpd):
         self.symmetries = symmetries
-        self.qpd = qpd
         self.head_operators = HeadSymmetryOperators.from_gd(symmetries, qpd.gd)
         self.body_operators = BodySymmetryOperators(symmetries, qpd)
 
-    def symmetrize_wvv(self, A_wvv):
-        self.head_operators.symmetrize_wvv(A_wvv)
+    def __len__(self):
+        return len(self.symmetries)
 
-    def symmetrize_wGG(self, A_wGG):
-        self.body_operators.symmetrize_wGG(A_wGG)
+    def __getitem__(self, s):
+        M_vv, sign = self.head_operators[s]
+        return M_vv, sign, self.body_operators.G_sG[s]
+
+    def symmetrize_wvv(self, *args):
+        self.head_operators.symmetrize_wvv(*args)
 
     def symmetrize_wxvG(self, A_wxvG):
         """Symmetrize chi0_wxvG"""
-        A_cv = self.qpd.gd.cell_cv
-        iA_cv = self.qpd.gd.icell_cv
-
         tmp_wxvG = np.zeros_like(A_wxvG)
-        for (U_cc, sign, _), G_G in zip(self.symmetries, self.body_operators.G_sG):
-            M_vv = np.dot(np.dot(A_cv.T, U_cc.T), iA_cv)
+        for M_vv, sign, G_G in self:
             if sign == 1:
                 tmp = sign * np.dot(M_vv.T, A_wxvG[..., G_G])
             elif sign == -1:  # transpose wings
                 tmp = sign * np.dot(M_vv.T, A_wxvG[:, ::-1, :, G_G])
             tmp_wxvG += np.transpose(tmp, (1, 2, 0, 3))
-
         # Overwrite the input
-        A_wxvG[:] = tmp_wxvG / len(self.symmetries)
+        A_wxvG[:] = tmp_wxvG / len(self)
