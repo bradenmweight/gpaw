@@ -218,7 +218,7 @@ class Chi0BodyCalculator(Chi0ComponentPWCalculator):
         self.context.print('Integrating chi0 body.')
 
         # symmetries: QSymmetries from gpaw.response.symmetry
-        # generator: KPointDomainGenerator from gpaw.response.symmetry
+        # generator: KPointDomainGenerator from gpaw.response.kpoints
         # domain: Domain from from gpaw.response.integrators
         symmetries, generator, domain, prefactor = self.get_integration_domain(
             qpd.q_c, spins)
