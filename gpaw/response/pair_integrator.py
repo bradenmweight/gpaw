@@ -6,7 +6,7 @@ from gpaw.typing import Vector
 
 from gpaw.response import timer
 from gpaw.response.frequencies import ComplexFrequencyDescriptor
-from gpaw.response.symmetry import ensure_qsymmetry
+from gpaw.response.symmetry import QSymmetryAnalyzer
 from gpaw.response.kspair import (KohnShamKPointPair,
                                   KohnShamKPointPairExtractor)
 from gpaw.response.pw_parallelization import block_partition
@@ -146,7 +146,7 @@ class PairFunctionIntegrator(ABC):
         """
         self.gs = gs
         self.context = context
-        self.qsymmetry = ensure_qsymmetry(qsymmetry)
+        self.qsymmetry = QSymmetryAnalyzer.from_input(qsymmetry)
 
         # Communicators for distribution of memory and work
         (self.blockcomm,

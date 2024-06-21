@@ -86,6 +86,9 @@ class QSymmetries(Sequence):
         return ''.join(isl[:-1])
 
 
+QSymmetryInput = Union['QSymmetryAnalyzer', dict, bool]
+
+
 @dataclass
 class QSymmetryAnalyzer:
     """Identifies symmetries of the k-grid, under which q is invariant.
@@ -99,6 +102,10 @@ class QSymmetryAnalyzer:
     """
     point_group: bool = True
     time_reversal: bool = True
+
+    @staticmethod
+    def from_input(qsymmetry: QSymmetryInput):
+        return ensure_qsymmetry(qsymmetry)
 
     @property
     def disabled(self):
@@ -199,9 +206,6 @@ class QSymmetryAnalyzer:
         S_s = list(filter(is_not_non_symmorphic, S_s))
 
         return QSymmetries(q_c, U_ucc, S_s, shift_Sc[S_s])
-
-
-QSymmetryInput = Union[QSymmetryAnalyzer, dict, bool]
 
 
 def ensure_qsymmetry(qsymmetry: QSymmetryInput) -> QSymmetryAnalyzer:
