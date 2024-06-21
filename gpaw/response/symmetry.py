@@ -107,7 +107,13 @@ class QSymmetryAnalyzer:
 
     @staticmethod
     def from_input(qsymmetry: QSymmetryInput) -> QSymmetryAnalyzer:
-        return ensure_qsymmetry(qsymmetry)
+        if not isinstance(qsymmetry, QSymmetryAnalyzer):
+            if isinstance(qsymmetry, dict):
+                qsymmetry = QSymmetryAnalyzer(**qsymmetry)
+            else:
+                qsymmetry = QSymmetryAnalyzer(
+                    point_group=qsymmetry, time_reversal=qsymmetry)
+        return qsymmetry
 
     @property
     def disabled(self):
@@ -208,13 +214,3 @@ class QSymmetryAnalyzer:
         S_s = list(filter(is_not_non_symmorphic, S_s))
 
         return QSymmetries(q_c, U_ucc, S_s, shift_Sc[S_s])
-
-
-def ensure_qsymmetry(qsymmetry: QSymmetryInput) -> QSymmetryAnalyzer:
-    if not isinstance(qsymmetry, QSymmetryAnalyzer):
-        if isinstance(qsymmetry, dict):
-            qsymmetry = QSymmetryAnalyzer(**qsymmetry)
-        else:
-            qsymmetry = QSymmetryAnalyzer(
-                point_group=qsymmetry, time_reversal=qsymmetry)
-    return qsymmetry
