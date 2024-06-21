@@ -306,10 +306,20 @@ def main():
 
     # Tab completion:
     for cmd in ['ase', 'gpaw', 'mq', 'pip']:
+        if cmd == 'gpaw':
+            # Currently, running the "gpaw" command writes warning message
+            # to stdout, so "gpaw completion" does not work!
+            continue
         txt = run(f'. {activate} && {cmd} completion' +
                   (' --bash' if cmd == 'pip' else ''),
                   capture_output=True).stdout.decode()
         extra += txt
+
+    # gpaw-hack:
+    python = venv / 'bin/python3'
+    complete = venv / 'gpaw/gpaw/cli/complete.py'
+    extra += f'complete -o default -C "{python} {complete}" gpaw\n'
+
     activate.write_text(activate.read_text() + extra)
 
     # Run tests:
