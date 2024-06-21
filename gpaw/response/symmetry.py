@@ -329,12 +329,46 @@ class KPointDomainGenerator:
         return K_k
 
 
-class PWSymmetrizer:  # to do: move plane-wave specific stuff elsewhere XXX
+@dataclass
+class HeadSymmetryOperators(Sequence):
+    symmetries: QSymmetries
+    cell_cv: np.ndarray
+    icell_cv: np.ndarray
+
+    @classmethod
+    def from_gd(cls, symmetries, gd):
+        return cls(symmetries, gd.cell_cv, gd.icell_cv)
+
+    def __len__(self):
+        return len(self.symmetries)
+
+    def __getitem__(self, s):
+        U_cc, sign, _ = self.symmetries[s]
+        M_vv = self.cell_cv.T @ U_cc.T @ self.icell_cv
+        return M_vv, sign
+
+    def symmetrize_wvv(self, A_wvv):
+        tmp_wvv = np.zeros_like(A_wvv)
+        for M_vv, sign in self:
+            tmp = np.dot(np.dot(M_vv.T, A_wvv), M_vv)
+            if sign == 1:
+                tmp_wvv += np.transpose(tmp, (1, 0, 2))
+            elif sign == -1:  # transpose head
+                tmp_wvv += np.transpose(tmp, (1, 2, 0))
+        # Overwrite the input
+        A_wvv[:] = tmp_wvv / len(self)
+
+
+class PWSymmetrizer:
     def __init__(self, symmetries: QSymmetries, qpd):
         assert np.allclose(symmetries.q_c, qpd.q_c)
         self.symmetries = symmetries
         self.qpd = qpd
+        self.head_operators = HeadSymmetryOperators.from_gd(symmetries, qpd.gd)
         self.G_sG = self.initialize_G_maps()
+
+    def symmetrize_wvv(self, A_wvv):
+        self.head_operators.symmetrize_wvv(A_wvv)
 
     def symmetrize_wGG(self, A_wGG):
         """Symmetrize an array in GG'."""
@@ -377,23 +411,6 @@ class PWSymmetrizer:  # to do: move plane-wave specific stuff elsewhere XXX
 
         # Overwrite the input
         A_wxvG[:] = tmp_wxvG / len(self.symmetries)
-
-    def symmetrize_wvv(self, A_wvv):
-        """Symmetrize chi_wvv."""
-        A_cv = self.qpd.gd.cell_cv
-        iA_cv = self.qpd.gd.icell_cv
-
-        tmp_wvv = np.zeros_like(A_wvv)
-        for U_cc, sign, _ in self.symmetries:
-            M_vv = np.dot(np.dot(A_cv.T, U_cc.T), iA_cv)
-            tmp = np.dot(np.dot(M_vv.T, A_wvv), M_vv)
-            if sign == 1:
-                tmp_wvv += np.transpose(tmp, (1, 0, 2))
-            elif sign == -1:  # transpose head
-                tmp_wvv += np.transpose(tmp, (1, 2, 0))
-
-        # Overwrite the input
-        A_wvv[:] = tmp_wvv / len(self.symmetries)
 
     def initialize_G_maps(self):
         """Calculate the Gvector mappings."""
