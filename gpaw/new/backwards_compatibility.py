@@ -64,7 +64,9 @@ class FakeWFS:
         assert realspace
         psit_X = self.kpt_qs[k][s].wfs.psit_nX[n]
         if self.mode == 'pw':
-            psit_R = psit_X.ifft(grid=self.pwgrid, periodic=periodic)
+            psit_R = psit_X.ifft(grid=self.pwgrid, periodic=True)
+            if not periodic:
+                psit_R.multiply_by_eikr(psit_X.desc.kpt_c)
         else:
             psit_R = psit_X
             if periodic:
