@@ -8,7 +8,7 @@ from ase.units import Ha
 
 import gpaw
 from gpaw.response import ResponseContext
-from gpaw.response.symmetry import PWSymmetrizer
+from gpaw.response.symmetrize import PWSymmetrizer
 from gpaw.response.chi0_data import (Chi0Data, Chi0BodyData,
                                      Chi0OpticalExtensionData)
 from gpaw.response.frequencies import FrequencyDescriptor

@@ -11,7 +11,8 @@ from gpaw.utilities.blas import mmmx
 
 from gpaw.response import ResponseGroundStateAdapter, ResponseContext, timer
 from gpaw.response.symmetry import (
-    QSymmetryAnalyzer, ensure_qsymmetry, QSymmetryInput, PWSymmetrizer)
+    QSymmetryAnalyzer, ensure_qsymmetry, QSymmetryInput)
+from gpaw.response.symmetrize import BodySymmetryOperators
 from gpaw.response.frequencies import ComplexFrequencyDescriptor
 from gpaw.response.pw_parallelization import PlaneWaveBlockDistributor
 from gpaw.response.matrix_elements import (PlaneWaveMatrixElementCalculator,
@@ -144,7 +145,7 @@ class GeneralizedSuscetibilityCalculator(PairFunctionIntegrator):
         symmetries = self._integrate(chiks, transitions)
 
         # Symmetrize chiks according to the symmetries of the ground state
-        self.symmetrize(chiks, PWSymmetrizer(symmetries, chiks.qpd))
+        self.symmetrize(chiks, symmetries)
 
         # Map to standard output format
         chiks = self.post_process(chiks)
@@ -354,14 +355,14 @@ class GeneralizedSuscetibilityCalculator(PairFunctionIntegrator):
             mmmx(1.0, gcc_Gt, 'N', xf_tZg, 'N', 1.0, chiks_GZg)  # slow step
 
     @timer('Symmetrizing chiks')
-    def symmetrize(self, chiks, symmetrizer):
+    def symmetrize(self, chiks, symmetries):
         """Symmetrize chiks_zGG."""
-        chiks_ZgG = chiks.array_with_view('ZgG')
-
-        # Distribute over frequencies
+        operators = BodySymmetryOperators(symmetries, chiks.qpd)
+        # Distribute over frequencies and symmetrize
         nz = len(chiks.zd)
+        chiks_ZgG = chiks.array_with_view('ZgG')
         tmp_zGG = chiks.blockdist.distribute_as(chiks_ZgG, nz, 'zGG')
-        symmetrizer.symmetrize_zGG(tmp_zGG)
+        operators.symmetrize_zGG(tmp_zGG)
         # Distribute over plane waves
         chiks_ZgG[:] = chiks.blockdist.distribute_as(tmp_zGG, nz, 'ZgG')
 
