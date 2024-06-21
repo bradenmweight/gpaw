@@ -5,6 +5,7 @@ import numpy as np
 from ase.dft import monkhorst_pack
 from gpaw.response.pair_functions import SingleQPWDescriptor
 from gpaw.response.dyson import PWKernel
+from gpaw.kpt_descriptor import to1bz
 
 
 class NewCoulombKernel(PWKernel):
@@ -61,10 +62,11 @@ class CoulombKernel:
     def kernel(self, qpd, q_v=None):
         return np.diag(self.V(qpd, q_v=q_v))
 
-    def integrated_kernel(self, qpd, reduced):
+    def integrated_kernel(self, qpd, reduced, tofirstbz=False):
         return get_integrated_kernel(
             qpd=qpd, N_c=self.N_c, pbc_c=self.pbc_c,
-            truncation=self.truncation, reduced=reduced)
+            truncation=self.truncation, reduced=reduced,
+            tofirstbz=tofirstbz)
 
 
 def get_coulomb_kernel(qpd, N_c, q_v=None, truncation=None, *, pbc_c)\
@@ -143,7 +145,7 @@ def calculate_2D_truncated_coulomb(qpd, q_v=None, *, pbc_c):
 
 
 def get_integrated_kernel(qpd, N_c, truncation=None,
-                          N=100, reduced=False, *, pbc_c):
+                          N=100, reduced=False, tofirstbz=False, *, pbc_c):
     from scipy.special import j1, k0, j0, k1  # type: ignore
     # ignore type hints for the above import
     B_cv = 2 * np.pi * qpd.gd.icell_cv
@@ -151,8 +153,23 @@ def get_integrated_kernel(qpd, N_c, truncation=None,
     if reduced:
         # Only integrate periodic directions if truncation is used
         Nf_c[np.where(~pbc_c)[0]] = 1
-    q_qc = monkhorst_pack(Nf_c) / N_c
+
+    q_qc = monkhorst_pack(Nf_c)
+
+    if tofirstbz:
+        # We make a 1st BZ shaped integration volume, by reducing the full
+        # Monkhorts-Pack grid to the 1st BZ.
+        q_qc = to1bz(q_qc, qpd.gd.cell_cv)
+
+    q_qc /= N_c
     q_qc += qpd.q_c
+
+    if tofirstbz:
+        # Because we added the q_c q-point vector, the integration volume is
+        # no longer strictly inside the 1st BZ of the full cell. Thus, we
+        # reduce it again.
+        q_qc = to1bz(q_qc, qpd.gd.cell_cv)
+
     q_qv = np.dot(q_qc, B_cv)
 
     Nn_c = np.where(~pbc_c)[0]

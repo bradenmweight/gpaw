@@ -20,7 +20,8 @@ from gpaw.response.df import write_response_function
 from gpaw.response.frequencies import FrequencyDescriptor
 from gpaw.response.pair import KPointPairFactory, get_gs_and_context
 from gpaw.response.pair_functions import SingleQPWDescriptor
-from gpaw.response.screened_interaction import initialize_w_calculator
+from gpaw.response.screened_interaction import (initialize_w_calculator,
+                                                GammaIntegrationMode)
 
 
 def decide_whether_tammdancoff(val_sn, con_sn):
@@ -89,7 +90,7 @@ class BSEMatrix:
             assert ns == (
                 -(-bse.kd.nbzkpts // world.size) * (
                     bse.nv * bse.nc *
-                    bse.spins *
+                    bse.nspins *
                     (bse.spinors + 1)**2))
 
             # XXX We don't need to create new BLACS grids all the time
@@ -190,10 +191,13 @@ class BSEBackend:
                  eshift=None,
                  gw_skn=None,
                  truncation=None,
-                 integrate_gamma=1,
+                 integrate_gamma='reciprocal',
                  mode='BSE',
                  q_c=[0.0, 0.0, 0.0],
                  direction=0):
+
+        integrate_gamma = GammaIntegrationMode(integrate_gamma)
+
         self.gs = gs
         self.q_c = q_c
         self.direction = direction
@@ -208,10 +212,11 @@ class BSEBackend:
         self.nbands = nbands
         self.mode = mode
 
-        if integrate_gamma == 0 and truncation is not None:
+        if integrate_gamma.is_analytical and truncation is not None:
             self.context.print('***WARNING*** Analytical Coulomb integration' +
                                ' is not expected to work with Coulomb ' +
-                               'truncation. Use integrate_gamma=1')
+                               'truncation. ' +
+                               'Use integrate_gamma=\'reciprocal\'')
         self.integrate_gamma = integrate_gamma
 
         # Find q-vectors and weights in the IBZ:
@@ -810,14 +815,8 @@ class BSEBackend:
             f'Number of pair orbitals        : {self.nS}',
             '',
             f'Truncation of Coulomb kernel   : {self.coulomb.truncation}'])
-        if self.integrate_gamma == 0:
-            isl.append(
-                'Coulomb integration scheme     : Analytical - gamma only')
-        elif self.integrate_gamma == 1:
-            isl.append(
-                'Coulomb integration scheme     : Numerical - all q-points')
-        else:
-            pass
+        isl.append(
+            'Coulomb integration scheme     : {self.integrate_gamma}')
         isl.extend([
             '',
             '----------------------------------------------------------',
@@ -858,12 +857,7 @@ class BSE(BSEBackend):
             valence/conduction bands
         truncation: str or None
             Coulomb truncation scheme. Can be None or 2D.
-        integrate_gamma: int
-            Method to integrate the Coulomb interaction. 1 is a numerical
-            integration at all q-points with G=[0,0,0] - this breaks the
-            symmetry slightly. 0 is analytical integration at q=[0,0,0] only -
-            this conserves the symmetry. integrate_gamma=2 is the same as 1,
-            but the average is only carried out in the non-periodic directions.
+        integrate_gamma: dict
         txt: str
             txt output
         mode: str
