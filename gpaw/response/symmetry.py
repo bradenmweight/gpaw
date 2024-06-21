@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Union
 from dataclasses import dataclass
 from collections.abc import Sequence
@@ -104,7 +106,7 @@ class QSymmetryAnalyzer:
     time_reversal: bool = True
 
     @staticmethod
-    def from_input(qsymmetry: QSymmetryInput):
+    def from_input(qsymmetry: QSymmetryInput) -> QSymmetryAnalyzer:
         return ensure_qsymmetry(qsymmetry)
 
     @property
