@@ -9,17 +9,21 @@ from gpaw.response.pair_functions import SingleQPWDescriptor
 
 
 @dataclass
-class HeadSymmetryOperators(Sequence):
+class QSymmetryOperators(Sequence):
     symmetries: QSymmetries
+
+    def __len__(self):
+        return len(self.symmetries)
+
+
+@dataclass
+class HeadSymmetryOperators(QSymmetryOperators):
     cell_cv: np.ndarray
     icell_cv: np.ndarray
 
     @classmethod
     def from_gd(cls, symmetries, gd):
         return cls(symmetries, gd.cell_cv, gd.icell_cv)
-
-    def __len__(self):
-        return len(self.symmetries)
 
     def __getitem__(self, s):
         U_cc, sign, _ = self.symmetries[s]
@@ -40,16 +44,11 @@ class HeadSymmetryOperators(Sequence):
 
 
 @dataclass
-class BodySymmetryOperators(Sequence):
-    symmetries: QSymmetries
+class BodySymmetryOperators(QSymmetryOperators):
     qpd: SingleQPWDescriptor
 
     def __post_init__(self):
-        assert np.allclose(self.symmetries.q_c, self.qpd.q_c)
-        self.G_sG = self.initialize_G_maps()
-
-    def __len__(self):
-        return len(self.symmetries)
+        self.G_sG = initialize_G_maps(self.symmetries, self.qpd)
 
     def __getitem__(self, s):
         return self.G_sG[s], self.symmetries.sign_s[s]
@@ -71,47 +70,19 @@ class BodySymmetryOperators(Sequence):
     # Set up complex frequency alias
     symmetrize_zGG = symmetrize_wGG
 
-    def initialize_G_maps(self):
-        """Calculate the Gvector mappings."""
-        qpd = self.qpd
-        B_cv = 2.0 * np.pi * qpd.gd.icell_cv
-        G_Gv = qpd.get_reciprocal_vectors(add_q=False)
-        G_Gc = np.dot(G_Gv, np.linalg.inv(B_cv))
-        Q_G = qpd.Q_qG[0]
 
-        G_sG = []
-        for U_cc, sign, shift_c in self.symmetries:
-            iU_cc = np.linalg.inv(U_cc).T
-            UG_Gc = np.dot(G_Gc - shift_c, sign * iU_cc)
+@dataclass
+class WingSymmetryOperators(QSymmetryOperators):
+    qpd: SingleQPWDescriptor
 
-            assert np.allclose(UG_Gc.round(), UG_Gc)
-            UQ_G = np.ravel_multi_index(UG_Gc.round().astype(int).T,
-                                        qpd.gd.N_c, 'wrap')
-
-            G_G = len(Q_G) * [None]
-            for G, UQ in enumerate(UQ_G):
-                try:
-                    G_G[G] = np.argwhere(Q_G == UQ)[0][0]
-                except IndexError:
-                    print('This should not be possible but' +
-                          'a G-vector was mapped outside the sphere')
-                    raise IndexError
-            G_sG.append(np.array(G_G, dtype=np.int32))
-        return np.array(G_sG)
-
-
-class WingSymmetryOperators(Sequence):
-    def __init__(self, symmetries: QSymmetries, qpd):
-        self.symmetries = symmetries
-        self.head_operators = HeadSymmetryOperators.from_gd(symmetries, qpd.gd)
-        self.body_operators = BodySymmetryOperators(symmetries, qpd)
-
-    def __len__(self):
-        return len(self.symmetries)
+    def __post_init__(self):
+        self.head_operators = HeadSymmetryOperators.from_gd(
+            self.symmetries, self.qpd.gd)
+        self.G_sG = initialize_G_maps(self.symmetries, self.qpd)
 
     def __getitem__(self, s):
         M_vv, sign = self.head_operators[s]
-        return M_vv, sign, self.body_operators.G_sG[s]
+        return M_vv, sign, self.G_sG[s]
 
     def symmetrize_wvv(self, *args):
         self.head_operators.symmetrize_wvv(*args)
@@ -127,3 +98,32 @@ class WingSymmetryOperators(Sequence):
             tmp_wxvG += np.transpose(tmp, (1, 2, 0, 3))
         # Overwrite the input
         A_wxvG[:] = tmp_wxvG / len(self)
+
+
+def initialize_G_maps(symmetries: QSymmetries, qpd: SingleQPWDescriptor):
+    """Calculate the Gvector mappings."""
+    assert np.allclose(symmetries.q_c, qpd.q_c)
+    B_cv = 2.0 * np.pi * qpd.gd.icell_cv
+    G_Gv = qpd.get_reciprocal_vectors(add_q=False)
+    G_Gc = np.dot(G_Gv, np.linalg.inv(B_cv))
+    Q_G = qpd.Q_qG[0]
+
+    G_sG = []
+    for U_cc, sign, shift_c in symmetries:
+        iU_cc = np.linalg.inv(U_cc).T
+        UG_Gc = np.dot(G_Gc - shift_c, sign * iU_cc)
+
+        assert np.allclose(UG_Gc.round(), UG_Gc)
+        UQ_G = np.ravel_multi_index(UG_Gc.round().astype(int).T,
+                                    qpd.gd.N_c, 'wrap')
+
+        G_G = len(Q_G) * [None]
+        for G, UQ in enumerate(UQ_G):
+            try:
+                G_G[G] = np.argwhere(Q_G == UQ)[0][0]
+            except IndexError:
+                print('This should not be possible but' +
+                      'a G-vector was mapped outside the sphere')
+                raise IndexError
+        G_sG.append(np.array(G_G, dtype=np.int32))
+    return np.array(G_sG)
