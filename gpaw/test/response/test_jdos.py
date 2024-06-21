@@ -15,7 +15,7 @@ import gpaw.mpi as mpi
 from gpaw.response import ResponseGroundStateAdapter
 from gpaw.response.frequencies import ComplexFrequencyDescriptor
 from gpaw.response.jdos import JDOSCalculator
-from gpaw.response.symmetry import KPointFinder
+from gpaw.response.kpoints import KPointFinder
 from gpaw.test.response.test_chiks import (generate_system_s,
                                            generate_qrel_q, get_q_c)
 from gpaw.test.gpwfile import response_band_cutoff

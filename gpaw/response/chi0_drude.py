@@ -12,7 +12,7 @@ from gpaw.response.chi0_data import Chi0DrudeData
 from gpaw.response.frequencies import FrequencyGridDescriptor
 
 if TYPE_CHECKING:
-    from gpaw.response.symmetry import KPointDomainGenerator
+    from gpaw.response.kpoints import KPointDomainGenerator
 
 
 class Chi0DrudeCalculator(Chi0ComponentCalculator):
