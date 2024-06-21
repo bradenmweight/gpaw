@@ -1,16 +1,13 @@
-from abc import ABC, abstractmethod
 from pathlib import Path
-
 import numpy as np
 
 from ase.units import Hartree
 
-from gpaw.typing import Vector
 from gpaw.kpt_descriptor import KPointDescriptor
 from gpaw.pw.descriptor import PWDescriptor
 
-from gpaw.response.pair_integrator import PairFunction
 from gpaw.response.frequencies import ComplexFrequencyDescriptor
+from gpaw.response.pair_integrator import DynamicPairFunction
 from gpaw.response.pw_parallelization import (Blocks1D,
                                               PlaneWaveBlockDistributor)
 
@@ -47,42 +44,6 @@ class SingleQPWDescriptor(PWDescriptor):
             self.q_c, ecut, gd, gammacentered=gammacentered)
 
 
-class DynamicPairFunction(PairFunction):
-    r"""Dynamic pair function data object.
-
-    A dynamic pair function is not only a function of the crystal momentum q,
-    but also of the complex frequency z = ω + iη:
-               __
-               \
-    pf(q,z) =  /  pf_αα'(z) δ_{q,q_{α',α}}
-               ‾‾
-               α,α'
-
-    Typically, this will be some generalized (linear) susceptibility, which is
-    defined by the Kubo formula,
-
-                   i           ˰          ˰
-    χ_BA(t-t') = - ‾ θ(t-t') <[B_0(t-t'), A]>_0
-                   ħ
-
-    and can be written in its Lehmann representation as a function of frequency
-    in the upper half complex frequency plane,
-
-               __      ˰        ˰
-               \    <α|B|α'><α'|A|α>
-    χ_BA(z) =  /   ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾ (n_α - n_α')
-               ‾‾   ħz - (E_α' - E_α)
-               α,α'
-
-    where E_α and n_α are the eigenstate energies and occupations respectively.
-
-    For more information, please refer to [Skovhus T., PhD. Thesis, 2021]."""
-
-    def __init__(self, q_c: Vector, zd: ComplexFrequencyDescriptor):
-        self.zd = zd
-        super().__init__(q_c)
-
-
 class LatticePeriodicPairFunction(DynamicPairFunction):
     r"""Data object for lattice periodic pair functions.
 
@@ -112,7 +73,9 @@ class LatticePeriodicPairFunction(DynamicPairFunction):
     which are encoded in the SingleQPWDescriptor along with the wave vector q.
     """
 
-    def __init__(self, qpd, zd,
+    def __init__(self,
+                 qpd: SingleQPWDescriptor,
+                 zd: ComplexFrequencyDescriptor,
                  blockdist: PlaneWaveBlockDistributor,
                  distribution='ZgG'):
         """Contruct the LatticePeriodicPairFunction.

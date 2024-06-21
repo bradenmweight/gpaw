@@ -1,10 +1,11 @@
 import numpy as np
 from abc import ABC, abstractmethod
 
-from gpaw.typing import Vector
 from gpaw.utilities.progressbar import ProgressBar
+from gpaw.typing import Vector
 
 from gpaw.response import timer
+from gpaw.response.frequencies import ComplexFrequencyDescriptor
 from gpaw.response.symmetry import ensure_qsymmetry
 from gpaw.response.kspair import (KohnShamKPointPair,
                                   KohnShamKPointPairExtractor)
@@ -34,6 +35,42 @@ class PairFunction(ABC):
     @abstractmethod
     def zeros(self):
         """Generate an array of zeros, representing the pair function."""
+
+
+class DynamicPairFunction(PairFunction):
+    r"""Dynamic pair function data object.
+
+    A dynamic pair function is not only a function of the crystal momentum q,
+    but also of the complex frequency z = ω + iη:
+               __
+               \
+    pf(q,z) =  /  pf_αα'(z) δ_{q,q_{α',α}}
+               ‾‾
+               α,α'
+
+    Typically, this will be some generalized (linear) susceptibility, which is
+    defined by the Kubo formula,
+
+                   i           ˰          ˰
+    χ_BA(t-t') = - ‾ θ(t-t') <[B_0(t-t'), A]>_0
+                   ħ
+
+    and can be written in its Lehmann representation as a function of frequency
+    in the upper half complex frequency plane,
+
+               __      ˰        ˰
+               \    <α|B|α'><α'|A|α>
+    χ_BA(z) =  /   ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾ (n_α - n_α')
+               ‾‾   ħz - (E_α' - E_α)
+               α,α'
+
+    where E_α and n_α are the eigenstate energies and occupations respectively.
+
+    For more information, please refer to [Skovhus T., PhD. Thesis, 2021]."""
+
+    def __init__(self, q_c: Vector, zd: ComplexFrequencyDescriptor):
+        self.zd = zd
+        super().__init__(q_c)
 
 
 class PairFunctionIntegrator(ABC):
