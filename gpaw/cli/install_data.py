@@ -16,7 +16,7 @@ names = [r for r, d in sources]
 
 baseurls = {
     'gpaw': 'https://wiki.fysik.dtu.dk/gpaw/_sources/setups/setups.rst.txt',
-    'sg15': 'https://www.quantum-simulation.org/potentials/sg15_oncv/',
+    'sg15': 'http://www.quantum-simulation.org/potentials/sg15_oncv/',
     'basis': 'https://wiki.fysik.dtu.dk/gpaw-files/',
     'test': 'https://wiki.fysik.dtu.dk/gpaw-files/'}
 
