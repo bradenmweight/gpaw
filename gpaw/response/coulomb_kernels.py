@@ -62,11 +62,11 @@ class CoulombKernel:
     def kernel(self, qpd, q_v=None):
         return np.diag(self.V(qpd, q_v=q_v))
 
-    def integrated_kernel(self, qpd, reduced, tofirstbz=False):
+    def integrated_kernel(self, qpd, reduced, tofirstbz=False, N=100):
         return get_integrated_kernel(
             qpd=qpd, N_c=self.N_c, pbc_c=self.pbc_c,
             truncation=self.truncation, reduced=reduced,
-            tofirstbz=tofirstbz)
+            tofirstbz=tofirstbz, N=N)
 
 
 def get_coulomb_kernel(qpd, N_c, q_v=None, truncation=None, *, pbc_c)\
