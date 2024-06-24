@@ -27,6 +27,8 @@ PyObject* craypat_region_begin(PyObject *self, PyObject *args);
 PyObject* craypat_region_end(PyObject *self, PyObject *args);
 #endif
 
+PyObject* evaluate_mpa_poly(PyObject *self, PyObject *args);
+
 PyObject* symmetrize(PyObject *self, PyObject *args);
 PyObject* symmetrize_ft(PyObject *self, PyObject *args);
 PyObject* symmetrize_wavefunction(PyObject *self, PyObject *args);
@@ -195,6 +197,7 @@ PyObject* calculate_residual_gpu(PyObject* self, PyObject* args);
 #endif
 
 static PyMethodDef functions[] = {
+    {"evaluate_mpa_poly", evaluate_mpa_poly, METH_VARARGS, 0},
     {"symmetrize", symmetrize, METH_VARARGS, 0},
     {"symmetrize_ft", symmetrize_ft, METH_VARARGS, 0},
     {"symmetrize_wavefunction", symmetrize_wavefunction, METH_VARARGS, 0},
@@ -447,7 +450,7 @@ static PyObject* moduleinit(void)
     PyObject_SetAttrString(m, "have_openmp", Py_False);
 #endif
     // Version number of C-code.  Keep in sync with gpaw/__init__.py
-    PyObject_SetAttrString(m, "version", PyLong_FromLong(6));
+    PyObject_SetAttrString(m, "version", PyLong_FromLong(7));
 
     Py_INCREF(&LFCType);
     Py_INCREF(&OperatorType);
