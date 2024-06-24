@@ -444,7 +444,7 @@ Set the location of setups as described on :ref:`installation of paw datasets`.
 The details of the implementation of the exchange-correlation
 are described on the :ref:`xc_functionals` page.
 
-.. _libxc: http://www.tddft.org/programs/octopus/wiki/index.php/Libxc
+.. _libxc: https://libxc.gitlab.io/
 
 
 .. _manual_kpts:
