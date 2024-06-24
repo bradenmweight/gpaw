@@ -9,6 +9,7 @@ from gpaw.wannier90 import Wannier90
 import os
 from gpaw.mpi import world, serial_comm
 from subprocess import PIPE, run
+import time
 
 
 def out():
@@ -43,8 +44,8 @@ def test_w(in_tmp_dir, gpw_files, symm):
         w90 = Wannier90(calc, orbitals_ai=[[], [0, 1, 2, 3]],
                         bands=range(4),
                         seed=seed)
-        w90.write_input(num_iter=1000,
-                        plot=True,
+        w90.write_input(num_iter=100,
+                        plot=False,
                         write_u_matrices=True)
         w90.write_wavefunctions()
         os.system('wannier90.x -pp ' + seed)
