@@ -402,7 +402,7 @@ setup(name='gpaw',
                                'graphviz'],
                       'devel': ['flake8',
                                 'mypy',
-                                'pytest>=7.0.0'
+                                'pytest>=7.0.0',
                                 'pytest-xdist',
                                 'interrogate']},
       ext_modules=extensions,
