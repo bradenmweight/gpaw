@@ -116,6 +116,5 @@ first. Submitting jobs to the queue is done by::
 .. _FAQ: https://www.gbar.dtu.dk/index.php/General_use_FAQ
 .. _Unix: https://www.gbar.dtu.dk/index.php/UNIX
 .. _USB-sticks: https://www.gbar.dtu.dk/index.php/USBsticks
-.. _Octopus: https://www.tddft.org/programs/octopus/wiki/index.php/
-.. _tutorial: https://www.tddft.org/programs/octopus/wiki/index.php/Tutorial
-
+.. _Octopus: https://octopus-code.org/
+.. _tutorial: https://octopus-code.org/documentation/main/tutorial/
