@@ -5,7 +5,7 @@ FreeBSD
 =======
 
 Here you find information about the system
-`<http://freebsd.org/>`_.
+`<https://freebsd.org/>`_.
 
 To build gpaw add to the ``gpaw/customize.py``::
 

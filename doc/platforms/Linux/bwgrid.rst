@@ -2,14 +2,14 @@
 bwgrid
 ======
 
-The `BWgrid <http://www.bw-grid.de/>`__
+The `BWgrid <https://www.bw-grid.de/>`__
 is an grid of machines located in Baden-Württemberg, Germany.
 The installation in Freiburg is a cluster containing 139 dual socket,
 quad-core Intel Xenon E5440 CPUs, 2.83GHz processors with 2 GB of memory
 per core, 16 dual socket, quad-core Intel Xenon X5550 CPUs, 2.67GHz processors
 with 3 GB of memory per core and eight dual socket, six-core Intel Xenon
 X5650 CPUs, 2.66GHz processors with 2 GB of memory per core. For more
-information visit `<http://www.bfg.uni-freiburg.de/doc/bwgrid>`_.
+information visit `<https://www.bfg.uni-freiburg.de/doc/bwgrid>`_.
 
 Building GPAW with Intel compiler
 =================================
@@ -40,12 +40,12 @@ External libxc
 --------------
 
 After svn revision 10429 libxc has to be included as external library
-(see also the `libxc web site <http://www.tddft.org/programs/octopus/wiki/index.php/Libxc:download>`__). To install libxc we assume that MYLIBXCDIR is set to 
+(see also the `libxc web site <https://www.tddft.org/programs/octopus/wiki/index.php/Libxc:download>`__). To install libxc we assume that MYLIBXCDIR is set to 
 the directory where you want to install::
 
  $ module load compiler/intel/12.0
  $ cd $MYLIBXCDIR
- $ wget http://www.tddft.org/programs/octopus/down.php?file=libxc/libxc-2.0.2.tar.gz
+ $ wget https://www.tddft.org/programs/octopus/down.php?file=libxc/libxc-2.0.2.tar.gz
  $ tar -xzvf libxc-2.0.2.tar.gz
  $ cd libxc-2.0.2/
  $ mkdir install

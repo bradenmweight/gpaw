@@ -38,7 +38,7 @@ Force: -0.639 eV/Å
 .. image:: https://badge.fury.io/py/gpaw.svg
     :target: https://pypi.org/project/gpaw/
 
-.. _Python: http://www.python.org
+.. _Python: https://www.python.org
 .. _ASE: https://wiki.fysik.dtu.dk/ase
 
 
@@ -181,7 +181,7 @@ News
 
 * :ref:`GPAW version 0.6 <releasenotes>` released (Oct 9, 2009)
 
-* `QuantumWise <http://www.quantumwise.com>`_ adds GPAW-support to
+* `QuantumWise <https://www.quantumwise.com>`_ adds GPAW-support to
   `Virtual NanoLab`_ (Sep 8, 2009)
 
 * Join the new IRC channel ``#gpaw`` on FreeNode (Jul 15, 2009)
@@ -214,20 +214,20 @@ News
 
 * Work on atomic basis-sets begun (Sep 25, 2007)
 
-.. _numpy: http://numpy.scipy.org/
-.. _CSC: http://www.csc.fi
-.. _GPAW course: http://www.csc.fi/english/csc/courses/archive/gpaw-2008-01
-.. _Sphinx: http://www.sphinx-doc.org
-.. _CAMd summer school 2008: http://www.camd.dtu.dk/English/Events/CAMD_Summer_School_2008/Programme.aspx
-.. _code sprint 2007: http://www.dtu.dk/Nyheder/Nyt_fra_Institutterne.aspx?guid={38B92D63-FB09-4DFA-A074-504146A2D678}
-.. _Virtual NanoLab: http://www.quantumwise.com/products/12-products/28-atk-se-200906#GPAW
-.. _scientific highlight of the month: http://www.psi-k.org/newsletters/News_98/Highlight_98.pdf
-.. _pycon 2011: http://us.pycon.org/2011/schedule/presentations/226/
-.. _Python for High Performance Computing: http://pycon.blip.tv/file/4881240/
-.. _CSC's supercomputer procurement: http://www.csc.fi/english/pages/hpc2011
-.. _18 million CPU hour grant: http://www.prace-ri.eu/PRACE-5thRegular-Call
-.. _PRACE Unified European Application Benchmark Suite: http://www.prace-ri.eu/ueabs
-.. _NOMAD: http://repository.nomad-coe.eu/
+.. _numpy: https://numpy.scipy.org/
+.. _CSC: https://www.csc.fi
+.. _GPAW course: https://www.csc.fi/english/csc/courses/archive/gpaw-2008-01
+.. _Sphinx: https://www.sphinx-doc.org
+.. _CAMd summer school 2008: https://www.camd.dtu.dk/English/Events/CAMD_Summer_School_2008/Programme.aspx
+.. _code sprint 2007: https://www.dtu.dk/Nyheder/Nyt_fra_Institutterne.aspx?guid={38B92D63-FB09-4DFA-A074-504146A2D678}
+.. _Virtual NanoLab: https://www.quantumwise.com/products/12-products/28-atk-se-200906#GPAW
+.. _scientific highlight of the month: https://www.psi-k.org/newsletters/News_98/Highlight_98.pdf
+.. _pycon 2011: https://us.pycon.org/2011/schedule/presentations/226/
+.. _Python for High Performance Computing: https://pycon.blip.tv/file/4881240/
+.. _CSC's supercomputer procurement: https://www.csc.fi/english/pages/hpc2011
+.. _18 million CPU hour grant: https://www.prace-ri.eu/PRACE-5thRegular-Call
+.. _PRACE Unified European Application Benchmark Suite: https://www.prace-ri.eu/ueabs
+.. _NOMAD: https://repository.nomad-coe.eu/
 
 
 .. toctree::

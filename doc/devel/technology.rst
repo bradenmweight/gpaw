@@ -42,14 +42,14 @@ ScaLAPACK_
 
 
 .. _Python: https://www.python.org
-.. _C: http://www.open-std.org/jtc1/sc22/open/n2794/n2794.pdf
-.. _reStructuredText: http://docutils.sourceforge.net/rst.html
-.. _docutils: http://docutils.sourceforge.net
-.. _BLAS: http://www.netlib.org/blas
-.. _LAPACK: http://www.netlib.org/lapack
-.. _NumPy: http://www.numpy.org
+.. _C: https://www.open-std.org/jtc1/sc22/open/n2794/n2794.pdf
+.. _reStructuredText: https://docutils.sourceforge.net/rst.html
+.. _docutils: https://docutils.sourceforge.net
+.. _BLAS: https://www.netlib.org/blas
+.. _LAPACK: https://www.netlib.org/lapack
+.. _NumPy: https://www.numpy.org
 .. _distutils: https://docs.python.org/library/distutils.html
-.. _MPI: http://www.mpi-forum.org
-.. _FFTW: http://www.fftw.org
-.. _BLACS: http://www.netlib.org/blacs
-.. _ScaLAPACK: http://www.netlib.org/scalapack/scalapack_home.html
+.. _MPI: https://www.mpi-forum.org
+.. _FFTW: https://www.fftw.org
+.. _BLACS: https://www.netlib.org/blacs
+.. _ScaLAPACK: https://www.netlib.org/scalapack/scalapack_home.html

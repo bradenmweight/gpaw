@@ -52,7 +52,7 @@ version to become the next release.
 
 * Details about supported :ref:`platforms and architectures`.
 
-.. _PyLint: http://www.logilab.org/857
+.. _PyLint: https://www.logilab.org/857
 
 
 .. _the_big_picture:

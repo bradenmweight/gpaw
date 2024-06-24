@@ -1,14 +1,14 @@
 # Permittivity of gold
 # Source:
-# http://refractiveindex.info/?shelf=main&book=Au&page=Johnson
+# https://refractiveindex.info/?shelf=main&book=Au&page=Johnson
 # Direct download link:
-# wget http://refractiveindex.info/database/data/main/Au/Johnson.yml -O Au.yml
+# wget https://refractiveindex.info/database/data/main/Au/Johnson.yml -O Au.yml
 #
 # this file is part of refractiveindex.info database
 # refractiveindex.info database is in the public domain
 # copyright and related rights waived via CC0 1.0
 
-REFERENCES: "P. B. Johnson and R. W. Christy. Optical Constants of the Noble Metals, <a href=\"http://dx.doi.org/10.1103/PhysRevB.6.4370\"><i>Phys. Rev. B</i> <b>6</b>, 4370-4379 (1972)</a>"
+REFERENCES: "P. B. Johnson and R. W. Christy. Optical Constants of the Noble Metals, <a href=\"https://dx.doi.org/10.1103/PhysRevB.6.4370\"><i>Phys. Rev. B</i> <b>6</b>, 4370-4379 (1972)</a>"
 COMMENTS: "Room temperature"
 DATA:
   - type: tabulated nk

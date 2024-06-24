@@ -576,7 +576,7 @@ class FFTVDWFunctional(VDWFunctionalBase):
 
         The recipe is from
 
-          http://en.wikipedia.org/wiki/Spline_(mathematics) """
+          https://en.wikipedia.org/wiki/Spline_(mathematics) """
 
         n = self.Nalpha
         lambd = self.lambd

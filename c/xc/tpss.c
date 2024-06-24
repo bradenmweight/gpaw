@@ -215,7 +215,7 @@ XC(mgga_x_tpss)(void *p, const double *rho, const double *sigma, const double *t
  Implements Perdew, Tao, Staroverov & Scuseria
    meta-Generalized Gradient Approximation.
    J. Chem. Phys. 120, 6898 (2004)
-   http://dx.doi.org/10.1063/1.1665298
+   https://dx.doi.org/10.1063/1.1665298
 
   Correlation part
 ************************************************************************/

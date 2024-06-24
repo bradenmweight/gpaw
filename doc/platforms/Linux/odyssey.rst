@@ -5,7 +5,7 @@ odyssey.fas.harvard.edu
 =======================
 
 Information about the Harvard Odyssey cluster can be found at
-`<http://rc.fas.harvard.edu>`_.
+`<https://rc.fas.harvard.edu>`_.
 
 Intel C++ compiler, MKL, and OpenMPI are required::
 

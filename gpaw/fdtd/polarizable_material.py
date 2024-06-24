@@ -316,7 +316,7 @@ class PolarizableRod():
         mask = False * np.ones(ng)
 
         for p in self.corners[1:]:
-            # http://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line:
+            # https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line:
             # d = |(a-p)-((a-p).n)n|   point p, line a+tn  (|n|=1)
             n = (p-a)/np.sqrt((p-a).dot(p-a))
             v1 = np.array([a[w]-r_gv[:, :, :, w] for w in range(3)]).transpose((1, 2, 3, 0)) # a-p
@@ -363,7 +363,7 @@ class PolarizableRod():
         return mask
 
 class PolarizableTetrahedron():
-    #http://steve.hollasch.net/cgindex/geometry/ptintet.html
+    #https://steve.hollasch.net/cgindex/geometry/ptintet.html
     #obrecht@imagen.com (Doug Obrecht) writes:
     #
     # Can someone point me to an algorithm that determines if a point is within a tetrahedron?

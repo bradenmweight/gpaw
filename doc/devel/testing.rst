@@ -32,7 +32,7 @@ to run multiple tests at the same time
 Please report errors to the ``gpaw-users`` mailing list so that we
 can fix them (see :ref:`mail list`).
 
-.. _pytest: http://doc.pytest.org/en/latest/contents.html
+.. _pytest: https://doc.pytest.org/en/latest/contents.html
 .. _pytest-xdist: https://github.com/pytest-dev/pytest-xdist
 
 

@@ -54,19 +54,19 @@ def f(filename):
 label_bib = {
     'gpaw1':
         'Mortensen et al., Phys. Rev. B (2005)',
-        # http://doi.org/10.1103/PhysRevB.71.035109
+        # https://doi.org/10.1103/PhysRevB.71.035109
     'gpaw2':
         'Enkovaara et al., J. Phys.: Condens. Matter (2010)',
-        # http://doi.org/10.1088/0953-8984/22/25/253202
+        # https://doi.org/10.1088/0953-8984/22/25/253202
     'lcao':
         'Larsen et al., Phys. Rev. B (2009)',
-        # http://doi.org/10.1103/PhysRevB.80.195112
+        # https://doi.org/10.1103/PhysRevB.80.195112
     'tddft':
         'Walter et al., J. Chem. Phys. (2008)',
-        # http://doi.org/10.1063/1.2943138
+        # https://doi.org/10.1063/1.2943138
     'response':
         'Yan et al., Phys. Rev. B (2011)',
-        # http://doi.org/10.1103/PhysRevB.83.245122
+        # https://doi.org/10.1103/PhysRevB.83.245122
 }
 
 plt.figure(figsize=(8, 4))

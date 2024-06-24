@@ -17,7 +17,7 @@ Below, there will be Python code examples starting with ``>>>`` (and
 ``...`` for continuation lines).  It is a good idea to start the
 Python interpreter and try some of the examples below.
 
-.. _Python: http://www.python.org
+.. _Python: https://www.python.org
 .. _Atomic Simulation Environment: https://wiki.fysik.dtu.dk/ase
 
 The units used by the GPAW calculator correspond to the :mod:`ASE
@@ -403,7 +403,7 @@ are listed below.
 
 ``'LDA'`` is the default value.  The next three ones are of
 generalized gradient approximation (GGA) type, and the last two are
-`hybrid functionals <http://en.wikipedia.org/wiki/Hybrid_functional>`_.
+`hybrid functionals <https://en.wikipedia.org/wiki/Hybrid_functional>`_.
 
 For the list of all functionals available in GPAW see :ref:`overview_xc`.
 

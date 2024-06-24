@@ -5,10 +5,10 @@ neolith.nsc.liu.se
 ==================
 
 Here you find information about the system
-http://www.nsc.liu.se/systems/neolith.
+https://www.nsc.liu.se/systems/neolith.
 
 The installation of user's packages on neolith described below uses
-`cmod <http://www.lysator.liu.se/cmod/>`_ modules:
+`cmod <https://www.lysator.liu.se/cmod/>`_ modules:
 
 - packages are installed under ``~/apps``::
 
@@ -18,18 +18,18 @@ The installation of user's packages on neolith described below uses
 
    mkdir ~/modulefiles
 
-- build `nose <http://code.google.com/p/python-nose/>`_::
+- build `nose <https://code.google.com/p/python-nose/>`_::
 
    cd ~/apps
-   wget http://python-nose.googlecode.com/files/nose-0.10.1.tar.gz
+   wget https://python-nose.googlecode.com/files/nose-0.10.1.tar.gz
    tar zxf nose-0.10.1.tar.gz
    cd nose-0.10.1
    python setup.py install --root=~/apps/nose-0.10.1-1
 
-- build `numpy <http://numpy.scipy.org/>`_::
+- build `numpy <https://numpy.scipy.org/>`_::
 
    cd ~/apps
-   wget http://downloads.sourceforge.net/numpy/numpy-1.3.0.tar.gz
+   wget https://downloads.sourceforge.net/numpy/numpy-1.3.0.tar.gz
    tar zxf numpy-1.3.0.tar.gz
    cd  numpy-1.3.0
    python setup.py install --root=~/apps/numpy-1.3.0-1
@@ -46,7 +46,7 @@ The installation of user's packages on neolith described below uses
 - build gpaw-setups::
 
    cd ~/apps
-   wget --no-check-certificate "http://wiki.fysik.dtu.dk/gpaw-files/gpaw-setups-0.5.3574.tar.gz"
+   wget --no-check-certificate "https://wiki.fysik.dtu.dk/gpaw-files/gpaw-setups-0.5.3574.tar.gz"
    tar zxf gpaw-setups-0.5.3574.tar.gz
 
 - deploy modules::

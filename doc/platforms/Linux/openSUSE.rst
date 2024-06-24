@@ -5,7 +5,7 @@ openSUSE
 ========
 
 Here you find information about the system
-`<http://www.opensuse.org/>`_.
+`<https://www.opensuse.org/>`_.
 
 System wide installation with yast
 ==================================
@@ -33,5 +33,5 @@ The steps described below require root access and assume bash shell:
 .. note::
 
    There are no new releases of fys packages for "Discontinued distributions"
-   of openSUSE: see http://en.opensuse.org/Lifetime
+   of openSUSE: see https://en.opensuse.org/Lifetime
 

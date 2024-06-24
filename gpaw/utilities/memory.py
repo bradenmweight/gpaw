@@ -2,7 +2,7 @@
 
 # The functions  _VmB, memory, resident, and stacksize are based on
 # Python Cookbook, recipe number 286222
-# http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/286222
+# https://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/286222
 
 import os
 import numpy as np
@@ -34,7 +34,7 @@ def _VmB(VmKey):
 
 def maxrss():
     """Return maximal resident memory size in bytes."""
-    # see http://www.kernel.org/doc/man-pages/online/pages/man5/proc.5.html
+    # see https://www.kernel.org/doc/man-pages/online/pages/man5/proc.5.html
 
     # try to get it from /proc/id/status
     # This will not work on supercomputers like Blue Gene or Cray
@@ -49,7 +49,7 @@ def maxrss():
 
     # try to get it from rusage
     # Python documentation here:
-    # http://docs.python.org/library/resource.html
+    # https://docs.python.org/library/resource.html
     # says to multiply by the pagesize, but this is incorrect.
     # What is implementation depenedent is whether ru_maxrss is in
     # bytes or kilobytes. We make an intelligent attempt to convert

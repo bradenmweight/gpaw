@@ -82,11 +82,11 @@ Notes and hints
 
 * Printer: There is a printer in each databar, the name is written on
   the printer. To use it from a terminal: :samp:`lp -d {printename}
-  {filename}`.  Read more about printing `here <http://www.gbar.dtu.dk/wiki/Printing>`_.
+  {filename}`.  Read more about printing `here <https://www.gbar.dtu.dk/wiki/Printing>`_.
 
 * To open a pdf-file: :samp:`evince {filename}`
 
-* How to `use USB sticks <http://www.gbar.dtu.dk/wiki/USB_Access>`_.
+* How to `use USB sticks <https://www.gbar.dtu.dk/wiki/USB_Access>`_.
 
 * The normal tilde (~) key combination is not functional on the
   databar computers.  Use :kbd:`Alt Graph + 5` to type a tilde.
@@ -141,8 +141,8 @@ command::
   $ linuxsh -X
 
 
-.. _`Cendio's webpage`: http://www.cendio.com/downloads/clients/
-.. _`DTU databar wiki`: http://www.gbar.dtu.dk/wiki/Thinlinc
+.. _`Cendio's webpage`: https://www.cendio.com/downloads/clients/
+.. _`DTU databar wiki`: https://www.gbar.dtu.dk/wiki/Thinlinc
 .. _`Niflheim wiki`: https://wiki.fysik.dtu.dk/niflheim/X11_on_Windows
 
 

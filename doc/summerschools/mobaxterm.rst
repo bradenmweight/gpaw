@@ -10,7 +10,7 @@ MobaXTerm for Windows users
 Install MobaXterm
 =================
 
-Go to the `MobaXterm Homepage <http://mobaxterm.mobatek.net/>`_ and click "Get MobaXTerm Now".  Choose the free Home edition.  You can choose between a portable version and an installable version, we have only tested the portable but expect that both work.  Download it.  Unpack the ZIP file.  You can now move the executable to whereever you want, e.g. your desktop or onto a USB stick so you can use MobaXterm from other Windows machines.
+Go to the `MobaXterm Homepage <https://mobaxterm.mobatek.net/>`_ and click "Get MobaXTerm Now".  Choose the free Home edition.  You can choose between a portable version and an installable version, we have only tested the portable but expect that both work.  Download it.  Unpack the ZIP file.  You can now move the executable to whereever you want, e.g. your desktop or onto a USB stick so you can use MobaXterm from other Windows machines.
 
 
 Logging in the first time

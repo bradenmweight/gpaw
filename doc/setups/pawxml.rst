@@ -74,7 +74,7 @@ or for an empty element::
 .. tip::
    An XML-tutorial can be found here_
 
-   .. _here: http://www.w3schools.com/xml/default.asp
+   .. _here: https://www.w3schools.com/xml/default.asp
 
 
 ----------
@@ -100,7 +100,7 @@ web page::
 
   <!-- Nitrogen dataset for the Projector Augmented Wave method. -->
   <!-- Units: Hartree and Bohr radii.                            -->
-  <!-- http://www.where.org/paw_dataset.html                     -->
+  <!-- https://www.where.org/paw_dataset.html                     -->
 
 
 --------------------

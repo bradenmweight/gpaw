@@ -45,7 +45,7 @@ Setting up the metal surface
 Ru crystalises in the hcp structure with a lattice constants a = 2.706 Å and
 c = 4.282 Å.  It is often better to use the lattice constants corresponding
 to the DFT variant used (here PBE with PAW).  We get this from
-http://oqmd.org.
+https://oqmd.org.
 
 We model the surface by a 2 layer slab of metal atoms, and add 5Å vacuum on
 each side.

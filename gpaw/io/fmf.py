@@ -8,7 +8,7 @@ class FMF:
     """Full-Metadata Format
 
     Full-Metadata Format after
-    http://www.sir.uni-freiburg.de/repository/2009/SI20090302a/SI20090302a.pdf
+    https://www.sir.uni-freiburg.de/repository/2009/SI20090302a/SI20090302a.pdf
     """
     def __init__(self,
                  title='-',

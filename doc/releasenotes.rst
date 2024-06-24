@@ -619,7 +619,7 @@ Oct 19, 2020: :git:`20.10.0 <../20.10.0>`
       $ python3 -m gpaw.utilities.dipole <gpw-file>
 
 
-.. _pytest: http://doc.pytest.org/en/latest/contents.html
+.. _pytest: https://doc.pytest.org/en/latest/contents.html
 .. _mypy: https://mypy.readthedocs.io/en/stable/
 
 
@@ -1029,7 +1029,7 @@ Feb 7, 2017: :git:`1.2.0 <../1.2.0>`.
   method that returns an :class:`ase.spectrum.band_structure.BandStructure`
   object.  This makes it easy to create band-structure plots as shown
   in section 9 of this awesome Psi-k *Scientfic Highlight Of The Month*:
-  http://psi-k.net/download/highlights/Highlight_134.pdf.
+  https://psi-k.net/download/highlights/Highlight_134.pdf.
 
 * Dipole-layer corrections for slab calculations can now be done in PW-mode
   also.  See :ref:`dipole`.
@@ -1182,7 +1182,7 @@ July 22, 2015: :git:`0.11.0 <../0.11.0>`.
   be used to calculate forces to a given precision.
 
 * Fixed bug in printing work functions for calculations with a
-  dipole-correction `<http://listserv.fysik.dtu.dk/pipermail/
+  dipole-correction `<https://listserv.fysik.dtu.dk/pipermail/
   gpaw-users/2015-February/003226.html>`_.
 
 * A :ref:`continuum solvent model <continuum_solvent_model>` was added.

@@ -4,11 +4,11 @@
 sun.chpc.ac.za
 ==============
 
-Here you find information about the system http://www.chpc.ac.za/sun/.
+Here you find information about the system https://www.chpc.ac.za/sun/.
 
 The installation of user's packages on SUSE 10 **login01**,
 64-bit described below uses
-`modules <http://modules.sourceforge.net/>`_, and assumes ``sh`` shell:
+`modules <https://modules.sourceforge.net/>`_, and assumes ``sh`` shell:
 
 - packages are installed under ``~/CAMd``::
 
