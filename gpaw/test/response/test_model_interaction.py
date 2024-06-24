@@ -9,7 +9,6 @@ from gpaw.wannier90 import Wannier90
 import os
 from gpaw.mpi import world, serial_comm
 from subprocess import PIPE, run
-import time
 
 
 def out():
