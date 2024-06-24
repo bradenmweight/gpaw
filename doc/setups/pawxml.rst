@@ -161,8 +161,7 @@ can be specified in the following ways:
 
   <xc_functional type="GGA", name="PBE"/>
 
-.. _LibXC: http://www.tddft.org/programs/octopus/wiki/index.php/
-           Libxc:manual#Available_functionals
+.. _LibXC: https://libxc.gitlab.io/functionals/
 
 
 ---------
