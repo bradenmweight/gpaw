@@ -44,7 +44,7 @@ if not os.path.exists('calcDelta.py'):
         try:  # new in 2.6
             z.extractall()
         except AttributeError:
-            # http://stackoverflow.com/questions/7806563/how-to-unzip-a-zip-file-with-python-2-4
+            # https://stackoverflow.com/questions/7806563/how-to-unzip-a-zip-file-with-python-2-4
             for f in z.namelist():
                 fd = open(f, "w")
                 fd.write(z.read(f))

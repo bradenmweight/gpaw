@@ -6,7 +6,7 @@ Compare to data from:
 
     Jiří Klimeš, Merzuk Kaltak, Georg Kresse
 
-    http://arxiv.org/abs/1404.3101
+    https://arxiv.org/abs/1404.3101
 """
 
 import ase.db

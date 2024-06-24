@@ -69,18 +69,18 @@ Optional (highly recommended for increased performance):
 
 See :ref:`releasenotes` for version requirements.
 
-.. _Python: http://www.python.org/
-.. _NumPy: http://docs.scipy.org/doc/numpy/reference/
-.. _SciPy: http://docs.scipy.org/doc/scipy/reference/
-.. _LibXC: http://www.tddft.org/programs/libxc/
-.. _MPI: http://www.mpi-forum.org/
-.. _BLAS: http://www.netlib.org/blas/
-.. _BLACS: http://www.netlib.org/blacs/
-.. _ScaLAPACK: http://www.netlib.org/scalapack/
+.. _Python: https://www.python.org/
+.. _NumPy: https://docs.scipy.org/doc/numpy/reference/
+.. _SciPy: https://docs.scipy.org/doc/scipy/reference/
+.. _LibXC: https:/libxc.gitlab.io/
+.. _MPI: https://www.mpi-forum.org/
+.. _BLAS: https://www.netlib.org/blas/
+.. _BLACS: https://www.netlib.org/blacs/
+.. _ScaLAPACK: https://www.netlib.org/scalapack/
 .. _PyPI: https://pypi.org/project/gpaw
 .. _PIP: https://pip.pypa.io/en/stable/
 .. _ASE: https://wiki.fysik.dtu.dk/ase
-.. _FFTW: http://www.fftw.org/
+.. _FFTW: https://www.fftw.org/
 .. _docker image: https://hub.docker.com/r/marcindulak/gpaw-openmpi
 
 
@@ -257,7 +257,8 @@ Libxc Installation
 ==================
 
 If you OS does not have a LibXC package you can use then you can download
-and install LibXC as described `here <http://www.tddft.org/programs/libxc/>`_.
+and install LibXC as described
+`here <https://libxc.gitlab.com/installation/>`_.
 A few extra tips:
 
 * Libxc installation requires both a C compiler and a Fortran compiler.
@@ -283,16 +284,15 @@ A few extra tips:
     export LD_LIBRARY_PATH=/my/path/to/libxc/5.2.0/install/lib
 
 Example::
-
-    wget http://www.tddft.org/programs/octopus/down.php?file=libxc/5.2.0/libxc-5.2.0.tar.gz -O libxc-5.2.0.tar.gz
-    tar -xf libxc-5.2.0.tar.gz
-    cd libxc-5.2.0
-    ./configure --enable-shared --disable-fortran --prefix=$HOME/libxc-5.2.0
+    wget https://gitlab.com/libxc/libxc/-/archive/6.2.2/libxc-6.2.2.tar.bz2
+    tar -xf libxc-6.2.2.tar.bz2
+    cd libxc-6.2.2
+    ./configure --enable-shared --disable-fortran --prefix=$HOME/libxc-6.2.2
     make
     make install
 
     # add these to your .bashrc:
-    XC=~/libxc-5.2.0
+    XC=~/libxc-6.2.2
     export C_INCLUDE_PATH=$XC/include
     export LIBRARY_PATH=$XC/lib
     export LD_LIBRARY_PATH=$XC/lib

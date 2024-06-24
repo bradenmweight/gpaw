@@ -5,7 +5,7 @@ jugene.fz-juelich.de
 ====================
 
 Here you find information about the system
-`<http://www.fz-juelich.de/jsc/jugene>`_.
+`<https://www.fz-juelich.de/jsc/jugene>`_.
 
 Numpy needs to be build with powerpc-bgp-linux-gfortran instead of gfortran
 compiler, so in order to build numpy specify the environment variable F90::

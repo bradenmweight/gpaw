@@ -121,7 +121,7 @@ To manually install the setups, do as follows:
 
 See also `NIST Atomic Reference Data`_.
 
-.. _NIST Atomic Reference Data: http://physics.nist.gov/PhysRefData/DFTdata/Tables/ptable.html
+.. _NIST Atomic Reference Data: https://physics.nist.gov/PhysRefData/DFTdata/Tables/ptable.html
 
 
 Tests

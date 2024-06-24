@@ -2,14 +2,14 @@ setenv APPS "/afs/crc.nd.edu/user/j/jbray2/CAMd"
 setenv MODULEFILES "${APPS}/modulefiles"
 
 set nose_version=0.11.3
-wget http://python-nose.googlecode.com/files/nose-${nose_version}.tar.gz
+wget https://python-nose.googlecode.com/files/nose-${nose_version}.tar.gz
 tar zxf nose-${nose_version}.tar.gz
 cd nose-${nose_version}
 python setup.py install --root=${APPS}/nose-${nose_version}-1
 cd ..
 
 set numpy_version=1.4.1
-wget http://downloads.sourceforge.net/numpy/numpy-${numpy_version}.tar.gz
+wget https://downloads.sourceforge.net/numpy/numpy-${numpy_version}.tar.gz
 tar zxf numpy-${numpy_version}.tar.gz
 cd  numpy-${numpy_version}
 python setup.py install --root=${APPS}/numpy-${numpy_version}-1
@@ -24,7 +24,7 @@ wget https://wiki.fysik.dtu.dk/gpaw-files/gpaw-${gpaw_version}.tar.gz
 tar zxf gpaw-${gpaw_version}.tar.gz
 
 set gpaw_setups_version=0.6.6300
-wget http://wiki.fysik.dtu.dk/gpaw-files/gpaw-setups-${gpaw_setups_version}.tar.gz
+wget https://wiki.fysik.dtu.dk/gpaw-files/gpaw-setups-${gpaw_setups_version}.tar.gz
 tar zxf gpaw-setups-${gpaw_setups_version}.tar.gz
 
 mkdir -p ${MODULEFILES}/nose

@@ -120,7 +120,7 @@ bulk Aluminum.
       see S. Kurth *et al.*, Int. J. Quant. Chem. **75** 889-909
       (1999).
 
-.. _NumPy: http://docs.scipy.org/doc/numpy/reference/generated/
+.. _NumPy: https://docs.scipy.org/doc/numpy/reference/generated/
     numpy.polynomial.polynomial.Polynomial.html
     #numpy-polynomial-polynomial-polynomial
 

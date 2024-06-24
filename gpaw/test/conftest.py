@@ -293,7 +293,7 @@ def needs_ase_master():
         pytest.skip('ASE is too old')
 
 
-def pytest_report_header(config, startdir):
+def pytest_report_header(config, start_path):
     # Use this to add custom information to the pytest printout.
     yield f'GPAW MPI rank={world.rank}, size={world.size}'
 

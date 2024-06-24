@@ -30,7 +30,7 @@ Set the versions::
 
   set nose=0.11.3
   # Warning: version 1.6.0 seems inconsistent about C-, Fortran-contiguous
-  # http://mail.scipy.org/pipermail/numpy-discussion/2011-July/057557.html
+  # https://mail.scipy.org/pipermail/numpy-discussion/2011-July/057557.html
   set numpy=1.5.1
   set scipy=0.9.0
 
@@ -113,7 +113,7 @@ Build nose/numpy/scipy::
 
   wget --no-check-certificate https://downloads.sourceforge.net/project/numpy/NumPy/${numpy}/numpy-${numpy}.tar.gz
   wget --no-check-certificate https://downloads.sourceforge.net/project/scipy/scipy/${scipy}/scipy-${scipy}.tar.gz
-  wget http://python-nose.googlecode.com/files/nose-${nose}.tar.gz
+  wget https://python-nose.googlecode.com/files/nose-${nose}.tar.gz
   tar zxf nose-${nose}.tar.gz
   tar zxf numpy-${numpy}.tar.gz
   tar zxf scipy-${scipy}.tar.gz
@@ -147,7 +147,7 @@ Install ASE/GPAW::
 
   wget https://wiki.fysik.dtu.dk/ase-files/python-ase-${ase}.tar.gz
   wget https://wiki.fysik.dtu.dk/gpaw-files/gpaw-${gpaw}.tar.gz
-  wget http://wiki.fysik.dtu.dk/gpaw-files/gpaw-setups-${setups}.tar.gz
+  wget https://wiki.fysik.dtu.dk/gpaw-files/gpaw-setups-${setups}.tar.gz
   tar zxf python-ase-${ase}.tar.gz
   tar zxf gpaw-${gpaw}.tar.gz
   tar zxf gpaw-setups-${setups}.tar.gz

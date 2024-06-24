@@ -54,17 +54,22 @@ class FakeWFS:
             self.mode = 'lcao'
         self.collinear = wfs.ncomponents < 4
 
-    def _get_wave_function_array(self, u, n, realspace):
+    def _get_wave_function_array(self, u, n, realspace=True, periodic=False):
+        assert realspace and not periodic
         psit_X = self.kpt_u[u].wfs.psit_nX[n]
         if hasattr(psit_X, 'ifft'):
-            return psit_X.ifft(grid=self.pwgrid).data
+            psit_R = psit_X.ifft(grid=self.pwgrid, periodic=True)
+            psit_R.multiply_by_eikr(psit_X.desc.kpt_c)
+            return psit_R.data
         return psit_X.data
 
     def get_wave_function_array(self, n, k, s, realspace=True, periodic=False):
         assert realspace
         psit_X = self.kpt_qs[k][s].wfs.psit_nX[n]
         if self.mode == 'pw':
-            psit_R = psit_X.ifft(grid=self.pwgrid, periodic=periodic)
+            psit_R = psit_X.ifft(grid=self.pwgrid, periodic=True)
+            if not periodic:
+                psit_R.multiply_by_eikr(psit_X.desc.kpt_c)
         else:
             psit_R = psit_X
             if periodic:

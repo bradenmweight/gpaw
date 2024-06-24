@@ -1,7 +1,7 @@
 # A. Pletzer Tue Mar 20 11:42:05 EST 2001
 # G. Genellina 2009-09-10: Minor syntax changes,
 #   compatibility with Python 2.4 and above
-# downloaded from http://code.activestate.com/recipes/52292/
+# downloaded from https://code.activestate.com/recipes/52292/
 # and slightly changed
 """
 Gauss-Legendre Integration

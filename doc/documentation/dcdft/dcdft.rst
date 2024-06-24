@@ -20,7 +20,7 @@ that we, humans tend to do mistakes.
 
 Therefore the motto of this exercise is taken from Karl Popper's
 "All life is problem solving":
-`the novelty in the scientific approach is that we actively seek to eliminate our attempted solutions <http://books.google.dk/books?id=W0jP04qn0uoC&pg=PA9&lpg=PA9&dq=%22The+novelty+in+the+scientific+approach+is+that+we+actively+seek+to+eliminate+our+attempted+solutions%22&source=bl&ots=pvgW-0uZUp&sig=Rr6pyMIoFa7Fq_RxiHkcdvjAgyo&hl=en&sa=X&ei=_kLSU_noJKWGywOLmYG4Aw&ved=0CCAQ6AEwAA#v=onepage&q=%22The%20novelty%20in%20the%20scientific%20approach%20is%20that%20we%20actively%20seek%20to%20eliminate%20our%20attempted%20solutions%22&f=false>`_.
+`the novelty in the scientific approach is that we actively seek to eliminate our attempted solutions <https://books.google.dk/books?id=W0jP04qn0uoC&pg=PA9&lpg=PA9&dq=%22The+novelty+in+the+scientific+approach+is+that+we+actively+seek+to+eliminate+our+attempted+solutions%22&source=bl&ots=pvgW-0uZUp&sig=Rr6pyMIoFa7Fq_RxiHkcdvjAgyo&hl=en&sa=X&ei=_kLSU_noJKWGywOLmYG4Aw&ved=0CCAQ6AEwAA#v=onepage&q=%22The%20novelty%20in%20the%20scientific%20approach%20is%20that%20we%20actively%20seek%20to%20eliminate%20our%20attempted%20solutions%22&f=false>`_.
 
 In this exercise, in addition to the traditional, error prone
 method of writing output files generated using separate scripts
@@ -35,11 +35,11 @@ the script). Please consult the introduction to the
 You can find out more about "reproducible science" with ASE in
 the following talks:
 `Emacs + org-mode + python in reproducible research
-<http://www.youtube.com/watch?v=1-dUkyn_fZA>`_ or
+<https://www.youtube.com/watch?v=1-dUkyn_fZA>`_ or
 `How Python & the iPython notebook can revamp quantum chemical reseach
-<http://www.youtube.com/watch?v=WKoImDmYFQE>`_.
+<https://www.youtube.com/watch?v=WKoImDmYFQE>`_.
 
-We will compare PBE numbers from GPAW with http://www.wien2k.at/ for K, Ca
+We will compare PBE numbers from GPAW with https://www.wien2k.at/ for K, Ca
 and Ti. We use default PAW-datasets, a plane-wave cutoff of 340 eV, a
 **k**-point density of 3.5 Å and a Fermi-Dirac distribution with a 0.1 eV
 temperature. Copy this :download:`dcdft_gpaw.py` to a place in your file area:

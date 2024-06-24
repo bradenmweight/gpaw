@@ -5,7 +5,7 @@ juropa.fz-juelich.de   (Intel Xeon, Infiniband, MKL)
 ====================================================
 
 Here you find information about the system
-http://www.fz-juelich.de/jsc/juropa.
+https://www.fz-juelich.de/jsc/juropa.
 
 Numpy is installed system wide, so separate installation is not needed.
 
@@ -80,7 +80,7 @@ Execution
 =========
 
 General execution instructions can be found at
-http://www.fz-juelich.de/jsc/juropa/usage/quick-intro.
+https://www.fz-juelich.de/jsc/juropa/usage/quick-intro.
 
 Example batch job script for GPAW (512 cores, 30 minutes)::
 
@@ -113,7 +113,7 @@ SMT_ can be used
 to virtually double the number of nodes. A test case did not show
 an improvement in performance though.
 
-.. _SMT: http://www2.fz-juelich.de/jsc/juropa/usage/smt
+.. _SMT: https://www2.fz-juelich.de/jsc/juropa/usage/smt
 
 ====== ===== === =========
 #cores t[s]  SMT date

@@ -7,7 +7,7 @@ This document shows how to build a *venv* for GPAW+ASE.
 .. seealso::
 
     * :mod:`Creation of Python virtual environments <venv>`.
-    * Information about the `GBar <http://www.gbar.dtu.dk/>`_.
+    * Information about the `GBar <https://www.gbar.dtu.dk/>`_.
     * Information about the `DCC software stack
       <https://www.hpc.dtu.dk/?page_id=3246>`_.
     * MyQueue_.
@@ -60,7 +60,7 @@ Submitting jobs
 Using bsub
 ----------
 
-See `here <http://www.gbar.dtu.dk/>`_.
+See `here <https://www.gbar.dtu.dk/>`_.
 
 
 Using MyQueue

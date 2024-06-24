@@ -78,7 +78,7 @@ following settings for the ``MomentCorrectionPoissonSolver`` may be tried out::
 When multiple centers are used, the multipole moments are calculated on
 non-overlapping regions of the calculation cell. Each point in space is
 associated to its closest center. See `Voronoi diagrams
-<http://en.wikipedia.org/wiki/Voronoi_diagram>`_ for analogous illustration of
+<https://en.wikipedia.org/wiki/Voronoi_diagram>`_ for analogous illustration of
 the partitioning of a plane.
 
 .. [#Castro2003]

@@ -5,7 +5,7 @@ monolith
 ========
 
 Here you find information about the system
-`<http://www.nsc.liu.se/systems/retiredsystems/monolith/>`_.
+`<https://www.nsc.liu.se/systems/retiredsystems/monolith/>`_.
 
 The Monolith machine is a cluster of 2.4Ghz Xeon processors with 2GB of
 memory.  The ScaMPI implementation of MPI has a problem, but we can

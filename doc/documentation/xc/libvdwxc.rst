@@ -11,7 +11,7 @@ To use libvdwxc, you need to install it
 and compile GPAW with it.  libvdwxc can be used with other semilocal
 functionals like optPBE, optB88, and BEEF-vdW.
 
-`Install <http://libvdwxc.readthedocs.io>`_ libvdwxc,
+`Install <https://libvdwxc.readthedocs.io>`_ libvdwxc,
 making sure that its dependencies FFTW3 and
 FFTW3-MPI are available on the system.  For truly large systems, you
 may install PFFT to achieve better scalability.  For realistically-sized systems, FFTW3-MPI is efficient

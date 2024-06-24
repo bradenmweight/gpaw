@@ -5,7 +5,7 @@ seaborg.nersc.gov
 =================
 
 Here you find information about the system
-`<http://www.nersc.gov/nusers/systems/SP/>`_.
+`<https://www.nersc.gov/nusers/systems/SP/>`_.
 
 We need to use the mpi-enabled compiler ``mpcc`` and we should link to
 LAPACK before ESSL.  Make sure LAPACK is added::
@@ -22,7 +22,7 @@ and use this customize.py::
 The Numeric Python extension is not installed on NERSC, so we should
 install it.  Get the Numeric-24.2 and do this::
 
-  $ wget http://downloads.sourceforge.net/numpy/Numeric-24.2.tar.gz
+  $ wget https://downloads.sourceforge.net/numpy/Numeric-24.2.tar.gz
   $ gunzip -c Numeric-24.2.tar.gz | tar xf -
   $ cd Numeric-24.2
   $ python setup.py install --home=$HOME

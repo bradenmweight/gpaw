@@ -83,4 +83,4 @@ References
    T. P. Rossi,
    Simulating electric field enhancement in plasmonic nanomaterials,
    Master's thesis, Aalto University (2013).
-   `<http://urn.fi/URN:NBN:fi:aalto-201309137662>`_
+   `<https://urn.fi/URN:NBN:fi:aalto-201309137662>`_

@@ -685,7 +685,7 @@ class LocalizedFunctionsCollection(BaseLFC):
         rank = comm.rank
         srequests = []
         rrequests = []
-        c_arxiv = {}  # see also http://arXiv.org
+        c_arxiv = {}  # see also https://arXiv.org
         b_axiv = {}
         M1 = 0
         for a in self.atom_indices:

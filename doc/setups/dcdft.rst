@@ -5,7 +5,7 @@ Delta Codes DFT
 ===============
 
 Codes precision estimated for PBE exchange-correlation functional
-on the database of bulk systems from http://molmod.ugent.be/DeltaCodesDFT.
+on the database of bulk systems from https://molmod.ugent.be/DeltaCodesDFT.
 
 For results see https://cmr.fysik.dtu.dk/.
 

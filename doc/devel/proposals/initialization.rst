@@ -78,7 +78,7 @@ to think about:
 Reading and writing
 ===================
 
-We should name things like described here: http://www.etsf.eu/fileformats
+We should name things like described here: https://www.etsf.eu/fileformats
 
 (is there an ETSF XC library?)
 

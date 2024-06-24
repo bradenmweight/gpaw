@@ -18,7 +18,7 @@ Set the versions::
 
   export nose=0.11.3
   # Warning: version 1.6.0 seems inconsistent about C-, Fortran-contiguous
-  # http://mail.scipy.org/pipermail/numpy-discussion/2011-July/057557.html
+  # https://mail.scipy.org/pipermail/numpy-discussion/2011-July/057557.html
   export numpy=1.5.1
   export scipy=0.9.0
 
@@ -75,7 +75,7 @@ both acml and cblas.
 
 This is how you can download and install cblas::
 
-  wget http://www.netlib.org/blas/blast-forum/cblas.tgz
+  wget https://www.netlib.org/blas/blast-forum/cblas.tgz
   tar zxf cblas.tar.gz && mv -f CBLAS CBLAS.acml-${acml} && cd CBLAS.acml-${acml}
 
   cp -p Makefile.LINUX Makefile.in
@@ -117,7 +117,7 @@ Build nose/numpy/scipy::
 
   wget --no-check-certificate https://downloads.sourceforge.net/project/numpy/NumPy/${numpy}/numpy-${numpy}.tar.gz
   wget --no-check-certificate https://downloads.sourceforge.net/project/scipy/scipy/${scipy}/scipy-${scipy}.tar.gz
-  wget http://python-nose.googlecode.com/files/nose-${nose}.tar.gz
+  wget https://python-nose.googlecode.com/files/nose-${nose}.tar.gz
   tar zxf nose-${nose}.tar.gz
   tar zxf numpy-${numpy}.tar.gz
   tar zxf scipy-${scipy}.tar.gz
@@ -188,7 +188,7 @@ Install ASE/GPAW::
 
   wget https://wiki.fysik.dtu.dk/ase-files/python-ase-${ase}.tar.gz
   wget https://wiki.fysik.dtu.dk/gpaw-files/gpaw-${gpaw}.tar.gz
-  wget http://wiki.fysik.dtu.dk/gpaw-files/gpaw-setups-${setups}.tar.gz
+  wget https://wiki.fysik.dtu.dk/gpaw-files/gpaw-setups-${setups}.tar.gz
   tar zxf python-ase-${ase}.tar.gz
   tar zxf gpaw-${gpaw}.tar.gz
   tar zxf gpaw-setups-${setups}.tar.gz

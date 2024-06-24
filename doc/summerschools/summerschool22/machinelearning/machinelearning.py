@@ -227,7 +227,7 @@ print(f'E(cubic) - E(tetragonal)={de_form:.4f} eV/Fu')
 """
 # Machine Learning
 
-Machine Learning is the science of getting computers to learn and act like humans do, and improve their learning over time in autonomous fashion, by feeding them data and information in the form of observations and real-world interactions. The crucial idea is that the computer should be able to improve its performance at a given task as we give it more information. A tutorial on machine learning in general can be found [here](http://scikit-learn.org/stable/tutorial/basic/tutorial.html).
+Machine Learning is the science of getting computers to learn and act like humans do, and improve their learning over time in autonomous fashion, by feeding them data and information in the form of observations and real-world interactions. The crucial idea is that the computer should be able to improve its performance at a given task as we give it more information. A tutorial on machine learning in general can be found [here](https://scikit-learn.org/stable/tutorial/basic/tutorial.html).
 
 In this workbook we will be carrying  out a supervised learning task, where we attempt to predict a particular (known) attribute of a given structure, based on other attributes of the structure. This can be useful if it allows us to use easy-to-calculate properties to say something about quantities which are difficult to calculate. This approach to learning, where we attempt to find a map $f$ from the attributes, $X$, of our data to some target property, $y$, is known as supervised learning. See [here](https://en.wikipedia.org/wiki/Supervised_learning) for more general information on the topic.
 
@@ -317,7 +317,7 @@ for the loss function.
 The very simplest class of machine learning models are just generalized
 linear models, where the target, $y$, is assumed to be a linear function of
 the input variables. You can read more about them
-[here](http://scikit-learn.org/stable/modules/linear_model.html#ordinary-least-squares). For a
+[here](https://scikit-learn.org/stable/modules/linear_model.html#ordinary-least-squares). For a
 linear function, we guess a functional form $f(\mathbf{x}) = \sum_n w_n x_n = \mathbf w \cdot \mathbf x$, and seek to optimize the weight vector, $\mathbf w$.
 
 If we choose the loss function
@@ -682,7 +682,7 @@ print('yes, loss is better')
 Most phenomena we encounter don't have nice linear relationships between inputs and outputs. We model nonlinear relationships in two different ways: we either introduce nonlinearity in our features, or in our model. The first
 is known as feature engineering, and requires a good method. The second makes optimizing the parameters of our model slightly more difficult, as we can lose many of the nice properties of the linear model, such as the closed-form solution.
 
-Here we will focus on gaussian process regression as a case study. You can read more about it [here](http://scikit-learn.org/stable/modules/gaussian_process.html#gaussian-process). This lets us fit nonlinear functions and also provides a confidence interval indicating how well the machine is doing.
+Here we will focus on gaussian process regression as a case study. You can read more about it [here](https://scikit-learn.org/stable/modules/gaussian_process.html#gaussian-process). This lets us fit nonlinear functions and also provides a confidence interval indicating how well the machine is doing.
 
 Similar to the `linear_regression`, we can import it from `sklearn` and create an example of the model with `model = GaussianProcessRegressor(kernel=YYY)`, where `YYY` is the kernel used. As a start, we should use a radial basis function, which is also available from `sklearn`. As usual, the model has a `fit()` and a `predict()` method, which sets the parameters of the model, and tries to predict outputs based on inputs.
 """
@@ -720,7 +720,7 @@ best_model.fit(X, y).kernel_
 
 # %%
 """
-Ideally you should find that length scales of ~1.0 perform best according to this scoring metric. In general, `scikit` has many tools for finding optimized hyperparameters for a given model - an example is [GridSearchCV](http://scikit-learn.org/stable/auto_examples/model_selection/plot_grid_search_digits.html), which automatically goes through all possible combinations of hyperparameters, finding the best one. You should note that there is a problem with using the Cross-validation scores we compute here to evaluate the performance of a given set of hyperparameters, which is very similar to the original problem of overfitting. Can you see what it is?
+Ideally you should find that length scales of ~1.0 perform best according to this scoring metric. In general, `scikit` has many tools for finding optimized hyperparameters for a given model - an example is [GridSearchCV](https://scikit-learn.org/stable/auto_examples/model_selection/plot_grid_search_digits.html), which automatically goes through all possible combinations of hyperparameters, finding the best one. You should note that there is a problem with using the Cross-validation scores we compute here to evaluate the performance of a given set of hyperparameters, which is very similar to the original problem of overfitting. Can you see what it is?
 """
 
 # %%
