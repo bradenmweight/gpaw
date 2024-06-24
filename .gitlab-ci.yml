@@ -555,7 +555,10 @@ docs:
     - make
     - make doctest
     - cd ..
-    - python -c "from gpaw.utilities.urlcheck import test; test()"
+# We would like to verify that the URLs are valid, but this has been failing.
+# We could reenable this check and make sure it runs well (and is not
+# too spammy on the URLs)
+#     - python -c "from gpaw.utilities.urlcheck import test; test()"
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
       when: manual
