@@ -102,7 +102,7 @@ look at the GPAW exercises_ and tutorials_.
 .. _ASE: https://wiki.fysik.dtu.dk/ase
 .. _NumPy: http://docs.scipy.org/doc/numpy/reference/
 .. _SciPy: http://docs.scipy.org/doc/scipy/reference/
-.. _LibXC: http://www.tddft.org/programs/libxc/
+.. _LibXC: https://libxc.gitlab.io/
 .. _MPI: http://www.mpi-forum.org/
 .. _BLAS: http://www.netlib.org/blas/
 .. _FFTW: http://www.fftw.org/
