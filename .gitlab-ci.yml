@@ -556,7 +556,11 @@ docs:
     - make doctest
     - cd ..
     - python -c "from gpaw.utilities.urlcheck import test; test()"
-  when: manual
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+      when: manual
+      allow_failure: true
+    - if: $CI_PIPELINE_SOURCE == "schedule"
   artifacts:
     paths:
       - doc/build/html
