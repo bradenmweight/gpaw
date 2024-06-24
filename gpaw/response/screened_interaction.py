@@ -13,6 +13,7 @@ class GammaIntegrationMode:
         if isinstance(gamma_integration, GammaIntegrationMode):
             self.type = gamma_integration.type
             self.reduced = gamma_integration.reduced
+            self._N = gamma_integration._N
             return
 
         defaults = {'sphere': {'type': 'sphere'},
@@ -33,6 +34,7 @@ class GammaIntegrationMode:
 
         self.type = gamma_integration['type']
         self.reduced = gamma_integration.get('reduced', False)
+        self._N = gamma_integration.get('N', 100)
 
         if self.type not in {'sphere', 'reciprocal', '1BZ', 'WS'}:
             raise TypeError('type in gamma_integration should be one of sphere'
@@ -61,6 +63,10 @@ class GammaIntegrationMode:
     @property
     def to_1bz(self):
         return self.type == '1BZ'
+
+    @property
+    def N(self):
+        return self._N
 
 
 class QPointDescriptor(KPointDescriptor):
@@ -168,9 +174,11 @@ class WBaseCalculator():
         if self.integrate_gamma.is_numerical:
             reduced = self.integrate_gamma.reduced
             tofirstbz = self.integrate_gamma.to_1bz
+            N = self.integrate_gamma.N
             V0, sqrtV0 = self.coulomb.integrated_kernel(qpd=chi0.qpd,
                                                         reduced=reduced,
-                                                        tofirstbz=tofirstbz)
+                                                        tofirstbz=tofirstbz,
+                                                        N=N)
         elif self.integrate_gamma.is_analytical:
             if chi0.optical_limit:
                 # The volume of reciprocal cell occupied by a single q-point

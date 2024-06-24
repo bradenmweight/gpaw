@@ -55,18 +55,17 @@ class CoulombKernel:
 
     def V(self, qpd, q_v=None):
         assert isinstance(qpd, SingleQPWDescriptor)
-        return get_coulomb_kernel(
-            qpd, self.N_c, pbc_c=self.pbc_c, q_v=q_v,
-            truncation=self.truncation)
+        return get_coulomb_kernel(qpd, self.N_c, pbc_c=self.pbc_c, q_v=q_v,
+                                  truncation=self.truncation)
 
     def kernel(self, qpd, q_v=None):
         return np.diag(self.V(qpd, q_v=q_v))
 
-    def integrated_kernel(self, qpd, reduced, tofirstbz=False):
+    def integrated_kernel(self, qpd, reduced, tofirstbz=False, *, N):
         return get_integrated_kernel(
             qpd=qpd, N_c=self.N_c, pbc_c=self.pbc_c,
             truncation=self.truncation, reduced=reduced,
-            tofirstbz=tofirstbz)
+            tofirstbz=tofirstbz, N=N)
 
 
 def get_coulomb_kernel(qpd, N_c, q_v=None, truncation=None, *, pbc_c)\
@@ -145,7 +144,7 @@ def calculate_2D_truncated_coulomb(qpd, q_v=None, *, pbc_c):
 
 
 def get_integrated_kernel(qpd, N_c, truncation=None,
-                          N=100, reduced=False, tofirstbz=False, *, pbc_c):
+                          reduced=False, tofirstbz=False, *, pbc_c, N):
     from scipy.special import j1, k0, j0, k1  # type: ignore
     # ignore type hints for the above import
     B_cv = 2 * np.pi * qpd.gd.icell_cv

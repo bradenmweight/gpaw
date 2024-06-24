@@ -6,6 +6,7 @@ from ase.build import bulk
 from gpaw import GPAW
 from gpaw.mpi import world
 from gpaw.response.g0w0 import G0W0
+from gpaw.response.screened_interaction import GammaIntegrationMode
 
 
 def generate_si_systems():
@@ -21,6 +22,10 @@ def run(gpw_filename, nblocks, integrate_gamma):
     # This tests checks the actual numerical accuracy which is asserted below
     calc = GPAW(gpw_filename)
     e = calc.get_potential_energy()
+
+    integrate_gamma = GammaIntegrationMode(integrate_gamma)
+    # The numerical integration default is too slow, so overriding
+    integrate_gamma._N = 30
 
     gw = G0W0(gpw_filename, 'gw_None',
               nbands=8, integrate_gamma=integrate_gamma,
@@ -44,10 +49,11 @@ reference = {'sphere': pytest.approx([-9.253, 5.442, 2.389, 0.403, 0.000,
              'WS': pytest.approx([-9.253, 5.442, 2.389, 0.403, 0.000,
                                   6.284, 3.551, 1.285, 0.001], abs=0.0035),
              '1BZ': pytest.approx([-9.252, 5.441, 2.389, 0.403, 0.000,
-                                   6.360, 3.405, 1.148, 0.001], abs=0.0035),
+                                   6.337, 3.450, 1.193, 0.002], abs=0.0035),
              'reciprocal': pytest.approx([-9.252, 5.441, 2.389, 0.403, 0.000,
-                                          6.132, 3.817, 1.579, 0.001],
+                                          6.110, 3.86, 1.624, 0.002],
                                          abs=0.0035)}
+
 # The systems are not 2D, thus, the reciprocal2D will yield same results as
 # reciprocal. This is tested in test_integrate_gamma_modes.
 reference['reciprocal2D'] = reference['reciprocal']
