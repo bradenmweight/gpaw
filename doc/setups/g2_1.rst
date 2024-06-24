@@ -22,7 +22,7 @@ Fixed geometries
 ++++++++++++++++
 
 Atomization energies on single-point energy calculations
-vs http://www.nwchem-sw.org
+vs https://nwchemgit.github.io/
 
 .. csv-table::
    :file: pbe_gpaw_nrel_ea_vs.csv
@@ -33,13 +33,13 @@ vs http://www.nwchem-sw.org
 Relaxed geometries
 ++++++++++++++++++
 
-Atomization energies on relaxed geometries vs http://www.nwchem-sw.org
+Atomization energies on relaxed geometries vs https://nwchemgit.github.io/
 
 .. csv-table::
    :file: pbe_gpaw_nrel_opt_ea_vs.csv
 
 Optimized distance between the first and last atom in the given molecule
-vs http://www.nwchem-sw.org
+vs https://nwchemgit.github.io/
 
 .. csv-table::
    :file: pbe_gpaw_nrel_opt_distance_vs.csv
