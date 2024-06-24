@@ -26,7 +26,7 @@ You can add comments to Python code by using the ``#`` character.
 
 Some links for reference:
 * [Python](https://www.python.org/)
-* Numerical package [NumPy](http://www.numpy.org/)
+* Numerical package [NumPy](https://www.numpy.org/)
 * Scientific package [Scipy](https://www.scipy.org/)
 * Plotting package [Matplotlib](https://matplotlib.org/)
 """

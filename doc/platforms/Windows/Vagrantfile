@@ -1,7 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# http://stackoverflow.com/questions/23926945/specify-headless-or-gui-from-command-line
+# https://stackoverflow.com/questions/23926945/specify-headless-or-gui-from-command-line
 def gui_enabled?
   !ENV.fetch('GUI', '').empty?
 end
@@ -9,7 +9,7 @@ end
 Vagrant.configure(2) do |config|
   # windows
   config.vm.define "windows" do |windows|
-    # the http://aka.ms/vagrant-win boxes hang for me ...
+    # the https://aka.ms/vagrant-win boxes hang for me ...
     windows.vm.box = "opentable/win-2012r2-standard-amd64-nocm"
     windows.vm.box_url = "opentable/win-2012r2-standard-amd64-nocm"
     windows.vm.provider 'virtualbox' do |v|
@@ -44,7 +44,7 @@ SCRIPT
     # requires Microsoft Visual C++ 2008 Redistributable Package (x86),
     # download and install it from:
     # https://www.microsoft.com/en-us/download/details.aspx?id=5582
-    # Use http://www.dependencywalker.com/ to find missing DLLs in case of
+    # Use https://www.dependencywalker.com/ to find missing DLLs in case of
     # ImportError: DLL load failed: The specified module could not be found
     #
     # NOTE! all the commands below are executed from a @powershell with administrator rights
@@ -53,22 +53,22 @@ SCRIPT
     windows.vm.provision :shell, :inline => "choco install --force -y wget"
     windows.vm.provision :shell, :inline => "choco install --force -y 7zip.commandline"
     windows.vm.provision :shell, :inline => "choco install --force -y svn"
-    windows.vm.provision :shell, :inline => "cmd /c 'wget --quiet --no-check-certificate http://downloads.sourceforge.net/project/mingw/MSYS/Base/msys-core/msys-1.0.11/msysCORE-1.0.11-bin.tar.gz -O c:\\msysCORE-1.0.11-bin.tar.gz'"
+    windows.vm.provision :shell, :inline => "cmd /c 'wget --quiet --no-check-certificate https://downloads.sourceforge.net/project/mingw/MSYS/Base/msys-core/msys-1.0.11/msysCORE-1.0.11-bin.tar.gz -O c:\\msysCORE-1.0.11-bin.tar.gz'"
     windows.vm.provision :shell, :inline => "cmd /c 'cd c:\\& 7za x msysCORE-1.0.11-bin.tar.gz'"
     windows.vm.provision :shell, :inline => "cmd /c 'cd c:\\& copy msysCORE-1.0.11-bin.tar c:\\programdata\\chocolatey'"
     windows.vm.provision :shell, :inline => "cmd /c 'cd c:\\programdata\\chocolatey& 7za x msysCORE-1.0.11-bin.tar'"
     windows.vm.provision :shell, :inline => "mkdir c:\\msys\\1.0\\bin"
     windows.vm.provision :shell, :inline => "cp c:\\programdata\\chocolatey\\bin\\sh.exe c:\\msys\\1.0\\bin"  # standard msys path, we only need sh.exe there
-    windows.vm.provision :shell, :inline => "cmd /c 'wget --quiet --no-check-certificate http://pythonxy.connectmv.com/Python(x,y)-2.7.5.2.exe -O c:\\Python.exe'"
+    windows.vm.provision :shell, :inline => "cmd /c 'wget --quiet --no-check-certificate https://pythonxy.connectmv.com/Python(x,y)-2.7.5.2.exe -O c:\\Python.exe'"
     windows.vm.provision :shell, :inline => "cmd /c 'c:\\Python.exe /S'"
-    windows.vm.provision :shell, :inline => "cmd /c 'wget --quiet --no-check-certificate http://downloads.activestate.com/ActivePerl/releases/5.20.2.2001/ActivePerl-5.20.2.2001-MSWin32-x64-298913.msi -O c:\\ActivePerl-5.20.2.2001-MSWin32-x64-298913.msi'"
+    windows.vm.provision :shell, :inline => "cmd /c 'wget --quiet --no-check-certificate https://downloads.activestate.com/ActivePerl/releases/5.20.2.2001/ActivePerl-5.20.2.2001-MSWin32-x64-298913.msi -O c:\\ActivePerl-5.20.2.2001-MSWin32-x64-298913.msi'"
     windows.vm.provision :shell, :inline => "cmd /c 'msiexec /i c:\\ActivePerl-5.20.2.2001-MSWin32-x64-298913.msi PERL_PATH=Yes PERL_EXT=Yes /quiet'"
-    windows.vm.provision :shell, :inline => "cmd /c 'wget --quiet --no-check-certificate http://github.com/xianyi/OpenBLAS/archive/v0.2.14.tar.gz -O c:\\v0.2.14.tar.gz'"
+    windows.vm.provision :shell, :inline => "cmd /c 'wget --quiet --no-check-certificate https://github.com/xianyi/OpenBLAS/archive/v0.2.14.tar.gz -O c:\\v0.2.14.tar.gz'"
     windows.vm.provision :shell, :inline => "cmd /c 'cd c:\\& 7za x v0.2.14.tar.gz'"
     windows.vm.provision :shell, :inline => "cmd /c 'cd c:\\& 7za x v0.2.14.tar'"
     windows.vm.provision :shell, :inline => "cmd /c 'cd c:\\& xcopy /e /i OpenBLAS-0.2.14 OpenBLAS'"
     windows.vm.provision :shell, :inline => $install_openblas
-    windows.vm.provision :shell, :inline => "cmd /c 'wget --quiet --no-check-certificate http://www.tddft.org/programs/octopus/down.php?file=libxc/libxc-2.1.2.tar.gz -O c:\\libxc-2.1.2.tar.gz'"
+    windows.vm.provision :shell, :inline => "cmd /c 'wget --quiet --no-check-certificate https://www.tddft.org/programs/octopus/down.php?file=libxc/libxc-2.1.2.tar.gz -O c:\\libxc-2.1.2.tar.gz'"
     windows.vm.provision :shell, :inline => "cmd /c 'cd c:\\& 7za x libxc-2.1.2.tar.gz'"
     windows.vm.provision :shell, :inline => "cmd /c 'cd c:\\& 7za x libxc-2.1.2.tar'"
     windows.vm.provision :shell, :inline => "cmd /c 'cd c:\\& xcopy /e /i libxc-2.1.2 libxc'"

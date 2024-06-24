@@ -88,6 +88,6 @@ atom and CO molecule and compare them to results from molecular orbital theory.
   .. figure:: co_bonding.jpg
      :align: center
 
-.. _Mayavi: http://docs.enthought.com/mayavi/mayavi/index.html
-.. _The Chemogenesis Web Book: http://www.meta-synthesis.com/webbook/
+.. _Mayavi: https://docs.enthought.com/mayavi/mayavi/index.html
+.. _The Chemogenesis Web Book: https://www.meta-synthesis.com/webbook/
                                39_diatomics/diatomics.html#CO

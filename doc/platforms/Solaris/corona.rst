@@ -5,7 +5,7 @@ corona.csc.fi
 =============
 
 Here you find information about the system
-`<http://raketti.csc.fi/english/research/Computing_services/computing/servers/corona>`_.
+`<https://raketti.csc.fi/english/research/Computing_services/computing/servers/corona>`_.
 
 Submit jobs like this::
 

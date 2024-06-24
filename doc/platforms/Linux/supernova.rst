@@ -16,9 +16,9 @@ Build the unoptimized numpy/scipy::
   mkdir -p ${HOME}/opt/python/lib/python2.4/site-packages
   setenv PYTHONPATH ${HOME}/opt/python/lib/python2.4/site-packages
 
-  wget http://dfn.dl.sourceforge.net/sourceforge/numpy/numpy-1.3.0.tar.gz
-  wget http://dfn.dl.sourceforge.net/sourceforge/scipy/scipy-0.7.0.tar.gz
-  wget http://python-nose.googlecode.com/files/nose-0.11.0.tar.gz
+  wget https://dfn.dl.sourceforge.net/sourceforge/numpy/numpy-1.3.0.tar.gz
+  wget https://dfn.dl.sourceforge.net/sourceforge/scipy/scipy-0.7.0.tar.gz
+  wget https://python-nose.googlecode.com/files/nose-0.11.0.tar.gz
   tar zxf nose-0.11.0.tar.gz
   tar zxf numpy-1.3.0.tar.gz
   tar zxf scipy-0.7.0.tar.gz
@@ -29,10 +29,10 @@ Build the unoptimized numpy/scipy::
   cd ..
   python -c "import numpy; numpy.test()"
 
-  wget http://www.netlib.org/blas/blas.tgz
+  wget https://www.netlib.org/blas/blas.tgz
   tar zxf blas.tgz
   export BLAS_SRC=${HOME}/opt/BLAS
-  wget http://www.netlib.org/lapack/lapack.tgz
+  wget https://www.netlib.org/lapack/lapack.tgz
   tar zxf lapack.tgz
   export LAPACK_SRC=${HOME}/opt/lapack-3.2.1
 

@@ -13,8 +13,8 @@ reStructuredText_.  Also, read carefully the
 :ref:`Writing documentation for ASE <ase:writing_documentation_ase>`
 page.
 
-.. _reStructuredText: http://docutils.sf.net/rst.html
-.. _Sphinx: http://www.sphinx-doc.org
+.. _reStructuredText: https://docutils.sf.net/rst.html
+.. _Sphinx: https://www.sphinx-doc.org
 
 **Structure**
 

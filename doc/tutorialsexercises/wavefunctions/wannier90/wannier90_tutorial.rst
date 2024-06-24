@@ -10,7 +10,7 @@ tutorial assumes that ``Wannier90`` is installed and ``wannier90.x``,
 ``postw90.x`` are in your path of executables. We emphasize that this is only
 to be regarded as a tutorial on the GPAW interface to ``Wannier90``. Details
 and tutorials on the ``Wannier90`` code itself can be found at the `Wannier90
-home page <http://www.wannier.org>`_. For details on the theory the review
+home page <https://www.wannier.org>`_. For details on the theory the review
 paper [#Wannier_code]_ may be consulted. The interface is
 documented in Ref. [#Olsen]_
 

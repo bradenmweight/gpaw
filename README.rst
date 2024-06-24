@@ -100,14 +100,14 @@ look at the GPAW exercises_ and tutorials_.
 
 .. _Python: https://www.python.org/
 .. _ASE: https://wiki.fysik.dtu.dk/ase
-.. _NumPy: http://docs.scipy.org/doc/numpy/reference/
-.. _SciPy: http://docs.scipy.org/doc/scipy/reference/
-.. _LibXC: http://www.tddft.org/programs/libxc/
-.. _MPI: http://www.mpi-forum.org/
-.. _BLAS: http://www.netlib.org/blas/
-.. _FFTW: http://www.fftw.org/
-.. _BLACS: http://www.netlib.org/blacs/
-.. _ScaLAPACK: http://www.netlib.org/scalapack/
+.. _NumPy: https://docs.scipy.org/doc/numpy/reference/
+.. _SciPy: https://docs.scipy.org/doc/scipy/reference/
+.. _LibXC: https://www.tddft.org/programs/libxc/
+.. _MPI: https://www.mpi-forum.org/
+.. _BLAS: https://www.netlib.org/blas/
+.. _FFTW: https://www.fftw.org/
+.. _BLACS: https://www.netlib.org/blacs/
+.. _ScaLAPACK: https://www.netlib.org/scalapack/
 .. _gpaw-users: https://listserv.fysik.dtu.dk/mailman/listinfo/gpaw-users
 .. _Matrix: https://app.element.io/#/room/#gpaw:matrix.org
 .. _gitlab-issues: https://gitlab.com/gpaw/gpaw/issues

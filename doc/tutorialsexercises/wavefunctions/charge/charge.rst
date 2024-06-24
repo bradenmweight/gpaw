@@ -15,7 +15,7 @@ method, the analysis is based purely on the electron density. The
 partitioning of the density is determined according to its zero-flux
 surfaces. Details of their implementation can be found in [Tang]_. The
 program is freely available at
-http://theory.cm.utexas.edu/henkelman/research/bader/ where you will
+https://theory.cm.utexas.edu/henkelman/research/bader/ where you will
 also find a description of the method.
 
 The algorithm is well suited for large solid state physical

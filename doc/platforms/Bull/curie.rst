@@ -8,7 +8,7 @@ Curie   (BullX cluster, Intel Nehalem, Infiniband QDR, MKL)
       These instructions are up-to-date as of October 2014
 
 Here you find information about the system
-http://www-hpc.cea.fr/en/complexe/tgcc-curie.htm
+https://www-hpc.cea.fr/en/complexe/tgcc-curie.htm
 
 For large calculations, it is suggested that one utilizes the Scalable Python
 interpreter. Small to medium size calculations are fine with standard Python,
@@ -39,7 +39,7 @@ proper one):
 Add then ``install_prefix/bin`` to your PATH, and download and install NumPy::
 
    export PATH=install_prefix/bin:$PATH
-   wget http://sourceforge.net/projects/numpy/files/NumPy/1.8.1/numpy-1.8.1.tar.gz
+   wget https://sourceforge.net/projects/numpy/files/NumPy/1.8.1/numpy-1.8.1.tar.gz
    tar xzf numpy-1.8.1.tar.gz
    cd numpy-1.8.1
    python setup.py install

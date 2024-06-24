@@ -21,12 +21,12 @@ You can get separate cube files (the format used by Gaussian) for each wavefunct
 
 .. literalinclude:: CO2cube.py
 
-The script produced the files CO_0.cube .. CO_5.cube, which might be viewed using for example `jmol <http://jmol.sourceforge.net/>`_ or `VMD <http://www.ks.uiuc.edu/Research/vmd/>`_. 
+The script produced the files CO_0.cube .. CO_5.cube, which might be viewed using for example `jmol <https://jmol.sourceforge.net/>`_ or `VMD <https://www.ks.uiuc.edu/Research/vmd/>`_. 
 
 Plotting wave functions with jmol
 ---------------------------------
 
-See http://jmol.sourceforge.net/docs/surface/
+See https://jmol.sourceforge.net/docs/surface/
 
 You can visualize an isosurface from a cube file by creating the
 `myscript.spt` script:

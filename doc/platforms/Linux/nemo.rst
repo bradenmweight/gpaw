@@ -2,7 +2,7 @@
 nemo
 ====
 
-Information about `nemo <http://www.hpc.uni-freiburg.de/nemo>`__.
+Information about `nemo <https://www.hpc.uni-freiburg.de/nemo>`__.
 
 Building GPAW
 =============
@@ -48,14 +48,14 @@ such that we also see them with::
 libxc
 -----
 
-GPAW relies on libxc (see the `libxc web site <http://www.tddft.org/programs/octopus/wiki/index.php/Libxc:download>`__).
+GPAW relies on libxc (see the `libxc web site <https://www.tddft.org/programs/octopus/wiki/index.php/Libxc:download>`__).
 To install libxc we assume that ``MYLIBXCDIR`` is set to
 the directory where you want to install
 (e.g. ``MYLIBXCDIR=$HOME/source/libxc``)::
 
  mkdir -p $MYLIBXCDIR
  cd $MYLIBXCDIR
- wget http://www.tddft.org/programs/libxc/down.php?file=5.2.2/libxc-5.2.2.tar.gz -O libxc-5.2.2.tar.gz
+ wget https://www.tddft.org/programs/libxc/down.php?file=5.2.2/libxc-5.2.2.tar.gz -O libxc-5.2.2.tar.gz
  tar xvzf libxc-5.2.2.tar.gz
  cd libxc-5.2.2
  mkdir install

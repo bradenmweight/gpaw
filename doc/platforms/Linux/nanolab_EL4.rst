@@ -5,10 +5,10 @@ nanolab.cnf.cornell.edu
 =======================
 
 Here you find information about the system
-http://www.cnf.cornell.edu/cnf5_tool.taf?_function=detail&eq_id=111.
+https://www.cnf.cornell.edu/cnf5_tool.taf?_function=detail&eq_id=111.
 
 The installation of user's packages on nanolab EL4, 32-bit described below uses
-`modules <http://modules.sourceforge.net/>`_, and assumes *bash* shell:
+`modules <https://modules.sourceforge.net/>`_, and assumes *bash* shell:
 
 - packages are installed under ``~/CAMd``::
 

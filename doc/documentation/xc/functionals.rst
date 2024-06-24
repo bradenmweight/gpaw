@@ -28,9 +28,9 @@ In libxc_ we have (see also "Standard subroutine calls" on ccg_dft_design_)
   \sigma_{ij} = \mathbf{\nabla}n_i \cdot \mathbf{\nabla}n_j
 
 
-.. _libxc: http://www.tddft.org/programs/octopus/wiki/index.php/Libxc
+.. _libxc: https://www.tddft.org/programs/octopus/wiki/index.php/Libxc
 
-.. _ccg_dft_design: http://www.cse.scitech.ac.uk/ccg/dft/design.html
+.. _ccg_dft_design: https://www.cse.scitech.ac.uk/ccg/dft/design.html
 
 
 Uniform 3D grid

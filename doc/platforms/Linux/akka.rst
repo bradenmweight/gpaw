@@ -4,13 +4,13 @@
 akka.hpc2n.umu.se
 =================
 
-The Akka machine (http://www.hpc2n.umu.se/resources/Akka/) is a
+The Akka machine (https://www.hpc2n.umu.se/resources/Akka/) is a
 cluster of Intel Xeon dual-socket, quad-core L5420 CPUs, 2.5 GHz
 processors with 2 GB of memory per core.
 
 On Akka, you need to use the filesystem located under */pfs/* to be
 able to write files when running in the queue.  Enable it with
-(http://www.hpc2n.umu.se/support/userguide/common/filesystems.html)::
+(https://www.hpc2n.umu.se/support/userguide/common/filesystems.html)::
 
  ln -s /pfs/nobackup$HOME $HOME/pfs
 
@@ -75,7 +75,7 @@ A gpaw script :file:`gpaw-script.py` can be submitted like this::
   qsub -l nodes=1:ppn=8 -l walltime=02:00:00 -m abe pbs_submitfile
 
 with the following `pbs_submitfile
-<http://www.hpc2n.umu.se/support/userguide/Sarek/src/pbs_submitfile>`_::
+<https://www.hpc2n.umu.se/support/userguide/Sarek/src/pbs_submitfile>`_::
 
   #!/bin/bash
   ###PBS -A SNICXXX-YY-ZZ

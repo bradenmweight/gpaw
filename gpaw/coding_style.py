@@ -66,7 +66,7 @@ class SimpleExample:
 
         There can be other sections - see bolow and here:
 
-          http://scipy.org/...
+          https://scipy.org/...
 
         """
 

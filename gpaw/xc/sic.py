@@ -24,7 +24,7 @@
 #
 # For further information see:
 #
-#     http://compas.hinet.info
+#     https://compas.hinet.info
 #
 # ============================================================================
 """Perdew-Zunger SIC to DFT functionals.

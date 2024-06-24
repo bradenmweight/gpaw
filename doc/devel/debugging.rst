@@ -49,7 +49,7 @@ p expression
 
 Most commands can be invoked with only the first letter. A full list of
 all the commands and their explanation can be found in the `Python debugger (PDB)
-documentation <http://docs.python.org/library/pdb.html>`_.
+documentation <https://docs.python.org/library/pdb.html>`_.
 
 
 An example session might look like::
@@ -137,7 +137,7 @@ script as ``run -m pdb H.py`` i.e::
 
 
 The basic gdb commands are the same as in pdb (or vice versa). Full documentation
-can be found in the `GDB user manual <http://www.gnu.org/software/gdb/documentation/>`_.
+can be found in the `GDB user manual <https://www.gnu.org/software/gdb/documentation/>`_.
 Apart from the commands mentioned earlier, a few are worthy of mention here:
 
 backtrace [n | full]
@@ -186,7 +186,7 @@ can be debugged using *gdb* as described above.
 .. note::
 
    Please refer to the Python/C API Reference Manual or the unofficial (but helpful)
-   introduction to `reference counting in Python <http://edcjones.tripod.com/refcount.html>`_.
+   introduction to `reference counting in Python <https://edcjones.tripod.com/refcount.html>`_.
 
 On the other hand, neglecting the deallocation or forgetting to decrease the
 reference count of a Python object will lead to a build-up of unreachable
@@ -211,7 +211,7 @@ Note that Valgrind_ is more than just a memory profiler for C; it provides an
 entire instrumentation framework for building dynamic analysis tools and thus
 includes other debugging tools, e.g. a heap/stack/global array overrun detector.
 
-.. _Valgrind: http://valgrind.org
+.. _Valgrind: https://valgrind.org
 
 
 .. _parallel_debugging:
@@ -227,7 +227,7 @@ requires that a custom Python interpreter is built with the necessary MPI bindin
 There are probably numerous ways to debug an MPI application with GDB, and experimentation
 is strongly encouraged, but the following method is recommended for interactive debugging.
 This approach builds upon advice in Open MPI's FAQ `Debugging applications in parallel
-<http://www.open-mpi.org/faq/?category=debugging#serial-debuggers>`_, but is adapted for use
+<https://www.open-mpi.org/faq/?category=debugging#serial-debuggers>`_, but is adapted for use
 with Python on a GNU/Linux development platform. Prepend the following to your script::
 
     import os, sys, time, math
@@ -240,7 +240,7 @@ with Python on a GNU/Linux development platform. Prepend the following to your s
     world.barrier()
 
 This runs ``gdb /path/to/gpaw-python pid`` from within each instance of the custom Python
-interpreter and detaches it into a `screen <http://www.gnu.org/software/screen/>`_ session
+interpreter and detaches it into a `screen <https://www.gnu.org/software/screen/>`_ session
 called ``gdb.0`` for rank 0 etc. You may now resume control of the debugger instances by
 running ``screen -rd gdb.0``, entering `c` to continue and so forth for all instances.
 
@@ -255,4 +255,4 @@ running ``screen -rd gdb.0``, entering `c` to continue and so forth for all inst
    a single instance of the parallel program with the usual serial methods first.
 
 For details on using Valgrind on parallel programs, please refer to the online manual
-`Debugging MPI Parallel Programs with Valgrind <http://valgrind.org/docs/manual/mc-manual.html#mc-manual.mpiwrap>`_
+`Debugging MPI Parallel Programs with Valgrind <https://valgrind.org/docs/manual/mc-manual.html#mc-manual.mpiwrap>`_

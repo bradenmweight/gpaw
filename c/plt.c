@@ -69,7 +69,7 @@ int write_plt_file(char *fname,
 
   Output_p = fopen(fname,"wb");
   
-  /* see http://www.csc.fi/gopenmol/developers/plt_format.phtml */
+  /* see https://www.csc.fi/gopenmol/developers/plt_format.phtml */
 
 #define au_A 0.52917725
   scale = au_A; /* atomic length in Angstroem */

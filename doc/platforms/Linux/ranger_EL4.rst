@@ -5,10 +5,10 @@ ranger.tacc.utexas.edu
 ======================
 
 Here you find information about the system
-http://services.tacc.utexas.edu/index.php/ranger-user-guide.
+https://services.tacc.utexas.edu/index.php/ranger-user-guide.
 
 The installation of user's packages on ranger EL4, 64-bit described below uses
-`modules <http://modules.sourceforge.net/>`_, and assumes *csh* shell:
+`modules <https://modules.sourceforge.net/>`_, and assumes *csh* shell:
 
 - packages are installed under ``~/CAMd``::
 
@@ -89,7 +89,7 @@ The installation of user's packages on ranger EL4, 64-bit described below uses
    module load mkl/10.0
    module load campos-gpaw
 
-   # wget http://svn.fysik.dtu.dk/projects/gpaw/trunk/doc/devel/256H2O/b256H2O.py
+   # wget https://svn.fysik.dtu.dk/projects/gpaw/trunk/doc/devel/256H2O/b256H2O.py
 
    ibrun `which gpaw-python` b256H2O.py
 

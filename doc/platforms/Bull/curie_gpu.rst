@@ -5,7 +5,7 @@ curie.ccc.cea.fr GPU
 ====================
 
 Here you find information about the system
-http://www-hpc.cea.fr/en/complexe/tgcc-curie.htm.
+https://www-hpc.cea.fr/en/complexe/tgcc-curie.htm.
 
 **Warning**: May 14 2013: rpa-gpu-expt branch fails to compile
 due to cublasZdgmm missing in cuda-4.2.

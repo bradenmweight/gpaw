@@ -332,7 +332,7 @@ class BlacsDescriptor(MatrixDescriptor):
         self.mb = mb  # block cyclic distr dim 1
         self.nb = nb  # and 2.  How many rows or columns are on this processor
         # more info:
-        # http://www.netlib.org/scalapack/slug/node75.html
+        # https://www.netlib.org/scalapack/slug/node75.html
         self.rsrc = rsrc
         self.csrc = csrc
 
