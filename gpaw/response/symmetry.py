@@ -9,8 +9,6 @@ from scipy.spatial import Delaunay, cKDTree
 from gpaw.bztools import get_reduced_bz, unique_rows
 from gpaw.cgpaw import GG_shuffle
 
-from gpaw.response.pair_functions import SingleQPWDescriptor
-
 
 class KPointFinder:
     def __init__(self, bzk_kc):
@@ -331,8 +329,8 @@ class KPointDomainGenerator:
         return K_k
 
 
-class PWSymmetrizer:
-    def __init__(self, symmetries: QSymmetries, qpd: SingleQPWDescriptor):
+class PWSymmetrizer:  # to do: move plane-wave specific stuff elsewhere XXX
+    def __init__(self, symmetries: QSymmetries, qpd):
         assert np.allclose(symmetries.q_c, qpd.q_c)
         self.symmetries = symmetries
         self.qpd = qpd

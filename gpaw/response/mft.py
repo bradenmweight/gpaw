@@ -4,6 +4,7 @@ from abc import abstractmethod
 
 import numpy as np
 
+from gpaw.typing import Vector
 from gpaw.response import (ResponseGroundStateAdapter, ResponseContext,
                            GPWFilename, TXTFilename,
                            ensure_gs, ensure_gs_and_context)
@@ -12,8 +13,7 @@ from gpaw.response.chiks import ChiKSCalculator, smat
 from gpaw.response.localft import LocalFTCalculator, add_LSDA_Wxc
 from gpaw.response.site_kernels import SiteKernels
 from gpaw.response.site_data import AtomicSites, AtomicSiteData
-from gpaw.response.pair_functions import SingleQPWDescriptor, PairFunction
-from gpaw.response.pair_integrator import PairFunctionIntegrator
+from gpaw.response.pair_integrator import PairFunction, PairFunctionIntegrator
 from gpaw.response.pair_transitions import PairTransitions
 from gpaw.response.matrix_elements import (SitePairDensityCalculator,
                                            SiteZeemanPairEnergyCalculator)
@@ -319,13 +319,9 @@ def calculate_pair_site_zeeman_energy(
 
 class StaticSiteFunction(PairFunction):
     """Data object for static single-particle site functions."""
-    def __init__(self,
-                 qpd: SingleQPWDescriptor,
-                 sites: AtomicSites):
-        self.qpd = qpd
-        self.q_c = qpd.q_c
+    def __init__(self, q_c: Vector, sites: AtomicSites):
         self.sites = sites
-        self.array = self.zeros()
+        super().__init__(q_c)
 
     @property
     def shape(self):
@@ -371,8 +367,7 @@ class SingleParticleSiteSumRuleCalculator(PairFunctionIntegrator):
         transitions = PairTransitions(n1_t=n_t, n2_t=n_t, s1_t=s_t, s2_t=s_t)
 
         # Set up data object with q=0
-        qpd = self.get_pw_descriptor([0., 0., 0.], ecut=1e-3)
-        site_function = StaticSiteFunction(qpd, self.sites)
+        site_function = StaticSiteFunction(q_c=[0., 0., 0.], sites=self.sites)
 
         # Perform actual calculation
         self._integrate(site_function, transitions)
@@ -398,7 +393,7 @@ class SingleParticleSiteSumRuleCalculator(PairFunctionIntegrator):
         """
         # Calculate matrix elements
         site_matrix_element = self.matrix_element_calc(
-            kptpair, site_function.qpd)
+            kptpair, site_function.q_c)
         assert site_matrix_element.tblocks.blockcomm.size == 1
         f_tap = site_matrix_element.get_global_array()
 
@@ -511,10 +506,8 @@ class TwoParticleSiteSumRuleCalculator(PairFunctionIntegrator):
         self.context.print(self.get_info_string(
             q_c, self.nbands, len(transitions)))
 
-        # Set up data object (without a plane-wave representation, which is
-        # irrelevant in this case)
-        qpd = self.get_pw_descriptor(q_c, ecut=1e-3)
-        site_pair_function = StaticSitePairFunction(qpd, self.sites)
+        # Set up data object
+        site_pair_function = StaticSitePairFunction(q_c, self.sites)
 
         # Perform actual calculation
         self._integrate(site_pair_function, transitions)
@@ -546,12 +539,12 @@ class TwoParticleSiteSumRuleCalculator(PairFunctionIntegrator):
         where V0 is the cell volume.
         """
         # Calculate site matrix elements
-        qpd = site_pair_function.qpd
-        matrix_element1 = self.matrix_element_calc1(kptpair, qpd)
+        q_c = site_pair_function.q_c
+        matrix_element1 = self.matrix_element_calc1(kptpair, q_c)
         if self.matrix_element_calc2 is self.matrix_element_calc1:
             matrix_element2 = matrix_element1
         else:
-            matrix_element2 = self.matrix_element_calc2(kptpair, qpd)
+            matrix_element2 = self.matrix_element_calc2(kptpair, q_c)
 
         # Calculate the product between the Pauli matrix and the occupational
         # differences
