@@ -17,12 +17,12 @@ def test_symmetry_fractional_translations_big():
                     spacegroup=92, cellpar=[a, a, c, 90, 90, 90])
 
     # with fractional translations
-    calc = GPAW(mode=PW(),
+    calc = GPAW(mode=PW(200),
                 xc='LDA',
                 kpts=(3, 3, 2),
-                nbands=40,
+                nbands=32,
                 symmetry={'symmorphic': False},
-                gpts=(24, 24, 32),
+                gpts=(16, 16, 20),
                 eigensolver='rmm-diis')
 
     atoms.calc = calc
@@ -32,11 +32,11 @@ def test_symmetry_fractional_translations_big():
     assert len(calc.wfs.kd.symmetry.op_scc) == 8
 
     # without fractional translations
-    calc = GPAW(mode=PW(),
+    calc = GPAW(mode=PW(200),
                 xc='LDA',
                 kpts=(3, 3, 2),
-                nbands=40,
-                gpts=(24, 24, 32),
+                nbands=32,
+                gpts=(16, 16, 20),
                 eigensolver='rmm-diis')
 
     atoms.calc = calc
