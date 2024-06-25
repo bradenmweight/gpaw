@@ -4,7 +4,7 @@ from gpaw import GPAW, PW
 
 a0 = 4.04
 al = bulk('Al', 'fcc', a=a0)
-cell0 = al.cell
+cell0 = al.cell.copy()
 
 for ecut in range(200, 501, 50):
     al.calc = GPAW(mode=PW(ecut),
