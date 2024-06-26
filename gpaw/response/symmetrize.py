@@ -16,7 +16,6 @@ class QSymmetryOperators(Sequence):
         return len(self.symmetries)
 
 
-@dataclass
 class HeadSymmetryOperators:
     def __init__(self, symmetries, cell_cv, icell_cv):
         self.M_svv = initialize_v_maps(symmetries, cell_cv, icell_cv)
@@ -40,21 +39,17 @@ class HeadSymmetryOperators:
         A_wvv[:] = tmp_wvv / self.nsym
 
 
-@dataclass
-class BodySymmetryOperators(QSymmetryOperators):
-    qpd: SingleQPWDescriptor
-
-    def __post_init__(self):
-        self.G_sG = initialize_G_maps(self.symmetries, self.qpd)
-
-    def __getitem__(self, s):
-        return self.G_sG[s], self.symmetries.sign_s[s]
+class BodySymmetryOperators:
+    def __init__(self, symmetries, qpd):
+        self.G_sG = initialize_G_maps(symmetries, qpd)
+        self.sign_s = symmetries.sign_s
+        self.nsym = len(symmetries)
 
     def symmetrize_wGG(self, A_wGG):
         """Symmetrize an array in GG'."""
         for A_GG in A_wGG:
             tmp_GG = np.zeros_like(A_GG, order='C')
-            for G_G, sign in self:
+            for G_G, sign in zip(self.G_sG, self.sign_s):
                 # Numpy:
                 # if sign == 1:
                 #     tmp_GG += A_GG[G_G, :][:, G_G]
@@ -62,7 +57,7 @@ class BodySymmetryOperators(QSymmetryOperators):
                 #     tmp_GG += A_GG[G_G, :][:, G_G].T
                 # C:
                 GG_shuffle(G_G, sign, A_GG, tmp_GG)
-            A_GG[:] = tmp_GG / len(self)
+            A_GG[:] = tmp_GG / self.nsym
 
     # Set up complex frequency alias
     symmetrize_zGG = symmetrize_wGG
