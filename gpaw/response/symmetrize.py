@@ -1,19 +1,9 @@
-from dataclasses import dataclass
-from collections.abc import Sequence
 import numpy as np
 
 from gpaw.cgpaw import GG_shuffle
 
 from gpaw.response.symmetry import QSymmetries
 from gpaw.response.pair_functions import SingleQPWDescriptor
-
-
-@dataclass
-class QSymmetryOperators(Sequence):
-    symmetries: QSymmetries
-
-    def __len__(self):
-        return len(self.symmetries)
 
 
 class HeadSymmetryOperators:
@@ -59,34 +49,22 @@ class BodySymmetryOperators:
     symmetrize_zGG = symmetrize_wGG
 
 
-@dataclass
-class WingSymmetryOperators(QSymmetryOperators):
-    qpd: SingleQPWDescriptor
-
-    def __post_init__(self):
-        self.head_operators = HeadSymmetryOperators(
-            self.symmetries, self.qpd.gd)
-        self.G_sG = initialize_G_maps(self.symmetries, self.qpd)
-
-    def __getitem__(self, s):
-        M_vv = self.head_operators.M_svv[s]
-        sign = self.symmetries.sign_s[s]
-        return M_vv, sign, self.G_sG[s]
-
-    def symmetrize_wvv(self, *args):
-        self.head_operators.symmetrize_wvv(*args)
+class WingSymmetryOperators(HeadSymmetryOperators):
+    def __init__(self, symmetries, qpd):
+        super().__init__(symmetries, qpd.gd)
+        self.G_sG = initialize_G_maps(symmetries, qpd)
 
     def symmetrize_wxvG(self, A_wxvG):
         """Symmetrize chi0_wxvG"""
         tmp_wxvG = np.zeros_like(A_wxvG)
-        for M_vv, sign, G_G in self:
+        for M_vv, sign, G_G in zip(self.M_svv, self.sign_s, self.G_sG):
             if sign == 1:
                 tmp = sign * np.dot(M_vv.T, A_wxvG[..., G_G])
             elif sign == -1:  # transpose wings
                 tmp = sign * np.dot(M_vv.T, A_wxvG[:, ::-1, :, G_G])
             tmp_wxvG += np.transpose(tmp, (1, 2, 0, 3))
         # Overwrite the input
-        A_wxvG[:] = tmp_wxvG / len(self)
+        A_wxvG[:] = tmp_wxvG / self.nsym
 
 
 def initialize_v_maps(symmetries: QSymmetries,
