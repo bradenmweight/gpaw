@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 a = np.loadtxt('anisotropy.dat')
-plt.plot(a[:, 0], (a[:, 1] - a[0, 1]) * 1.0e6, '-o')
+plt.plot(a[:, 0] / 180 * np.pi, (a[:, 1] - a[0, 1]) * 1.0e6, '-o')
 
 plt.xticks([0, np.pi / 2, np.pi], ['0', r'$\pi/2$', r'$\pi$'], size=20)
 plt.yticks(size=16)

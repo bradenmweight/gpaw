@@ -150,11 +150,11 @@ class Density:
 
     def new(self, new_grid, pw, fracpos_ac, atomdist):
         self.move(fracpos_ac, atomdist)
-        new_pw = PWDesc(ecut=0.99 * new_grid.ecut_max(),
+        new_pw = PWDesc(ecut=0.99 * new_grid.ekin_max(),
                         cell=new_grid.cell,
                         comm=new_grid.comm)
         old_grid = self.nt_sR.desc
-        old_pw = PWDesc(ecut=0.99 * old_grid.ecut_max(),
+        old_pw = PWDesc(ecut=0.99 * old_grid.ekin_max(),
                         cell=old_grid.cell,
                         comm=new_grid.comm)
         new_nt_sR = new_grid.empty(self.ncomponents, xp=self.nt_sR.xp)
