@@ -121,9 +121,9 @@ def initialize_G_maps(symmetries: QSymmetries, qpd: SingleQPWDescriptor):
         for G, UQ in enumerate(UQ_G):
             try:
                 G_G[G] = np.argwhere(Q_G == UQ)[0][0]
-            except IndexError:
-                print('This should not be possible but' +
-                      'a G-vector was mapped outside the sphere')
-                raise IndexError
+            except IndexError as err:
+                raise RuntimeError(
+                    'Something went wrong: a symmetry operation mapped a '
+                    'G-vector outside the plane-wave cutoff sphere') from err
         G_sG.append(np.array(G_G, dtype=np.int32))
     return np.array(G_sG)
