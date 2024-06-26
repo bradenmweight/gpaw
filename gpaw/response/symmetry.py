@@ -54,8 +54,7 @@ class QSymmetries(Sequence):
         return len(self.S_s)
 
     def __getitem__(self, s):
-        S = self.S_s[s]
-        return self.unioperator(S), self.sign(S), self.shift_sc[s]
+        return self.U_scc[s], self.sign_s[s], self.shift_sc[s]
 
     def unioperator(self, S):
         return self.U_ucc[S % self.nU]
@@ -69,6 +68,10 @@ class QSymmetries(Sequence):
         if self.timereversal(S):
             return -1
         return 1
+
+    @cached_property
+    def U_scc(self):
+        return np.array([self.unioperator(S) for S in self.S_s])
 
     @cached_property
     def sign_s(self):

@@ -17,30 +17,27 @@ class QSymmetryOperators(Sequence):
 
 
 @dataclass
-class HeadSymmetryOperators(QSymmetryOperators):
-    cell_cv: np.ndarray
-    icell_cv: np.ndarray
+class HeadSymmetryOperators:
+    def __init__(self, symmetries, cell_cv, icell_cv):
+        self.M_svv = initialize_v_maps(symmetries, cell_cv, icell_cv)
+        self.sign_s = symmetries.sign_s
+        self.nsym = len(symmetries)
 
     @classmethod
     def from_gd(cls, symmetries, gd):
         return cls(symmetries, gd.cell_cv, gd.icell_cv)
 
-    def __getitem__(self, s):
-        U_cc, sign, _ = self.symmetries[s]
-        M_vv = self.cell_cv.T @ U_cc.T @ self.icell_cv
-        return M_vv, sign
-
     def symmetrize_wvv(self, A_wvv):
         """Symmetrize chi0_wvv"""
         tmp_wvv = np.zeros_like(A_wvv)
-        for M_vv, sign in self:
+        for M_vv, sign in zip(self.M_svv, self.sign_s):
             tmp = np.dot(np.dot(M_vv.T, A_wvv), M_vv)
             if sign == 1:
                 tmp_wvv += np.transpose(tmp, (1, 0, 2))
             elif sign == -1:  # transpose head
                 tmp_wvv += np.transpose(tmp, (1, 2, 0))
         # Overwrite the input
-        A_wvv[:] = tmp_wvv / len(self)
+        A_wvv[:] = tmp_wvv / self.nsym
 
 
 @dataclass
@@ -81,7 +78,8 @@ class WingSymmetryOperators(QSymmetryOperators):
         self.G_sG = initialize_G_maps(self.symmetries, self.qpd)
 
     def __getitem__(self, s):
-        M_vv, sign = self.head_operators[s]
+        M_vv = self.head_operators.M_svv[s]
+        sign = self.symmetries.sign_s[s]
         return M_vv, sign, self.G_sG[s]
 
     def symmetrize_wvv(self, *args):
@@ -98,6 +96,14 @@ class WingSymmetryOperators(QSymmetryOperators):
             tmp_wxvG += np.transpose(tmp, (1, 2, 0, 3))
         # Overwrite the input
         A_wxvG[:] = tmp_wxvG / len(self)
+
+
+def initialize_v_maps(symmetries: QSymmetries,
+                      cell_cv: np.ndarray,
+                      icell_cv: np.ndarray):
+    """Calculate cartesian component mapping."""
+    return np.array([cell_cv.T @ U_cc.T @ icell_cv
+                     for U_cc in symmetries.U_scc])
 
 
 def initialize_G_maps(symmetries: QSymmetries, qpd: SingleQPWDescriptor):
