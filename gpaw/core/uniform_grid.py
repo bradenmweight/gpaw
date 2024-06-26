@@ -275,10 +275,14 @@ class UGDesc(Domain):
             raise ValueError('Positions outside cell!')
         return np.ravel_multi_index(rank_ac.T, self.parsize_c)  # type: ignore
 
-    def ekin_max(self):
-        """Maximum value of ekin=G^2/2"""
-        dv_cv = self.cell_cv / self.size_c[:, np.newaxis]
-        return 0.5 * np.pi**2 / (dv_cv**2).sum(1).max()  # or min ??????
+    def ekin_max(self) -> float:
+        """Maximum value of ekin so that all 0.5 * G^2 < ekin.
+
+        In 1D, this will be 0.5*(pi/h)^2 where h is the grid-spacing.
+        """
+        # Height of reciprocal cell (squared):
+        b2_c = np.pi**2 / (self.cell_cv**2).sum(1)
+        return 0.5 * (self.size_c**2 * b2_c).min()
 
 
 class UGArray(DistributedArrays[UGDesc]):
