@@ -17,14 +17,10 @@ class QSymmetryOperators(Sequence):
 
 
 class HeadSymmetryOperators:
-    def __init__(self, symmetries, cell_cv, icell_cv):
-        self.M_svv = initialize_v_maps(symmetries, cell_cv, icell_cv)
+    def __init__(self, symmetries, gd):
+        self.M_svv = initialize_v_maps(symmetries, gd.cell_cv, gd.icell_cv)
         self.sign_s = symmetries.sign_s
         self.nsym = len(symmetries)
-
-    @classmethod
-    def from_gd(cls, symmetries, gd):
-        return cls(symmetries, gd.cell_cv, gd.icell_cv)
 
     def symmetrize_wvv(self, A_wvv):
         """Symmetrize chi0_wvv"""
@@ -68,7 +64,7 @@ class WingSymmetryOperators(QSymmetryOperators):
     qpd: SingleQPWDescriptor
 
     def __post_init__(self):
-        self.head_operators = HeadSymmetryOperators.from_gd(
+        self.head_operators = HeadSymmetryOperators(
             self.symmetries, self.qpd.gd)
         self.G_sG = initialize_G_maps(self.symmetries, self.qpd)
 
