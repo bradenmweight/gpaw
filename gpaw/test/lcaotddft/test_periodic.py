@@ -16,7 +16,6 @@ pytestmark = pytest.mark.usefixtures('module_tmp_path')
 parallel_i = parallel_options(include_kpt=True)
 
 
-@pytest.mark.rttddft
 @pytest.fixture(scope='module')
 @only_on_master(world)
 def initialize_system():
