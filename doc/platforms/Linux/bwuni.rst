@@ -2,7 +2,7 @@
 bwuni
 =====
 
-Information about `bwUniCluster <http://www.scc.kit.edu/dienste/bwUniCluster.php>`__.
+Information about `bwUniCluster <https://www.scc.kit.edu/dienste/bwUniCluster.php>`__.
 
 Building GPAW
 =============

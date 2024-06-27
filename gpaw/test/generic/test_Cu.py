@@ -30,7 +30,7 @@ def test_generic_Cu(in_tmp_dir):
     #
     # The reference values are from:
     #
-    #   http://physics.nist.gov/PhysRefData/DFTdata/Tables/29Cu.html
+    #   https://physics.nist.gov/PhysRefData/DFTdata/Tables/29Cu.html
     #
     if mpi.rank == 0:
         print(e_4s_major - e_3d_minor, -0.184013 - -0.197109)

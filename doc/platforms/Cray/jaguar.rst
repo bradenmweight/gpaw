@@ -5,7 +5,7 @@ jaguar  (Cray XT5)
 ==================
 
 Here you find information about the system
-http://www.nccs.gov/computing-resources/jaguar/.
+https://www.nccs.gov/computing-resources/jaguar/.
 
 The current operating system in Cray XT4/XT5 compute nodes, Compute Linux
 Environment (CLE) has some limitations, most notably it does not
@@ -59,25 +59,25 @@ The recommended place for user's applications is under ``$HOME``::
   mkdir -p sw/xt5
   cd sw/xt5
   set sw_home=~/sw/xt5
-  wget http://www.python.org/ftp/python/2.5.4/Python-2.5.4.tar.bz2
-  wget http://sunet.dl.sourceforge.net/sourceforge/expat/expat-2.0.1.tar.gz
-  wget http://www.zlib.net/zlib-1.2.3.tar.bz2
+  wget https://www.python.org/ftp/python/2.5.4/Python-2.5.4.tar.bz2
+  wget https://sunet.dl.sourceforge.net/sourceforge/expat/expat-2.0.1.tar.gz
+  wget https://www.zlib.net/zlib-1.2.3.tar.bz2
   tar jxf Python-2.5.4.tar.bz2
   tar zxf expat-2.0.1.tar.gz
   tar jxf zlib-1.2.3.tar.bz2
-  wget http://python-nose.googlecode.com/files/nose-0.11.0.tar.gz
+  wget https://python-nose.googlecode.com/files/nose-0.11.0.tar.gz
   tar zxf nose-0.11.0.tar.gz
-  wget http://dfn.dl.sourceforge.net/sourceforge/numpy/numpy-1.2.1.tar.gz
+  wget https://dfn.dl.sourceforge.net/sourceforge/numpy/numpy-1.2.1.tar.gz
   tar zxf numpy-1.2.1.tar.gz
 
 Before installing a special python, expat_ and zlib_
 which are needed by GPAW,
 but which are not included in the python distribution.
 The installation is based on instructions from
-http://yt.enzotools.org/wiki/CrayXT5Installation.
+https://yt.enzotools.org/wiki/CrayXT5Installation.
 
-.. _expat: http://expat.sourceforge.net/
-.. _zlib: http://www.zlib.net/
+.. _expat: https://expat.sourceforge.net/
+.. _zlib: https://www.zlib.net/
 
 Install expat::
 
@@ -108,7 +108,7 @@ following instructions are tested with python 2.5.4:
 
 - create a special dynamic loader for correct resolution of namespaces::
 
-   wget --no-check-certificate http://svn.fysik.dtu.dk/projects/gpaw/trunk/doc/platforms/Cray/dynload_redstorm.c -O Python/dynload_jaguar.c
+   wget --no-check-certificate https://svn.fysik.dtu.dk/projects/gpaw/trunk/doc/platforms/Cray/dynload_redstorm.c -O Python/dynload_jaguar.c
 
 - run :file:`configure`::
 
@@ -116,7 +116,7 @@ following instructions are tested with python 2.5.4:
 
 - in order to use ``distutils`` append the :file:`Lib/distutils/unixccompiler.py` file, so that static libraries are created instead of shared ones::
 
-   wget --no-check-certificate http://svn.fysik.dtu.dk/projects/gpaw/trunk/doc/platforms/Cray/linkforshared.py
+   wget --no-check-certificate https://svn.fysik.dtu.dk/projects/gpaw/trunk/doc/platforms/Cray/linkforshared.py
    cat Lib/distutils/unixccompiler.py linkforshared.py > unixccompiler.py
    mv unixccompiler.py  Lib/distutils
 
@@ -124,7 +124,7 @@ following instructions are tested with python 2.5.4:
   by editing :file:`Modules/Setup`::
 
    mv Modules/Setup Modules/Setup.orig
-   wget --no-check-certificate http://svn.fysik.dtu.dk/projects/gpaw/trunk/doc/platforms/Cray/Setup_jaguar -O Modules/Setup
+   wget --no-check-certificate https://svn.fysik.dtu.dk/projects/gpaw/trunk/doc/platforms/Cray/Setup_jaguar -O Modules/Setup
    touch Modules/Setup
 
   **Note**: sha modules are required by numpy, so the following lines should be present in Modules/Setup::
@@ -133,7 +133,7 @@ following instructions are tested with python 2.5.4:
    _sha256 sha256module.c
    _sha512 sha512module.c
 
--  modify :file:`Lib/locale.py` as described at `<http://yt.enzotools.org/wiki/CrayXT5Installation>`_ (is it really needed?),
+-  modify :file:`Lib/locale.py` as described at `<https://yt.enzotools.org/wiki/CrayXT5Installation>`_ (is it really needed?),
 
 - build and install::
 
@@ -179,7 +179,7 @@ following instructions are tested with python 2.5.4:
 
 On jaguar only */tmp/work/$USER* filesystem is available for batch jobs.
 **Note**: that this space is cleaning periodically
-http://www.nccs.gov/computing-resources/jaguar/file-systems/.
+https://www.nccs.gov/computing-resources/jaguar/file-systems/.
 Test python/numpy::
 
  cp -r ${PYTHON_DIR} /tmp/work/$USER
@@ -218,7 +218,7 @@ Install ase/gpaw-setups (**Note**: use the latest releases)::
   cd ${sw_home}
   wget --no-check-certificate https://wiki.fysik.dtu.dk/ase-files/python-ase-3.1.0.846.tar.gz
   tar zxf python-ase-3.1.0.846.tar.gz
-  wget --no-check-certificate http://wiki.fysik.dtu.dk/gpaw-files/gpaw-setups-0.5.3574.tar.gz
+  wget --no-check-certificate https://wiki.fysik.dtu.dk/gpaw-files/gpaw-setups-0.5.3574.tar.gz
   tar zxf gpaw-setups-0.5.3574.tar.gz
 
   cp -r python-ase-3.1.0.846 gpaw-setups-0.5.3574 /tmp/work/$USER
@@ -231,7 +231,7 @@ Install gpaw (**Note**: instructions valid from the **5232** release)::
   wget --no-check-certificate https://wiki.fysik.dtu.dk/gpaw/gpaw-0.7.5232.tar.gz
   tar zxf gpaw-0.7.5232.tar.gz
   cd gpaw-0.7.5232
-  wget --no-check-certificate http://svn.fysik.dtu.dk/projects/gpaw/trunk/doc/platforms/Cray/customize_jaguar.py -O customize.py
+  wget --no-check-certificate https://svn.fysik.dtu.dk/projects/gpaw/trunk/doc/platforms/Cray/customize_jaguar.py -O customize.py
   ${PYTHON_DIR}/bin/python setup.py build_ext | tee build_ext.log
   cp -r ${sw_home}/gpaw-0.7.5232 /tmp/work/$USER
   cd /tmp/work/$USER

@@ -35,7 +35,7 @@ You are welcome to cite also the original GPAW reference and an earlier GPAW rev
 
 Please also cite those of the following that are relevant to you work:
 
-* `Libxc <http://libxc.gitlab.io>`_ for XC-functionals other
+* `Libxc <https://libxc.gitlab.io>`_ for XC-functionals other
   than LDA, PBE, revPBE, RPBE and PW91:
 
     *S. Lehtola, C. Steigemann, M. J. T. Oliveira and M. A. L. Marques.*,
@@ -133,7 +133,7 @@ In Danish: Først bogstavet "g", derefter "pav": "g-pav".
 
 In Finnish: supisuomalaisittain "kee-pav".
 
-In Polish: "gyeh" jak `"Gie"rek <http://en.wikipedia.org/wiki/Edward_Gierek>`_, "pav" jak `paw <http://pl.wikipedia.org/wiki/Paw_indyjski>`_: "gyeh-pav".
+In Polish: "gyeh" jak `"Gie"rek <https://en.wikipedia.org/wiki/Edward_Gierek>`_, "pav" jak `paw <https://pl.wikipedia.org/wiki/Paw_indyjski>`_: "gyeh-pav".
 
 
 Compiling the C-code

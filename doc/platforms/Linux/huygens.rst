@@ -5,7 +5,7 @@ huygens.sara.nl  (IBM Power6, Infiniband, ESSL)
 ===============================================
 
 Here you find information about the system
-`<http://huygens.supercomputer.nl/description/>`_.
+`<https://huygens.supercomputer.nl/description/>`_.
 
 One should not use the systems defaul python, but load the python module::
 

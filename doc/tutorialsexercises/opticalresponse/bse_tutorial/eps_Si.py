@@ -22,7 +22,7 @@ bse = BSE('gs_Si.gpw',
           conduction_bands=range(4, 8),
           nbands=50,
           mode='BSE',
-          integrate_gamma=0,
+          integrate_gamma='sphere',
           txt='bse_Si.txt')
 
 bse.get_dielectric_function(filename='eps_bse_Si.csv',

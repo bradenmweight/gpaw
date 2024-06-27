@@ -5,7 +5,7 @@ sepeli.csc.fi
 =============
 
 Here you find information about the system
-`<http://raketti.csc.fi/english/research/Computing_services/computing/servers/sepeli_policy>`_.
+`<https://raketti.csc.fi/english/research/Computing_services/computing/servers/sepeli_policy>`_.
 
 The installed subversion in sepeli does not support https-protocol, so
 one should use a tar file.

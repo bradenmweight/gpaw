@@ -8,9 +8,9 @@ Basic Linear Algebra Communication Subprogramcs (BLACS)
 ScaLAPACK
 
 See also:
-http://www.netlib.org/blacs
+https://www.netlib.org/blacs
 and
-http://www.netlib.org/scalapack
+https://www.netlib.org/scalapack
 """
 import numpy as np
 

@@ -11,7 +11,7 @@ from gpaw.convergence_criteria import (Criterion, check_convergence,
                                        dict2criterion)
 from gpaw.scf import write_iteration
 from gpaw.typing import Array2D
-from gpaw.yml import indent
+from gpaw.new.logger import indent
 from gpaw import KohnShamConvergenceError
 
 if TYPE_CHECKING:

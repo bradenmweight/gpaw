@@ -57,3 +57,10 @@ def pw_precond(G2_G: np.ndarray,
                r_G: np.ndarray,
                ekin: float,
                o_G: np.ndarray) -> None: ...
+def evaluate_mpa_poly(x2_GG: np.ndarray,
+                      omega: float,
+                      f: float,
+                      omegat_nGG: np.ndarray,
+                      W_nGG: np.ndarray,
+                      eta: float,
+                      factor: float) -> None: ...

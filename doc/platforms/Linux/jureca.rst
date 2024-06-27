@@ -6,7 +6,7 @@ jureca @ FZ-Jülich
 
 Find information about the `Jureca system here`_.
 
-.. _Jureca system here: http://www.fz-juelich.de/ias/jsc/jureca
+.. _Jureca system here: https://www.fz-juelich.de/ias/jsc/jureca
 
 Pre-installed versions
 ======================

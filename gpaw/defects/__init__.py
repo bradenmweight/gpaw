@@ -1,7 +1,7 @@
 import numpy as np
 import numbers
 from scipy.optimize import minimize
-from scipy.integrate import simps
+from scipy.integrate import simpson
 from gpaw import GPAW, PW
 from ase.parallel import parprint
 import scipy.integrate as integrate
@@ -146,7 +146,7 @@ class ElectrostaticCorrections():
         z = self.z_g
         L = self.L
         density_1d = self.density_1d
-        N = simps(density_1d, z)
+        N = simpson(density_1d, z)
         epsilons_z = np.zeros((2,) + np.shape(density_1d))
         epsilons_z += density_1d
 
@@ -156,7 +156,7 @@ class ElectrostaticCorrections():
         # Out-of-plane
         def objective_function(k):
             k = k[0]
-            integral = simps(1 / (k * density_1d + eb[1]), z) / L
+            integral = simpson(1 / (k * density_1d + eb[1]), z) / L
             return np.abs(integral - 1 / epsilons[1])
 
         test = minimize(objective_function, [1], method='Nelder-Mead')

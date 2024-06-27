@@ -5,7 +5,7 @@ CAMd Summer School 2016
 =======================
 
 Announcement:
-http://www.fysik.dtu.dk/english/Research/CAMD/Events/Summer-school-2016
+https://www.fysik.dtu.dk/english/Research/CAMD/Events/Summer-school-2016
 
 .. highlight:: bash
 
@@ -34,7 +34,7 @@ Using Secure Shell on Linux and Mac computers
 ..
 
   **Mac users**: You need to install the semi-official X-server for
-  MacOS: http://xquartz.macosforge.org/
+  MacOS: https://xquartz.macosforge.org/
 
 To log in, open a Terminal window.  On Ubuntu Linux click on the Dash Home
 and search for Terminal - we recommend dragging it to the dock.  In Mac OS X,
@@ -63,7 +63,7 @@ Installing and using Secure Shell on Windows computers
 
 To log in to the databar and display the applications on your Windows
 desktop, you need to install an X11 server on your Windows machine.
-We recommend installing `MobaXterm <http://mobaxterm.mobatek.net/>`_.
+We recommend installing `MobaXterm <https://mobaxterm.mobatek.net/>`_.
 See also :ref:`mobaxterm`.
 
 The server name is login.gbar.dtu.dk
@@ -84,7 +84,7 @@ Installing and using ThinLinc
 Windows machines, if for some reasons you do not wish to use SSH.**
 
 Information on how to install and use ThinLinc is available here:
-http://gbar.dtu.dk/index.php/faq/43-thinlinc
+https://gbar.dtu.dk/index.php/faq/43-thinlinc
 
 Set the server name to thinlinc.gbar.dtu.dk. User name and password is
 your DTU login.  When loggin in, you are asked to choose between
@@ -244,11 +244,11 @@ Notes and hints
 * Printer: There is a printer in each databar, the name is written on
   the printer. To use it from a terminal: :samp:`lp -d {printename}
   {filename}`.  Read more about printing `here
-  <http://www.gbar.dtu.dk/wiki/Printing>`_.
+  <https://www.gbar.dtu.dk/wiki/Printing>`_.
 
 * To open a pdf-file: :samp:`evince {filename.pdf}`
 
 * The normal tilde (~) key combination is not functional on the
   databar computers.  Use :kbd:`Alt Graph + 5` to type a tilde.
 
-.. * How to `use USB sticks <http://www.gbar.dtu.dk/wiki/USB_Access>`_.
+.. * How to `use USB sticks <https://www.gbar.dtu.dk/wiki/USB_Access>`_.

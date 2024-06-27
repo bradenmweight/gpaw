@@ -20,7 +20,7 @@ presentations and poster session relevant to anyone interested in
 GPAW, followed by one day with hands-on coding activities for
 developers.
 
-`Sponsored by psi-k <http://www.psi-k.org/>`__.
+`Sponsored by psi-k <https://www.psi-k.org/>`__.
 
 
 Location
@@ -30,8 +30,8 @@ Day 1 and 2 of the workshop will take place at DTU_ in building 306,
 auditorium 37.  Day 3 will be in building 307, room 127.  For
 directions, see this map_.
 
-.. _DTU: http://www.dtu.dk/english
-.. _map: http://www.dtu.dk/english/about_dtu/dtu%20directory/map_of_lyngby.aspx
+.. _DTU: https://www.dtu.dk/english
+.. _map: https://www.dtu.dk/english/about_dtu/dtu%20directory/map_of_lyngby.aspx
 
 
 Program

@@ -22,10 +22,6 @@
 #
 #     peter-Dot-kluepfel-At-gmail-Dot-com
 #
-# For further information see:
-#
-#     http://compas.hinet.info
-#
 # ============================================================================
 """Perdew-Zunger SIC to DFT functionals.
 

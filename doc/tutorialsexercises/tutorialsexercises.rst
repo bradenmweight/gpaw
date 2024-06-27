@@ -14,7 +14,7 @@ Further topics are organised by topic. Pick among them according to your interes
 
 The exercises are used in the course `Electronic structure methods
 in materials physics, chemistry and biology
-<http://www.kurser.dtu.dk/10302.aspx>`_.
+<https://www.kurser.dtu.dk/10302.aspx>`_.
 
 .. toctree::
    :maxdepth: 2

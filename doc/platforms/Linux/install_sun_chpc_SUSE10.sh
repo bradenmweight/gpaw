@@ -4,7 +4,7 @@ export MODULEFILES="${APPS}/modulefiles"
 # build packages
 
 python_version=2.7.3
-wget http://www.python.org/ftp/python/${python_version}/Python-${python_version}.tgz
+wget https://www.python.org/ftp/python/${python_version}/Python-${python_version}.tgz
 tar zxf Python-${python_version}.tgz
 cd Python-${python_version}
 ./configure --prefix=${APPS}/Python-${python_version}-1

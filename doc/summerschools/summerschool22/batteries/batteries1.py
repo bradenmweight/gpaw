@@ -257,7 +257,7 @@ n = calcname + '.log'
 
 # %%
 """
-Then we optimize the unit cell of the structure. We will take advantage of the [StrainFilter](https://wiki.fysik.dtu.dk/ase/ase/constraints.html#the-strainfilter-class) class. This allows us to simultaneously optimize both C-C distance and interlayer distance. We employ the [BFGS](http://aria42.com/blog/2014/12/understanding-lbfgs) algorithm to minimize the strain on the unit cell.
+Then we optimize the unit cell of the structure. We will take advantage of the [StrainFilter](https://wiki.fysik.dtu.dk/ase/ase/constraints.html#the-strainfilter-class) class. This allows us to simultaneously optimize both C-C distance and interlayer distance. We employ the [BFGS](https://aria42.com/blog/2014/12/understanding-lbfgs) algorithm to minimize the strain on the unit cell.
 """
 
 # %%

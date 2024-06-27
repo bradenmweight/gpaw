@@ -35,5 +35,5 @@ And finally, GPAW with ScaLAPACK and FFTW::
     $ python3 -m pip install -v gpaw --user
 
 
-.. _CentOS: http://www.centos.org/
+.. _CentOS: https://www.centos.org/
 .. _ASE: https://wiki.fysik.dtu.dk/ase/

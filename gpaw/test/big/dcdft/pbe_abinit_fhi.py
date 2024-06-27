@@ -66,7 +66,7 @@ for name in collection.names:
             nstep=900,
             diemix=0.1,
             fband=0.95,
-            # http://forum.abinit.org/viewtopic.php?f=8&t=35
+            # https://forum.abinit.org/viewtopic.php?f=8&t=35
             chksymbreak=0,
             nsym=1,  # various symmetry problems with various abinits ...
         )

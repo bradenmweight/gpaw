@@ -4,7 +4,7 @@
 gardar.nhpc.hi.is
 =================
 
-Information about the machine http://nhpc.hi.is/content/nhpc-system
+Information about the machine https://nhpc.hi.is/content/nhpc-system
 
 Instructions assume **bash**, installation under *${HOME}/global/apps*.
 

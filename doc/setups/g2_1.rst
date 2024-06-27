@@ -6,7 +6,7 @@ G2-1 database
 
 Codes precision estimated for PBE exchange-correlation functional
 on the database of molecular systems
-from http://www.cse.anl.gov/OldCHMwebsiteContent/compmat/G2-97.htm
+from https://www.cse.anl.gov/OldCHMwebsiteContent/compmat/G2-97.htm
 Single-point energy calculations performed at "MP2(full)/6-31G* geometries".
 
 Energies in *eV*, geometries in *Angstrom*.
@@ -22,7 +22,7 @@ Fixed geometries
 ++++++++++++++++
 
 Atomization energies on single-point energy calculations
-vs http://www.nwchem-sw.org
+vs https://nwchemgit.github.io/
 
 .. csv-table::
    :file: pbe_gpaw_nrel_ea_vs.csv
@@ -33,13 +33,13 @@ vs http://www.nwchem-sw.org
 Relaxed geometries
 ++++++++++++++++++
 
-Atomization energies on relaxed geometries vs http://www.nwchem-sw.org
+Atomization energies on relaxed geometries vs https://nwchemgit.github.io/
 
 .. csv-table::
    :file: pbe_gpaw_nrel_opt_ea_vs.csv
 
 Optimized distance between the first and last atom in the given molecule
-vs http://www.nwchem-sw.org
+vs https://nwchemgit.github.io/
 
 .. csv-table::
    :file: pbe_gpaw_nrel_opt_distance_vs.csv
@@ -49,7 +49,7 @@ NWCHEM
 ------
 
 Gaussian reference
-results from http://jcp.aip.org/resource/1/jcpsa6/v122/i23/p234102_s1
+results from https://jcp.aip.org/resource/1/jcpsa6/v122/i23/p234102_s1
 
 See :git:`gpaw/test/big/g2_1/g21nwchem.py`.
 

@@ -66,7 +66,7 @@ This is implemented in this function:
 .. autofunction:: gpaw.atom.radialgd.fsbt
 
 .. _spherical Bessel function:
-    http://en.wikipedia.org/wiki/Bessel_function
+    https://en.wikipedia.org/wiki/Bessel_function
     #Spherical_Bessel_functions:_jn.2C_yn
 
 

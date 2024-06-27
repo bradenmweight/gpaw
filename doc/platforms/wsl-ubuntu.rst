@@ -89,6 +89,6 @@ Lastly, you can install GPAW::
 
     $ conda install -c conda-forge gpaw
 
-.. _Ubuntu: http://www.ubuntu.com/
+.. _Ubuntu: https://www.ubuntu.com/
 .. _ASE: https://wiki.fysik.dtu.dk/ase/
 .. _Installation: https://docs.microsoft.com/en-us/windows/wsl/install

@@ -9,7 +9,7 @@ Begin by reading up on the GPAW parallelization strategies
 <https://wiki.alcf.anl.gov/index.php/References>`_.  In particular,
 :ref:`band_parallelization` will be needed to scale your calculation
 to large number of cores. The BG/P systems at the `Argonne Leadership
-Computing Facility <http://www.alcf.anl.gov>`_ uses Cobalt for
+Computing Facility <https://www.alcf.anl.gov>`_ uses Cobalt for
 scheduling and it will be referred to frequently below. Other
 schedulers should have similar functionality.
 
@@ -226,12 +226,12 @@ The second constraint above is no longer applicable as of SVN version 7520.
 
 Important DCMF environment variables
 ===============================================
-`DCMF <http://dcmf.anl-external.org/wiki/index.php/Main_Page>`_  is one
+`DCMF <https://dcmf.anl-external.org/wiki/index.php/Main_Page>`_  is one
 of the lower layers in the BG/P implementation of MPI software stack. 
 
 To understand th DCMF environment variables in greater detail, please read the
 appropriate sections of the  IBM System Blue Gene Solution:  
-`Blue Gene/P Application Development <http://www.redbooks.ibm.com/abstracts/sg247287.html?Open>`_ 
+`Blue Gene/P Application Development <https://www.redbooks.ibm.com/abstracts/sg247287.html?Open>`_ 
 
 DCMF_EAGER and DCMF_RECFIFO
 -----------------------------------

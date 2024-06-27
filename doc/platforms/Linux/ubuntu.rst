@@ -29,5 +29,5 @@ Then install GPAW (and dependencies: ASE_, Numpy, SciPy):
     $ pip install gpaw/
 
 
-.. _Ubuntu: http://www.ubuntu.com/
+.. _Ubuntu: https://www.ubuntu.com/
 .. _ASE: https://wiki.fysik.dtu.dk/ase/

@@ -5,7 +5,7 @@ jump.fz-juelich.de
 ==================
 
 Here you find information about the system
-`<http://www.fz-juelich.de/jsc/service/sco_ibmP6>`_.
+`<https://www.fz-juelich.de/jsc/service/sco_ibmP6>`_.
 
 The only way we found to compile numpy is using python2.3 and
 numpy-1.0.4. The next version numpy-1.1.0 did not work

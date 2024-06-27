@@ -26,7 +26,7 @@ from gpaw.setup import Setup
 from gpaw.spinorbit import soc as soc_terms
 from gpaw.typing import Array1D, Array2D, Array3D
 from gpaw.utilities import pack_hermitian, pack_density, unpack_hermitian
-from gpaw.yml import indent
+from gpaw.new.logger import indent
 from gpaw.mpi import MPIComm, serial_comm
 from gpaw.new.external_potential import ExternalPotential
 

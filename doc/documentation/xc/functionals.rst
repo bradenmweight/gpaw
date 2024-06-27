@@ -28,9 +28,9 @@ In libxc_ we have (see also "Standard subroutine calls" on ccg_dft_design_)
   \sigma_{ij} = \mathbf{\nabla}n_i \cdot \mathbf{\nabla}n_j
 
 
-.. _libxc: http://www.tddft.org/programs/octopus/wiki/index.php/Libxc
+.. _libxc: https://libxc/gitlab.io/
 
-.. _ccg_dft_design: http://www.cse.scitech.ac.uk/ccg/dft/design.html
+.. _ccg_dft_design: https://www.cse.scitech.ac.uk/ccg/dft/design.html
 
 
 Uniform 3D grid
@@ -54,7 +54,7 @@ Let's look at the spin-`k` XC potential from the energy expression
 .. math::
 
   v_{kg} = \sum_{g'} \frac{\partial \epsilon(\sigma_{ijg'})}{\partial n_{kg}}
-  = \sum_{g'} 
+  = \sum_{g'}
   \frac{\partial \epsilon(\sigma_{ijg'})}{\partial \sigma_{ijg'}}
   \frac{\partial \sigma_{ijg'}}{\partial n_{kg}}
 
@@ -124,7 +124,7 @@ where
     n_{Lg} =
     \sum_q D_{Lq} n_{qg} + \delta_{L,0} \sqrt{4 \pi} n_c(r_g)
 
-and 
+and
 
 .. math::
 

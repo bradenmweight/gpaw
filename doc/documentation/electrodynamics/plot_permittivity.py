@@ -52,7 +52,7 @@ def plot(fname, fiteps):
 
 # Permittivity of Gold
 # Source:
-# http://refractiveindex.info/?shelf=main&book=Au&page=Johnson
+# https://refractiveindex.info/?shelf=main&book=Au&page=Johnson
 # Direct download link:
 # wget https://refractiveindex.info/database/data/main/Au/Johnson.yml
 
@@ -60,7 +60,7 @@ def plot(fname, fiteps):
 ymlfname = 'Au.yml'
 
 # Fit to the permittivity
-# J. Chem. Phys. 135, 084121 (2011); http://dx.doi.org/10.1063/1.3626549
+# J. Chem. Phys. 135, 084121 (2011); https://dx.doi.org/10.1063/1.3626549
 fiteps = PermittivityPlus(data=[[0.2350, 0.1551, 95.62],
                                 [0.4411, 0.1480, -12.55],
                                 [0.7603, 1.946, -40.89],
