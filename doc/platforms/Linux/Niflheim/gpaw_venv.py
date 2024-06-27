@@ -18,12 +18,11 @@ version = '3.11'
 fversion = 'cpython-311'
 
 # Niflheim login hosts, with the oldest architecture as the first
-nifllogin = ['sylg',  # broadwell (xeon24)
-             'svol',  # skylake (xeon40)
-             'surt',  # icelake (xeon56)
-             'fjorm',  # epyc9004 (epyc96)
+nifllogin = ['slid2',  # broadwell_el8 (xeon24el8)
              'thul',  # skylake_el8 (xeon40el8)
-             'slid2']  # broadwell_el8 (xeon24el8)
+             'surt',  # icelake (xeon56)
+             'fjorm']  # epyc9004 (epyc96)
+
 
 # Easybuild uses a hierarchy of toolchains for the main foss and intel
 # chains.  The order in the tuples before are
