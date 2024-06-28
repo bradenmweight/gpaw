@@ -17,7 +17,7 @@ More information can be found here:
 
     Physical Review B, Vol. **87**, 235132 (2013)
 
-    __ http://prb.aps.org/abstract/PRB/v87/i23/e235132
+    __ https://prb.aps.org/abstract/PRB/v87/i23/e235132
 
 
 Quasi-particle spectrum of bulk diamond

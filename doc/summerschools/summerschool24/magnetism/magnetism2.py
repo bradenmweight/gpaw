@@ -18,7 +18,7 @@ but here in the antiferromagnetic case, $J<0$.
 
 Since we will need to do LDA calculations later on, we will start of this part of the project by relaxing the atomic structure of VI$_2$ using the LDA functional. Usually, the difference in crystal structure between different magnetically ordered states is small, so we will perform the relaxation in the ferromagnetic state, which has a smaller unit cell.
 
-1.   First you should download the relaxed PBE crystal structure. Either, browse the C2DB at https://cmrdb.fysik.dtu.dk/c2db and download the `.xyz` file for VI$_2$ or dowload it directly from the summer school tutorial website [here](https://wiki.fysik.dtu.dk/gpaw/summerschools/summerschool22/magnetism/magnetism.html)
+1.   First you should download the relaxed PBE crystal structure. Either, browse the C2DB at https://cmrdb.fysik.dtu.dk/c2db and download the `.xyz` file for VI$_2$ or dowload it directly from the summer school tutorial website [here](https://wiki.fysik.dtu.dk/gpaw/summerschools/summerschool24/magnetism/magnetism.html)
 2.   Fill in the expected ionic value for the V spins `S` below and run the cell to relax the crystal structure. The calculation takes about 17 minutes. (Hint: V has the electronic configuration [Ar]3d$^3$4s$^2$)
 
 """

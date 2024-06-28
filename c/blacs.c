@@ -988,7 +988,7 @@ PyObject* scalapack_diagonalize_mr3(PyObject *self, PyObject *args)
 {
   // Standard driver for MRRR algorithm
   // Computes 'iu' eigenvalues and eigenvectors
-  // http://icl.cs.utk.edu/lapack-forum/archives/scalapack/msg00159.html
+  // https://icl.cs.utk.edu/lapack-forum/archives/scalapack/msg00159.html
 
   PyArrayObject* a; // Hamiltonian matrix
   PyArrayObject* desca; // Hamintonian matrix descriptor
@@ -1438,7 +1438,7 @@ PyObject* scalapack_general_diagonalize_mr3(PyObject *self, PyObject *args)
 {
   // General driver for MRRR algorithm
   // Computes 'iu' eigenvalues and eigenvectors
-  // http://icl.cs.utk.edu/lapack-forum/archives/scalapack/msg00159.html
+  // https://icl.cs.utk.edu/lapack-forum/archives/scalapack/msg00159.html
 
   PyArrayObject* a; // Hamiltonian matrix
   PyArrayObject* b; // overlap matrix

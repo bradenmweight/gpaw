@@ -144,7 +144,7 @@ def test_coulomb(gridparam, qtrunc):
     N_c = np.array([2, 2, 1])
     v_G = get_coulomb_kernel(qpd, N_c, truncation=truncation, pbc_c=grid.pbc_c)
     V0, sqrtV0 = get_integrated_kernel(
-        qpd=qpd, N_c=N_c, truncation=truncation, pbc_c=grid.pbc_c)
+        qpd=qpd, N_c=N_c, truncation=truncation, pbc_c=grid.pbc_c, N=100)
     assert V0 == pytest.approx(V0_dev, maxdev)
     assert sqrtV0 == pytest.approx(sqrtV0_dev, maxdev)
 

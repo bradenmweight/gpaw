@@ -6,7 +6,7 @@ GPAW 2016: Users and developers meeting
 
 University of Jyväskylä, Finland, June 7-10, 2016
 
-Sponsored by `psi-k <http://www.psi-k.org/>`__ and
+Sponsored by `psi-k <https://www.psi-k.org/>`__ and
 `Faculty of Mathematics and Science, University of Jyväskylä
 <https://www.jyu.fi/science/en>`__
 

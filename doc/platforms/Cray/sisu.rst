@@ -48,7 +48,7 @@ LibXC
 
 Download libxc::
 
-   wget http://www.tddft.org/programs/octopus/down.php?file=libxc/libxc-2.2.0.tar.gz
+   wget https://www.tddft.org/programs/octopus/down.php?file=libxc/libxc-2.2.0.tar.gz
 
 Configure and make (use GNU environment)::
 
@@ -79,7 +79,7 @@ proper one):
 Add then ``install_prefix/bin`` to your PATH, and download and install NumPy::
 
    export PATH=install_prefix/bin:$PATH
-   wget http://sourceforge.net/projects/numpy/files/NumPy/1.8.1/numpy-1.8.1.tar.gz
+   wget https://sourceforge.net/projects/numpy/files/NumPy/1.8.1/numpy-1.8.1.tar.gz
    tar xzf numpy-1.8.1.tar.gz
    cd numpy-1.8.1
    python setup.py install

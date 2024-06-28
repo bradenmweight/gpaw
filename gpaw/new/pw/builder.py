@@ -60,7 +60,12 @@ class PWDFTComponentsBuilder(PWFDDFTComponentsBuilder):
 
     @cached_property
     def interpolation_desc(self):
-        return PWDesc(ecut=2 * self.ecut,
+        """Plane-wave set used for interpolating from corse to fine grid."""
+        # By default, the size of the grid used for the FFT's (self.grid)
+        # will acommodate G-vectors up to 2 * self.ecut, but the grid-size
+        # could have been set using h=... or gpts=...
+        ecut = min(2 * self.ecut, self.grid.ekin_max())
+        return PWDesc(ecut=ecut,
                       cell=self.grid.cell,
                       comm=self.grid.comm)
 

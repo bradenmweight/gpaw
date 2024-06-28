@@ -146,7 +146,7 @@ simulation environment (`ASE <https://wiki.fysik.dtu.dk/ase>`_). ASE provides:
 GPAW is released under the :xkcd:`GNU Public License <225>`
 version 3 or any later version.  See the file :git:`LICENSE` which
 accompanies the downloaded files, or see the license at GNU's web
-server at http://www.gnu.org/licenses/.  Everybody is invited to
+server at https://www.gnu.org/licenses/.  Everybody is invited to
 participate in using and :ref:`developing the code <devel>`.
 
 
@@ -156,7 +156,7 @@ participate in using and :ref:`developing the code <devel>`.
     September 2003 - August 2005: Sponsored by The `Carlsberg Foundation`_
     (artwork by P. Erhart)
 
-.. _Carlsberg Foundation: http://www.carlsbergfondet.dk
+.. _Carlsberg Foundation: https://www.carlsbergfondet.dk
 
 
 .. [Blo94] P. E. Blöchl,

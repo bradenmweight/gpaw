@@ -103,4 +103,4 @@ Version numbers:
 3) ...
 
 
-.. _Python documentation: http://docs.python.org/extending/index.html
+.. _Python documentation: https://docs.python.org/extending/index.html

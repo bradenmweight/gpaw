@@ -6,11 +6,11 @@ from ase.units import Bohr
 data = np.load('electrostatic_data_222.npz')
 
 z = data['z'] * Bohr
-# dV = data['D_V']
-# V_model = data['V_model']
+dV = data['D_V']
+V_model = data['V_model']
 V_diff = data['V_X'] - data['V_0']
-# plt.plot(z, dV.real, '-', label=r'$\Delta V(z)$')
-# plt.plot(z, V_model.real, '-', label='$V(z)$')
+plt.plot(z, dV.real[0], '-', label=r'$\Delta V(z)$')
+plt.plot(z, V_model.real, '-', label='$V(z)$')
 plt.plot(z, V_diff.real[0], '-',
          label=(r'$[V^{V_\mathrm{Ga}^{-3}}_\mathrm{el}(z) -'
                 r'V^{0}_\mathrm{el}(z) ]$'))

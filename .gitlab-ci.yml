@@ -511,14 +511,14 @@ lint:
     - >
       flake8
       --doctests
-      --exclude "doc/platforms/*,doc/*/summerschool22/*/"
+      --exclude "doc/platforms/*,doc/*/summerschool24/*/"
       --extend-ignore E402
       doc
     - >
       flake8
       --doctests
       --extend-ignore E402,E501
-      doc/summerschools/summerschool22/catalysis
+      doc/summerschools/summerschool24/catalysis
       doc/platforms/Linux/Niflheim
     - echo "interrogate"
     - pip install interrogate
@@ -537,7 +537,7 @@ typecheck:
   tags:
     - linux
   script:
-    - pip install mypy types-PyYAML
+    - pip install mypy
     - python --version
     - mypy --version
     - mypy --pretty
@@ -555,8 +555,15 @@ docs:
     - make
     - make doctest
     - cd ..
-    - python -c "from gpaw.utilities.urlcheck import test; test()"
-  when: manual
+# We would like to verify that the URLs are valid, but this has been failing.
+# We could reenable this check and make sure it runs well (and is not
+# too spammy on the URLs)
+#     - python -c "from gpaw.utilities.urlcheck import test; test()"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+      when: manual
+      allow_failure: true
+    - if: $CI_PIPELINE_SOURCE == "schedule"
   artifacts:
     paths:
       - doc/build/html

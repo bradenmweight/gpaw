@@ -6,9 +6,9 @@ Python wrapper functions for the ``C`` package:
 Basic Linear Algebra Subroutines (BLAS)
 
 See also:
-http://en.wikipedia.org/wiki/Basic_Linear_Algebra_Subprograms
+https://en.wikipedia.org/wiki/Basic_Linear_Algebra_Subprograms
 and
-http://www.netlib.org/lapack/lug/node145.html
+https://www.netlib.org/lapack/lug/node145.html
 """
 from typing import TypeVar
 

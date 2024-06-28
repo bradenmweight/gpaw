@@ -6,7 +6,7 @@ CAMd Summer School 2018
 
 The CAMD Summer School 2018 was held in Helsingør in August 2018.  You
 can still see the announcement here::
-http://www.fysik.dtu.dk/english/Research/CAMD/Events/Summer-school-2018
+https://www.fysik.dtu.dk/english/Research/CAMD/Events/Summer-school-2018
 
 .. highlight:: bash
 

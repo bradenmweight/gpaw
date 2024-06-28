@@ -75,7 +75,7 @@ class Chi0DrudeCalculator(Chi0ComponentCalculator):
         tmp_plasmafreq_wvv *= prefactor
 
         # Symmetrize the plasma frequency
-        operators = HeadSymmetryOperators.from_gd(symmetries, self.gs.gd)
+        operators = HeadSymmetryOperators(symmetries, self.gs.gd)
         plasmafreq_vv = tmp_plasmafreq_wvv[0].copy()
         operators.symmetrize_wvv(plasmafreq_vv[np.newaxis])
 

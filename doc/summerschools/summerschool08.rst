@@ -112,10 +112,9 @@ first. Submitting jobs to the queue is done by::
   qsub -l nodes=2:ppn=4:switch5 octopus_run.py
 
 
-.. _Userguides: http://www.gbar.dtu.dk/index.php/Category:User_Guides
-.. _FAQ: http://www.gbar.dtu.dk/index.php/General_use_FAQ
-.. _Unix: http://www.gbar.dtu.dk/index.php/UNIX
-.. _USB-sticks: http://www.gbar.dtu.dk/index.php/USBsticks
-.. _Octopus: http://www.tddft.org/programs/octopus/wiki/index.php/
-.. _tutorial: http://www.tddft.org/programs/octopus/wiki/index.php/Tutorial
-
+.. _Userguides: https://www.gbar.dtu.dk/index.php/Category:User_Guides
+.. _FAQ: https://www.gbar.dtu.dk/index.php/General_use_FAQ
+.. _Unix: https://www.gbar.dtu.dk/index.php/UNIX
+.. _USB-sticks: https://www.gbar.dtu.dk/index.php/USBsticks
+.. _Octopus: https://octopus-code.org/
+.. _tutorial: https://octopus-code.org/documentation/main/tutorial/

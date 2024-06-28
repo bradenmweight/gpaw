@@ -5,7 +5,7 @@ louhi.csc.fi  (Cray XT4/XT5)
 ============================
 
 Here you find information about the system
-`<http://www.csc.fi/english/research/Computing_services/computing/servers/louhi>`_.
+`<https://www.csc.fi/english/research/Computing_services/computing/servers/louhi>`_.
 
 .. note::
    These instructions are up-to-date as of August 28th 2012.
@@ -54,7 +54,7 @@ In order to use optimized BLAS with Numpy one has to first build a
 CBLAS which is linked with Cray's optimized BLAS routines. First,
 download the CBLAS source from netlib::
 
-    wget http://www.netlib.org/blas/blast-forum/cblas.tgz
+    wget https://www.netlib.org/blas/blast-forum/cblas.tgz
     tar -xzf cblas.tgz
 
 Change to the CBLAS directory and copy ``Makefile.LINUX`` to

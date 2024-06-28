@@ -20,9 +20,9 @@ if len(sys.argv) == 2:
     else:
         raise ValueError(f'Unknown command line argument: {sys.argv[1]}')
 
-kernel = {'display_name': 'CAMD2022',
+kernel = {'display_name': 'CAMD2024',
           'language': 'python',
-          'name': 'camd2022'}
+          'name': 'camd2024'}
 
 for path in Path().glob('*/*.py'):
     if path.read_text().startswith('# %%\n'):

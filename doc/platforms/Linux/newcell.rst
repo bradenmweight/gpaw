@@ -5,10 +5,10 @@ newcell.crc.nd.edu
 ==================
 
 Here you find information about the system
-`<http://crcmedia.hpcc.nd.edu/wiki/index.php/Available_Hardware>`_.
+`<https://crcmedia.hpcc.nd.edu/wiki/index.php/Available_Hardware>`_.
 
 The installation of user's packages on newcell described below uses
-`modules <http://modules.sourceforge.net/>`_, and assumes csh shell:
+`modules <https://modules.sourceforge.net/>`_, and assumes csh shell:
 
 - packages are installed under ``~/CAMd``::
 

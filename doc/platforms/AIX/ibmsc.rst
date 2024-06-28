@@ -5,7 +5,7 @@ ibmsc.csc.fi
 ============
 
 Here you find information about the system
-`<http://www.csc.fi/english/csc/news/customerinfo/IBMSC_phased_out>`_.
+`<https://www.csc.fi/english/csc/news/customerinfo/IBMSC_phased_out>`_.
 
 Debug like this::
 
