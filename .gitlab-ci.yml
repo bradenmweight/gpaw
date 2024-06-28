@@ -511,14 +511,14 @@ lint:
     - >
       flake8
       --doctests
-      --exclude "doc/platforms/*,doc/*/summerschool22/*/"
+      --exclude "doc/platforms/*,doc/*/summerschool24/*/"
       --extend-ignore E402
       doc
     - >
       flake8
       --doctests
       --extend-ignore E402,E501
-      doc/summerschools/summerschool22/catalysis
+      doc/summerschools/summerschool24/catalysis
       doc/platforms/Linux/Niflheim
     - echo "interrogate"
     - pip install interrogate
