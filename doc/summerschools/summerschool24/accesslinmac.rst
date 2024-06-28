@@ -34,9 +34,9 @@ Once you are logged in on the front-end, get a session on an interactive compute
 Starting a Jupyter Notebook
 ===========================
 
-Change to the folder where you keep your notebooks (most likely ``CAMD2022``) and start the Jupyter Notebook server::
+Change to the folder where you keep your notebooks (most likely ``CAMD2024``) and start the Jupyter Notebook server::
 
-  cd CAMD2022
+  cd CAMD2024
   source venv/bin/activate
   camdnotebook
 
@@ -91,4 +91,3 @@ When you are done for the day, please
   window where it is running.
 
 * Log out of the databar by typing ``exit`` twice in the window(s).
-
