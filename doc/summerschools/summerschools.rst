@@ -5,7 +5,8 @@ Summer schools
 .. toctree::
     :maxdepth: 1
 
-    summerschool22/summerschool22
+    summerschool24/summerschool24
+    summerschool22
     summerschool18/summerschool18
     summerschool16
     summerschool14
@@ -13,4 +14,4 @@ Summer schools
     summerschool10
     summerschool08
     mobaxterm
-    
+

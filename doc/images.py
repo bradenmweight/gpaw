@@ -149,22 +149,22 @@ get('.', ['carlsberg.png'])
 
 get('static', ['NOMAD_Logo_supported_by.png'])
 
-# Summer school 2022
+# Summer school 2024
 get('summerschool2018',
     ['CreateTunnelWin.png', 'JupyterRunningMac.png', 'JupyterRunningWin.png',
      'Logged_in_Mac.png', 'Logged_in_Win.png', 'Moba_ssh.png',
      'UseTunnelWin.png'],
-    target='summerschools/summerschool22')
+    target='summerschools/summerschool24')
 get('summerschool2018',
     ['organometal.master.db'],
-    target='summerschools/summerschool22/machinelearning')
+    target='summerschools/summerschool24/machinelearning')
 get('summerschool2018',
     ['C144Li18.png', 'C64.png', 'final.png', 'initial.png',
      'Li2.png', 'lifepo4_wo_li.traj', 'NEB_init.traj'],
-    target='summerschools/summerschool22/batteries')
+    target='summerschools/summerschool24/batteries')
 get('summerschool2022',
     ['Intro_projects_CAMD2022.pdf'],
-    target='summerschools/summerschool22')
+    target='summerschools/summerschool24')
 
 
 def setup(app):

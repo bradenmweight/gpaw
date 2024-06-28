@@ -97,7 +97,7 @@ Get access to the software
 To give access to the software you need for this course, please run
 the command::
 
-  source ~jasc/setup2022
+  source ~jasc/setup2024
 
 Note the tilde in the beginning of the second word.
 
@@ -113,7 +113,7 @@ particularly important if you are a DTU student/employee, the security
 of your DTU password is critical!*
 
 The script will also copy a selection of draft notebooks to a folder
-called CAMD2022 in your DTU databar account.
+called CAMD2024 in your DTU databar account.
 
 
 Carrying on
