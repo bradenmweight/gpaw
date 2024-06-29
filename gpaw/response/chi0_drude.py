@@ -12,7 +12,7 @@ from gpaw.response.chi0_data import Chi0DrudeData
 from gpaw.response.frequencies import FrequencyGridDescriptor
 
 if TYPE_CHECKING:
-    from gpaw.response.symmetry import KPointDomainGenerator
+    from gpaw.response.kpoints import KPointDomainGenerator
 
 
 class Chi0DrudeCalculator(Chi0ComponentCalculator):
@@ -53,7 +53,7 @@ class Chi0DrudeCalculator(Chi0ComponentCalculator):
         """
         q_c = [0., 0., 0.]
         # symmetries: QSymmetries from gpaw.response.symmetry
-        # generator: KPointDomainGenerator from gpaw.response.symmetry
+        # generator: KPointDomainGenerator from gpaw.response.kpoints
         # domain: Domain from from gpaw.response.integrators
         symmetries, generator, domain, prefactor = self.get_integration_domain(
             q_c=q_c, spins=range(self.gs.nspins))
