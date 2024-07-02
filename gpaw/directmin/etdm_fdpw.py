@@ -856,7 +856,6 @@ class FDPWETDM:
                         addpaw=False).item() * f
                     a = a.real
                     norm.append(a)
-        # error = sum(norm) * Hartree**2 / wfs.nvalence
         error = sum(norm)
         error = wfs.kd.comm.sum_scalar(error)
 
