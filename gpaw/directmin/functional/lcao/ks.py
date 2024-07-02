@@ -1,5 +1,4 @@
 import numpy as np
-from ase.units import Hartree
 from gpaw.directmin.tools import d_matrix
 
 

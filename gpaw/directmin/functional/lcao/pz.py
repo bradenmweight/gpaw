@@ -1,7 +1,6 @@
 """
 Potentials for orbital density dependent energy functionals
 """
-from ase.units import Hartree
 import numpy as np
 
 from gpaw.directmin.tools import d_matrix
