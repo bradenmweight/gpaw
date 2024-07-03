@@ -232,7 +232,7 @@ class BaseSetup:
 
         for j, (n1, l1, f, f_s) in enumerate(zip(self.n_j, self.l_j,
                                                  f_j, f_sj.T)):
-            if not f_s.any():
+            if not f_s.any() or n1 < 0:
                 continue
             I = 0
             for bf in self.basis.bf_j:
