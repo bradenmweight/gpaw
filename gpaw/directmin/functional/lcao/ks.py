@@ -1,5 +1,4 @@
 import numpy as np
-from ase.units import Hartree
 from gpaw.directmin.tools import d_matrix
 
 
@@ -111,7 +110,7 @@ class KSLCAO:
                 con1 = con[0]
                 hc_mn[:, con1] = 0.0
         norm = sum(hc_mn.conj() * hc_mn * f_n[:occ])
-        error = sum(norm.real) * Hartree ** 2 / nvalence
+        error = sum(norm.real)
 
         return error
 

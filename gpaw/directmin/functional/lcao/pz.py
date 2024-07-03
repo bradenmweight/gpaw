@@ -1,7 +1,6 @@
 """
 Potentials for orbital density dependent energy functionals
 """
-from ase.units import Hartree
 import numpy as np
 
 from gpaw.directmin.tools import d_matrix
@@ -178,7 +177,7 @@ class PZSICLCAO:
             norm.append(np.dot(hc_mn[:, i].conj(),
                                hc_mn[:, i]).real * kpt.f_n[i])
 
-        error = sum(norm) * Hartree ** 2 / wfs.nvalence
+        error = sum(norm)
         del rhs2, hc_mn, norm
         timer.stop('Residual')
 
