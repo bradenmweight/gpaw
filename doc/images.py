@@ -153,7 +153,7 @@ get('static', ['NOMAD_Logo_supported_by.png'])
 get('summerschool2018',
     ['CreateTunnelWin.png', 'JupyterRunningMac.png', 'JupyterRunningWin.png',
      'Logged_in_Mac.png', 'Logged_in_Win.png', 'Moba_ssh.png',
-     'UseTunnelWin.png'],
+     'UseTunnelWin.png', 'MobaXtermKeyConfiguration.png'],
     target='summerschools/summerschool24')
 get('summerschool2018',
     ['organometal.master.db'],
