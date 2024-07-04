@@ -379,6 +379,12 @@ class UGArray(DistributedArrays[UGDesc]):
         x = np.arange(grid.start_c[c], grid.end_c[c]) * dx
         return x, as_np(y)
 
+    def to_complex(self) -> UGArray:
+        """Return a copy with dtype=complex."""
+        c = self.desc.new(dtype=complex).empty()
+        c.data[:] = self.data
+        return c
+
     def scatter_from(self, data=None):
         """Scatter data from rank-0 to all ranks."""
         if isinstance(data, UGArray):
@@ -458,6 +464,9 @@ class UGArray(DistributedArrays[UGDesc]):
             out = pw.empty(xp=self.xp)
         if pw is None:
             pw = out.desc
+        if pw.dtype != self.desc.dtype:
+            raise TypeError(
+                f'Type mismatch: {self.desc.dtype} -> {pw.dtype}')
         input = self
         if self.desc.comm.size > 1:
             input = input.gather()

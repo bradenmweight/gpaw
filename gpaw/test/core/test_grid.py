@@ -7,6 +7,23 @@ from gpaw.fd_operators import Laplace
 from gpaw.mpi import world
 
 
+def test_real_to_complex_fft():
+    L = 1.0
+    n = 8
+    a = UGDesc(cell=[L, L, L], size=(n, n, n), comm=world).empty()
+    a.randomize()
+    pw = PWDesc(ecut=50.0, cell=a.desc.cell, dtype=complex, comm=world)
+    # real -> complex:
+    with pytest.raises(TypeError):
+        a.fft(pw=pw)
+    # complex -> complex:
+    b = a.to_complex().fft(pw=pw).gather(broadcast=True)
+    # c(G) = c(-G)^*:
+    coefs = {tuple(i_c): coef for i_c, coef in zip(pw.indices_cG.T, b.data)}
+    for (i, j, k), coef in coefs.items():
+        assert coef == coefs[(-i, -j, -k)].conj()
+
+
 @pytest.mark.ci
 def test_redist():
     a = 2.5
