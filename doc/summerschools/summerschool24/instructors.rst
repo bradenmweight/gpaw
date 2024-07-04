@@ -32,21 +32,15 @@ Setting up the Virtual Environment etc
 To prepare your account, run the script (you only need to do this
 once)::
 
-  bash ~jasc/CAMD2024/setup2024_teacher
+  bash ~jasc/setup2024
 
-(Note that this is an extended version of the students' setup script
-which will give you an editable version of GPAW and its documentation).
+(This is the same script the students will be running to set up their account).
 
-This will create a folder ``CAMD2024``, a "slim" virtual environment in
-``CAMD2024/venv``, and a MyQueue configuration.  The slim virtual
-environment is a fake venv folder where most of the contents is links
-to a master environment.  If this is causing trouble, please contact
-Jakob to get it fixed.
+This will create a folder ``CAMD2024``, a virtual environment in
+``CAMD2024/venv``, and a MyQueue configuration.
 
-Remember to activate the virtual environment - this may be done
-automatically for the students (XXX fix later)::
-
-  source ~/CAMD2024/venv/bin/activate
+A line is added to your .bashrc to automatically activate the virtual
+environment.  Remove it and activate manually if it causes trouble.
 
 
 Summerschool Notebooks
@@ -75,6 +69,13 @@ Student versions of all notebooks are extracted from the source Python
 files when you build the GPAW documentation (``make`` in the ``doc``
 folder).  Edit your notebooks in another folder, as **building the
 documentation mayoverwrite all notebooks without warning.**
+
+To extract teacher version, go to the folder
+``venv/gpaw/doc/summerschools/summerschool24`` after you have built
+the documentation, then run the script::
+
+  python convert.py --teacher
+  
 
 Making small modifications to the notebooks
 -------------------------------------------
@@ -154,16 +155,3 @@ Remember to also update the web pages associated with the projects.
 This is done by editing the associated ``.rst`` files in
 ``doc/summerschools/summeschool24``, and then submitting a merge request.
 
-
-
-Notes on how to set this up
-===========================
-
-These notes are intended as a starting point for setting this up in
-2026 !
-
-* Build a GPAW venv called venv-master
-
-* Upgrade sphinx, otherwise it will not work::
-
-    pip install --upgrade  sphinx sphinx-rtd-theme
