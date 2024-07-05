@@ -74,12 +74,11 @@ window opens, as shown here:
    
 In the field marked A you write the name of the compute node, and the
 port number of the Notebook server.  The machine name will have the
-form ``n-XX-YY-XX`` (where XX etc are numbers - if it is ``gbarlogin``
-you forgot to run the ``linuxsh`` command mentioned at the top of this
-page!)  The port number is typically 40000 or a number slightly above
-or below.  You see the name and port number on the output from the
-notebook server (Figure 1).
-
+form ``n-XX-YY-ZZ`` (where XX etc are one or two digits - if the name
+is ``gbarlogin`` you forgot to run the ``linuxsh`` command mentioned
+at the top of this page!)  The port number is typically 40000 or a
+number slightly above or below.  You see the name and port number on
+the output from the notebook server (Figure 1).
 
 In the field marked B you repeat the port number
 
@@ -104,7 +103,7 @@ Check that the machine name and port number are correct, then start
 the tunnel by pressing the small "play" button (with a right-pointing
 triangle).  
 
-**IMPORTANT:**  When you log out from the databar and log in again (fx
+**IMPORTANT:**  When you log out from the databar and log in again (e.g.
 on the following days of the summer school), you will get a new
 compute node.  You will therefore need to start a new Jupyter Notebook
 server, and create a new SSH tunnel as described above.  Then you have

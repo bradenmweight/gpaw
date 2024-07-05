@@ -83,12 +83,12 @@ below.
    :width: 66%
 
 The two last lines are the command prompt.  The first line indicates
-your current working directory, here your home folder symbolized by
+your current working directory, in this case your home folder symbolized by
 the ~ (tilde) character.  The lower line gives the name of the
 computer (``gbarlogin``) and the user name (``jasc`` in the figure)
 followed by a dollar sign.
 
-This computer (``gbarlogin``) may not be used to calculations, as it
+This computer (``gbarlogin``) may not be used for calculations, as it
 would be overloaded.  You therefore need to log in to the least loaded
 interactive computer by writing the command::
 
@@ -101,7 +101,7 @@ wrong, but the ASE graphical user interface will not work).
 Get access to the software
 ==========================
 
-To give access to the software you need for this course, please run
+To get access to the software you need for this course, please run
 the command::
 
   source ~jasc/setup2024

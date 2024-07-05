@@ -22,9 +22,7 @@ a Terminal window.  Log in to the databar front-end with the command::
 
   ssh -XY USERNAME@login.gbar.dtu.dk
 
-Replace ``USERNAME`` with your DTU username, and note that when you
-are asked for a password, you should use your *DTU password*, **not**
-the Jupyter password you just created!
+Replace ``USERNAME`` with your DTU username.
 
 Once you are logged in on the front-end, get a session on an interactive compute node by typing the command::
 
@@ -64,7 +62,7 @@ You now need to create an SSH tunnel to the server directly from your laptop.  I
 
 I this line, you should replace ``USERNAME`` with your DTU username,
 ``HOSTNAME`` with the servername you see in the other terminal window
-(it has the form ``n-XX-YY-ZZ``) and ``PORT`` with the port number you
+(it has the form ``n-XX-YY-ZZ`` or ``n-XX-YY-Z``) and ``PORT`` with the port number you
 see in that line (typically 40000 or close, note that it should be
 specified in two places!).  There is no feedback in form of stars when
 you type the password.  If you type the password correctly (and press
