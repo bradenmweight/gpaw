@@ -37,7 +37,6 @@ Starting a Jupyter Notebook
 Change to the folder where you keep your notebooks (most likely ``CAMD2024``) and start the Jupyter Notebook server::
 
   cd CAMD2024
-  source venv/bin/activate
   camdnotebook
 
 The command ``camdnotebook`` is a local script.  It checks that you
@@ -52,7 +51,7 @@ The Notebook server replies by printing a few status lines, as seen here
    :width: 66%
 
 The important line is the second from the bottom, it shows on which
-computer and port number the notebook is running (here ``n-62-27-18``
+computer and port number the notebook is running (here ``n-62-30-6``
 and 40000, respectively).
 
 
@@ -61,22 +60,28 @@ Create an SSH Tunnel to the notebook
 
 You now need to create an SSH tunnel to the server directly from your laptop.  It is also done with an ``ssh`` command, which unfortunately is a bit cryptic.  *Open a new Terminal window on your laptop,*  and write the following command::
 
-  ssh USERNAME@login.gbar.dtu.dk -g -L8080:HOSTNAME:PORT -N
+  ssh USERNAME@login.gbar.dtu.dk -g -LPORT:HOSTNAME:PORT -N
 
-I this line, you should replace ``USERNAME`` with your DTU username, ``HOSTNAME`` with the servername you see in the other terminal window (it has the form ``n-XX-YY-ZZ``) and ``PORT`` with the port number you see in that line (typically 40000 or close).  The command will ask for a password, you need your *DTU password*, **not** the Jupyter password.  There is no feedback in form of stars when you type the password.  If you type the password correctly (and press enter) then the command gives *no feedback indicating that it is running!*
+I this line, you should replace ``USERNAME`` with your DTU username,
+``HOSTNAME`` with the servername you see in the other terminal window
+(it has the form ``n-XX-YY-ZZ``) and ``PORT`` with the port number you
+see in that line (typically 40000 or close, note that it should be
+specified in two places!).  There is no feedback in form of stars when
+you type the password.  If you type the password correctly (and press
+enter) then the command gives *no feedback indicating that it is
+running!*
 
 
 Starting a browser.
 ===================
 
-Start a browser (Chrome and Firefox are known to work well) and write
-in the address bar::
+Start a browser (Chrome and Firefox are known to work well).  Find the
+link that begins with ``http://127.0.0.1`` and paste it into the
+address bar.  It will look similar to this::
 
-  https://localhost:8080
+  http://127.0.0.1:40000/?token=401bb4a3a4faeafd2fd948a137b0f6857ba4aa6e6fc47b7d
 
-Your browser is now asking for your *Jupyter password* (the one you
-created when setting up your account).  You are now ready to open one
-of the notebooks, and run the exercises.
+You are now ready to open one of the notebooks, and run the exercises.
 
 Logging out
 ===========
