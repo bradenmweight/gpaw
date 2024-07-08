@@ -10,8 +10,7 @@ from ase.units import Hartree
 from gpaw.utilities.blas import mmmx
 
 from gpaw.response import ResponseGroundStateAdapter, ResponseContext, timer
-from gpaw.response.symmetry import (
-    QSymmetryAnalyzer, ensure_qsymmetry, QSymmetryInput)
+from gpaw.response.symmetry import QSymmetryAnalyzer, QSymmetryInput
 from gpaw.response.symmetrize import BodySymmetryOperators
 from gpaw.response.frequencies import ComplexFrequencyDescriptor
 from gpaw.response.pw_parallelization import PlaneWaveBlockDistributor
@@ -488,8 +487,7 @@ class SelfEnhancementCalculator(GeneralizedSuscetibilityCalculator):
         self.rshelmax = rshelmax
         self.rshewmin = rshewmin
 
-        qsymmetry = ensure_qsymmetry(qsymmetry)
-
+        qsymmetry = QSymmetryAnalyzer.from_input(qsymmetry)
         super().__init__(gs, context=context,
                          qsymmetry=QSymmetryAnalyzer(
                              point_group=qsymmetry.point_group,
